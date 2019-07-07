@@ -30,6 +30,8 @@ public class Sketch {
   private List<SketchFile> files = new ArrayList<>();
 
   private File buildPath;
+  
+  private boolean ceuSketch;
 
   public static final Comparator<SketchFile> CODE_DOCS_COMPARATOR = new Comparator<SketchFile>() {
     @Override
@@ -49,8 +51,14 @@ public class Sketch {
    * @param file
    *          Any file inside the sketch directory.
    */
-  Sketch(File file) throws IOException {
+   
+   Sketch(File file) throws IOException {
+     this(file, false);
+   }
+   
+  Sketch(File file, boolean _ceuSketch) throws IOException {
     folder = file.getParentFile();
+    ceuSketch = _ceuSketch;
     files = listSketchFiles(true);
   }
 
@@ -163,6 +171,10 @@ public class Sketch {
 
   public SketchFile getFile(int i) {
     return files.get(i);
+  }
+  
+  public boolean isCeuSketch() {
+    return ceuSketch;
   }
 
   /**

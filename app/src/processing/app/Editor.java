@@ -1838,7 +1838,7 @@ public class Editor extends JFrame implements RunnerListener {
     }
 
     try {
-      sketch = new Sketch(file);
+      sketch = new Sketch(file, fileName.endsWith(".ceu"));
     } catch (IOException e) {
       Base.showWarning(tr("Error"), tr("Could not create the sketch."), e);
       return false;
