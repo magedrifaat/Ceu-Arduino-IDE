@@ -34,9 +34,11 @@ import processing.app.helpers.OSUtils;
 import processing.app.helpers.PreferencesMapException;
 import processing.app.packages.LibraryList;
 import processing.app.packages.UserLibrary;
+import processing.app.helpers.ProcessUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -48,6 +50,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.regex.*;
 
 import static processing.app.I18n.tr;
 
@@ -652,12 +655,17 @@ public class SketchController {
        
 
     boolean deleteTemp = false;
-    File pathToSketch = sketch.getPrimaryFile().getFile();
-    if (sketch.isModified()) {
-      // If any files are modified, make a copy of the sketch with the changes
-      // saved, so arduino-builder will see the modifications.
-      pathToSketch = saveSketchInTempFolder();
-      deleteTemp = true;
+    File pathToSketch;
+    if (sketch.isCeuSketch()) {
+      pathToSketch = BaseNoGui.getContentFile("ceu\\env\\env.ino");
+    } else {
+      pathToSketch = sketch.getPrimaryFile().getFile();
+      if (sketch.isModified()) {
+        // If any files are modified, make a copy of the sketch with the changes
+        // saved, so arduino-builder will see the modifications.
+        pathToSketch = saveSketchInTempFolder();
+        deleteTemp = true;
+      }
     }
 
     try {
@@ -679,25 +687,108 @@ public class SketchController {
 
     return Paths.get(tempFolder.getAbsolutePath(), sketch.getPrimaryFile().getFileName()).toFile();
   }
-
+  
+  
+  /**
+   *  Compiles the ceu part of the sketch to a c header file
+   *  that is included in the environment(primary) .ino file.
+   *  This should be called before build function in case of ceu sketches.
+   *
+   */
+  public void buildCeu() throws RunnerException, IOException {
+    List<String> cmd = new ArrayList<>();
+    // add the batch file full path
+    cmd.add(BaseNoGui.getContentFile("ceu-compiler.bat").getAbsolutePath());
+    
+    // add the main ceu file as first argument
+    cmd.add(sketch.getMainCeuFile().getFile().getAbsolutePath());
+    
+    // show the build command if verbose is enabled
+    boolean verbose = PreferencesData.getBoolean("build.verbose");
+    cmd.add(Boolean.toString(verbose));
+     
+    // run the batch and process the output
+    int result;
+    RunnerException ex = null;
+    try {
+      Process process = ProcessUtils.exec(cmd.toArray(new String[0]));
+      
+      EditorConsole.setCurrentEditorConsole(editor.console);
+      
+      // process and output the input and error streams of the batch file
+      BufferedReader inBuf = new BufferedReader(new InputStreamReader(process.getInputStream()));
+      BufferedReader errBuf = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+      
+      String line;
+      while ((line = inBuf.readLine())  != null) {
+        System.out.println(line);
+      }
+      inBuf.close();
+      
+      while ((line = errBuf.readLine())  != null) {
+        ex = parseCeuMessage(line);
+      }
+      errBuf.close();
+      
+      result = process.waitFor();
+    } catch (Exception e) {
+      throw new RunnerException(e);
+    }
+    
+    if (ex != null) {
+      System.err.println("Error compiling Ceu");
+      ex.hideStackTrace();
+      throw ex;
+    }
+    
+    if (result != 0) {
+      RunnerException re = new RunnerException(I18n.format(tr("Error compiling Ceu")));
+      re.hideStackTrace();
+      throw re;
+    }
+    
+  }
+  
+  private RunnerException parseCeuMessage(String msg) {
+    Pattern errPattern = Pattern.compile("^ERR.+:\\s+(.+)\\s+:\\s+line\\s+(\\d+)\\s+:\\s+(.*)");
+    Matcher m = errPattern.matcher(msg);
+    try {
+      if (m.find()) {
+        String fileName = m.group(1);
+        int line = Integer.parseInt(m.group(2));
+        String err = m.group(3);
+        for (SketchFile file : sketch.getFiles()) {
+          if (new File(fileName).getName().equals(file.getFileName())) {
+            return new RunnerException(err, file, line - 1);
+          }
+        }
+      }
+    }
+    catch (NumberFormatException nex) {
+      // skip
+    }
+    
+    return new RunnerException(msg);
+  }
+  
   /**
    * Handle export to applet.
    */
   protected boolean exportApplet(boolean usingProgrammer) throws Exception {
     // build the sketch
     editor.status.progressNotice(tr("Compiling sketch..."));
+    if (sketch.isCeuSketch()) {
+      buildCeu();
+    }
     String foundName = build(false, false);
+    
     // (already reported) error during export, exit this function
     if (foundName == null) return false;
-
-//    // If name != exportSketchName, then that's weirdness
-//    // BUG unfortunately, that can also be a bug in the preproc :(
-//    if (!name.equals(foundName)) {
-//      Base.showWarning("Error during export",
-//                       "Sketch name is " + name + " but the sketch\n" +
-//                       "name in the code was " + foundName, null);
-//      return false;
-//    }
+    
+    if (sketch.isCeuSketch()) {
+      // the uploaded project is always called env.ino in case of ceu sketches
+      foundName = "env.ino";
+    }
 
     editor.status.progressNotice(tr("Uploading..."));
     boolean success = upload(foundName, usingProgrammer);

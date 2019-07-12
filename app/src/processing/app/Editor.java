@@ -1649,6 +1649,9 @@ public class Editor extends JFrame implements RunnerListener {
     public void run() {
       try {
         removeAllLineHighlights();
+        if (sketch.isCeuSketch()) {
+          sketchController.buildCeu();
+        }
         sketchController.build(verbose, saveHex);
         statusNotice(tr("Done compiling."));
       } catch (PreferencesMapException e) {

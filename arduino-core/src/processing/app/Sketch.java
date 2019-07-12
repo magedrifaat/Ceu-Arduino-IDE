@@ -170,6 +170,16 @@ public class Sketch {
   public SketchFile getPrimaryFile() {
     return files.get(0);
   }
+  
+  public SketchFile getMainCeuFile() {
+    for (SketchFile file : files) {
+      if (file.isCeuPrimary())
+        return file;
+    }
+    
+    // For compiler warning. This function assumes the sketch is a correct Ceu sketch
+    return null;
+  }
 
   /**
    * Returns path to the main .pde file for this sketch.
