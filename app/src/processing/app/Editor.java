@@ -104,6 +104,7 @@ import processing.app.helpers.PreferencesMapException;
 import processing.app.helpers.StringReplacer;
 import processing.app.legacy.PApplet;
 import processing.app.syntax.PdeKeywords;
+import processing.app.syntax.CeuKeywords;
 import processing.app.syntax.SketchTextArea;
 import processing.app.tools.MenuScroller;
 import processing.app.tools.Tool;
@@ -936,9 +937,15 @@ public class Editor extends JFrame implements RunnerListener {
      return null;
    }
 
-  public void updateKeywords(PdeKeywords keywords) {
-    for (EditorTab tab : tabs)
-      tab.updateKeywords(keywords);
+  public void updateKeywords(PdeKeywords keywords, CeuKeywords ceuKeywords) {
+    for (EditorTab tab : tabs) {
+      if (tab.file.getFileName().endsWith(".ceu")) {
+        tab.updateKeywords(ceuKeywords);
+      }
+      else {
+        tab.updateKeywords(keywords);
+      }
+    }
   }
 
   JMenuItem createToolMenuItem(String className) {
