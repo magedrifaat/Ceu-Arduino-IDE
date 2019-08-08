@@ -1658,8 +1658,9 @@ public class Editor extends JFrame implements RunnerListener {
         removeAllLineHighlights();
         if (sketch.isCeuSketch()) {
           sketchController.buildCeu();
+        } else {
+          sketchController.build(verbose, saveHex);
         }
-        sketchController.build(verbose, saveHex);
         statusNotice(tr("Done compiling."));
       } catch (PreferencesMapException e) {
         statusError(I18n.format(
@@ -2088,7 +2089,13 @@ public class Editor extends JFrame implements RunnerListener {
 
         uploading = true;
 
-        boolean success = sketchController.exportApplet(usingProgrammer);
+        boolean success;
+        if (sketch.isCeuSketch()) {
+          success = sketchController.uploadCeu();
+        } else {
+          success = sketchController.exportApplet(usingProgrammer);
+        }
+        
         if (success) {
           statusNotice(tr("Done uploading."));
         }

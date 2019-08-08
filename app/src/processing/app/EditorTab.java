@@ -162,7 +162,11 @@ public class EditorTab extends JPanel implements SketchFile.TextStorage {
     textArea.setCloseCurlyBraces(PreferencesData.getBoolean("editor.auto_close_braces", true));
     textArea.setAntiAliasingEnabled(PreferencesData.getBoolean("editor.antialias"));
     textArea.setTabsEmulated(PreferencesData.getBoolean("editor.tabs.expand"));
-    textArea.setTabSize(PreferencesData.getInteger("editor.tabs.size"));
+    if (this.file.getFileName().endsWith(".ceu")) {
+      textArea.setTabSize(4);
+    } else {
+      textArea.setTabSize(PreferencesData.getInteger("editor.tabs.size"));
+    }
     textArea.addHyperlinkListener(evt -> {
       try {
         UpdatableBoardsLibsFakeURLsHandler boardLibHandler = new UpdatableBoardsLibsFakeURLsHandler(editor.base);
