@@ -471,6 +471,8 @@
     <copy todir="${staging_folder}/work/${staging_hardware_folder}/../">
       <fileset dir="shared" includes="lib/**" />
       <fileset file="shared/revisions.txt" />
+      <fileset file="shared/ceu-compiler.bat" />
+      <fileset file="shared/ceu-compiler.sh" />
     </copy>
 
     <mkdir dir="${staging_folder}/work" />
@@ -633,6 +635,7 @@
     <copy todir="linux/work">
       <fileset dir="shared" includes="lib/**" />
       <fileset file="shared/revisions.txt" />
+      <fileset file="shared/ceu-compiler.sh" />
     </copy>
 
     <copy todir="linux/work">
@@ -1040,6 +1043,7 @@
     <copy todir="windows/work">
       <fileset dir="shared" includes="lib/**" />
       <fileset file="shared/revisions.txt" />
+      <fileset file="shared/ceu-compiler.bat" />
     </copy>
 
     <fixcrlf file="windows/work/revisions.txt" eol="dos"/>
