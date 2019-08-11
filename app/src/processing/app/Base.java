@@ -1737,6 +1737,8 @@ public class Base {
     File entry = new File(folder, name + ".ino");
     if (!entry.exists() && (new File(folder, name + ".pde")).exists())
       entry = new File(folder, name + ".pde");
+    else if (!entry.exists() && (new File(folder, name + ".ceu")).exists())
+      entry = new File(folder, name + ".ceu");
 
     // if a .pde file of the same prefix as the folder exists..
     if (entry.exists()) {
