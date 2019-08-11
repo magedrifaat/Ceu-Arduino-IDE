@@ -625,9 +625,17 @@ public class SketchController {
     // commented out, then this will be a problem.
     StringBuilder buffer = new StringBuilder();
     for (String aList : list) {
-      buffer.append("#include <");
-      buffer.append(aList);
-      buffer.append(">\n");
+      buffer.append("#include ");
+      if (lib.getTypes().get(0).equals("Ceu")) {
+        buffer.append("\"");
+        buffer.append(aList);
+        buffer.append("\"");
+      } else {
+        buffer.append("<");
+        buffer.append(aList);
+        buffer.append(">");
+      }
+      buffer.append("\n");
     }
     buffer.append('\n');
     buffer.append(editor.getCurrentTab().getText());
