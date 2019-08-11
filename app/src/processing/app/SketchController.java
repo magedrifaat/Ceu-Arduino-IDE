@@ -664,17 +664,12 @@ public class SketchController {
        
 
     boolean deleteTemp = false;
-    File pathToSketch;
-    if (sketch.isCeuSketch()) {
-      pathToSketch = BaseNoGui.getContentFile("ceu\\env\\env.ino");
-    } else {
-      pathToSketch = sketch.getPrimaryFile().getFile();
-      if (sketch.isModified()) {
-        // If any files are modified, make a copy of the sketch with the changes
-        // saved, so arduino-builder will see the modifications.
-        pathToSketch = saveSketchInTempFolder();
-        deleteTemp = true;
-      }
+    File pathToSketch = sketch.getPrimaryFile().getFile();
+    if (sketch.isModified()) {
+      // If any files are modified, make a copy of the sketch with the changes
+      // saved, so arduino-builder will see the modifications.
+      pathToSketch = saveSketchInTempFolder();
+      deleteTemp = true;
     }
 
     try {
@@ -717,68 +712,87 @@ public class SketchController {
     }
     
     // add the main ceu file as first argument
-    cmd.add(sketch.getMainCeuFile().getFile().getAbsolutePath());
-    
-    // upload flag
-    cmd.add(Boolean.toString(false));
-    
-    // The board name
-    TargetBoard board = BaseNoGui.getTargetBoard();
-    if (board == null) {
-      throw new RunnerException("Board is not selected");
+    File ceuFile = sketch.getMainCeuFile().getFile();
+    String ceuFilePath = ceuFile.getAbsolutePath();
+    boolean deleteTemp = false;
+    if (sketch.isModified()) {
+      File tempFolder = FileUtils.createTempFolder("arduino_modified_sketch_");
+      FileUtils.copy(sketch.getFolder(), tempFolder);
+
+      for (SketchFile file : Stream.of(sketch.getFiles()).filter(SketchFile::isModified).collect(Collectors.toList())) {
+        Files.write(Paths.get(tempFolder.getAbsolutePath(), file.getFileName()), file.getProgram().getBytes("UTF-8"));
+      }
+      ceuFile = Paths.get(tempFolder.getAbsolutePath(), sketch.getMainCeuFile().getFileName()).toFile();
+      ceuFilePath = ceuFile.getAbsolutePath();
+      deleteTemp = true;
     }
-    cmd.add(board.getId());
-    
-    // The Architecture
-    TargetPlatform platform = board.getContainerPlatform();
-    cmd.add(platform.getId());
-    
-    // run the batch and process the output
-    int result;
-    RunnerException ex = null;
+    cmd.add(ceuFilePath);
+
     try {
-      Process process = ProcessUtils.exec(cmd.toArray(new String[0]));
+      // upload flag
+      cmd.add(Boolean.toString(false));
       
-      EditorConsole.setCurrentEditorConsole(editor.console);
-      
-      // process and output the input and error streams of the batch file
-      BufferedReader inBuf = new BufferedReader(new InputStreamReader(process.getInputStream()));
-      BufferedReader errBuf = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-      
-      String line;
-      while ((line = inBuf.readLine())  != null) {
-        System.out.println(line);
+      // The board name
+      TargetBoard board = BaseNoGui.getTargetBoard();
+      if (board == null) {
+        throw new RunnerException("Board is not selected");
       }
-      inBuf.close();
+      cmd.add(board.getId());
       
-      while ((line = errBuf.readLine())  != null) {
-        if (ex == null || !ex.hasCodeFile()) {
-          ex = parseCeuMessage(line);
-        }
+      // The Architecture
+      TargetPlatform platform = board.getContainerPlatform();
+      cmd.add(platform.getId());
+      
+      // run the batch and process the output
+      int result;
+      RunnerException ex = null;
+      try {
+        Process process = ProcessUtils.exec(cmd.toArray(new String[0]));
         
-        System.err.println(line);
+        EditorConsole.setCurrentEditorConsole(editor.console);
+        
+        // process and output the input and error streams of the batch file
+        BufferedReader inBuf = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        BufferedReader errBuf = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+        
+        String line;
+        while ((line = inBuf.readLine())  != null) {
+          System.out.println(line);
+        }
+        inBuf.close();
+        
+        while ((line = errBuf.readLine())  != null) {
+          if (ex == null || !ex.hasCodeFile()) {
+            ex = parseCeuMessage(line);
+          }
+          
+          System.err.println(line);
+        }
+        System.err.println();
+        errBuf.close();
+        
+        result = process.waitFor();
+      } catch (Exception e) {
+        throw new RunnerException(e);
       }
-      System.err.println();
-      errBuf.close();
       
-      result = process.waitFor();
-    } catch (Exception e) {
-      throw new RunnerException(e);
+      if (ex != null && result != 0) {
+        System.err.println("Error compiling Ceu");
+        ex.hideStackTrace();
+        throw ex;
+      }
+      
+      if (result != 0) {
+        RunnerException re = new RunnerException("Error compiling Ceu");
+        re.hideStackTrace();
+        throw re;
+      }
+      
+      System.out.println("Done Compiling");
+    } finally {      
+      if (deleteTemp)
+        FileUtils.recursiveDelete(ceuFile.getParentFile());
     }
-    
-    if (ex != null && result != 0) {
-      System.err.println("Error compiling Ceu");
-      ex.hideStackTrace();
-      throw ex;
-    }
-    
-    if (result != 0) {
-      RunnerException re = new RunnerException("Error compiling Ceu");
-      re.hideStackTrace();
-      throw re;
-    }
-    
-    System.out.println("Done Compiling");
     
   }
   
