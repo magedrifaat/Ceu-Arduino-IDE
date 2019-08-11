@@ -1,0 +1,43 @@
+#include "out.ceu"
+#include "wclock.ceu"
+
+output high/low OUT_11;
+output high/low OUT_12;
+output high/low OUT_13;
+
+loop do
+    emit OUT_11(low);
+    emit OUT_12(low);
+    emit OUT_13(low);
+    await 1s;
+
+    emit OUT_11(high);
+    await 1s;
+    emit OUT_11(low);
+
+    emit OUT_12(high);
+    await 500ms;
+    emit OUT_12(low);
+
+    emit OUT_13(high);
+    await 250ms;
+    emit OUT_13(low);
+    await 1s;
+
+    par/and do
+        emit OUT_11(high);
+        await 1s;
+        emit OUT_11(low);
+        await 1s;
+    with
+        emit OUT_12(high);
+        await 500ms;
+        emit OUT_12(low);
+        await 500ms;
+    with
+        emit OUT_13(high);
+        await 250ms;
+        emit OUT_13(low);
+        await 250ms;
+    end
+end

@@ -1,0 +1,28 @@
+// TODO: doesn't work with current static implementation
+
+// probably works only on ATmega328p
+
+#include "wclock.ceu"
+#include "hcsr04.ceu"
+
+// trigger
+output high/low PIN_07;
+output high/low PIN_08;
+
+// echo
+#include "pin_02.ceu"
+#include "pin_03.ceu"
+
+output high/low PIN_13;
+
+loop do
+    var int? d1;
+    var int? d2;
+    par/and do
+        d1 = await Hcsr04(7, 2);
+    with
+        d2 = await Hcsr04(8, 3);
+    end
+    emit PIN_13(d1? and d2? and ((d1!<=30 and d2!<=30) as high/low));
+    await 60ms;
+end

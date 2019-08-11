@@ -28,8 +28,11 @@ public class Sketch {
   private File folder;
 
   private List<SketchFile> files = new ArrayList<>();
+  private List<SketchFile> ceuFiles = new ArrayList<>();
 
   private File buildPath;
+  
+  private boolean ceuSketch;
 
   public static final Comparator<SketchFile> CODE_DOCS_COMPARATOR = new Comparator<SketchFile>() {
     @Override
@@ -37,6 +40,10 @@ public class Sketch {
       if (x.isPrimary() && !y.isPrimary())
         return -1;
       if (y.isPrimary() && !x.isPrimary())
+        return 1;
+      if (x.getFileName().endsWith(".ceu") && !y.getFileName().endsWith(".ceu"))
+        return -1;
+      if (y.getFileName().endsWith(".ceu") && !x.getFileName().endsWith(".ceu"))
         return 1;
       return x.getFileName().compareTo(y.getFileName());
     }
@@ -49,7 +56,13 @@ public class Sketch {
    * @param file
    *          Any file inside the sketch directory.
    */
-  Sketch(File file) throws IOException {
+   
+   Sketch(File file) throws IOException {
+     this(file, false);
+   }
+   
+  Sketch(File file, boolean _ceuSketch) throws IOException {
+    ceuSketch = _ceuSketch;
     folder = file.getParentFile();
     files = listSketchFiles(true);
   }
@@ -105,7 +118,11 @@ public class Sketch {
    */
   private List<SketchFile> listSketchFiles(boolean showWarnings) throws IOException {
     Set<SketchFile> result = new TreeSet<>(CODE_DOCS_COMPARATOR);
-    for (File file : FileUtils.listFiles(folder, false, EXTENSIONS)) {
+    List<String> extensions = new ArrayList<String>(EXTENSIONS);
+    if (ceuSketch) {
+      extensions.add("ceu");
+    }
+    for (File file : FileUtils.listFiles(folder, false, extensions)) {
       if (BaseNoGui.isSanitaryName(FileUtils.splitFilename(file).basename)) {
         result.add(new SketchFile(this, file));
       } else if (showWarnings) {
@@ -153,6 +170,16 @@ public class Sketch {
   public SketchFile getPrimaryFile() {
     return files.get(0);
   }
+  
+  public SketchFile getMainCeuFile() {
+    for (SketchFile file : files) {
+      if (file.isCeuPrimary())
+        return file;
+    }
+    
+    // For compiler warning. This function assumes the sketch is a correct Ceu sketch
+    return null;
+  }
 
   /**
    * Returns path to the main .pde file for this sketch.
@@ -163,6 +190,10 @@ public class Sketch {
 
   public SketchFile getFile(int i) {
     return files.get(i);
+  }
+  
+  public boolean isCeuSketch() {
+    return ceuSketch;
   }
 
   /**

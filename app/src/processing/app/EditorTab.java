@@ -114,7 +114,13 @@ public class EditorTab extends JPanel implements SketchFile.TextStorage {
   }
 
   private RSyntaxDocument createDocument(String contents) {
-    RSyntaxDocument document = new RSyntaxDocument(new ArduinoTokenMakerFactory(editor.base.getPdeKeywords()), RSyntaxDocument.SYNTAX_STYLE_CPLUSPLUS);
+    // TODO: replace getPdeKeywords with getCeuKeywords for ceu sketches
+    RSyntaxDocument document;
+    if (this.file.getFileName().endsWith(".ceu")) {
+      document = new RSyntaxDocument(new ArduinoTokenMakerFactory(editor.base.getCeuKeywords()), RSyntaxDocument.SYNTAX_STYLE_CPLUSPLUS);
+    } else {
+      document = new RSyntaxDocument(new ArduinoTokenMakerFactory(editor.base.getPdeKeywords()), RSyntaxDocument.SYNTAX_STYLE_CPLUSPLUS);
+    }
     document.putProperty(PlainDocument.tabSizeAttribute, PreferencesData.getInteger("editor.tabs.size"));
 
     // insert the program text into the document object
@@ -156,7 +162,11 @@ public class EditorTab extends JPanel implements SketchFile.TextStorage {
     textArea.setCloseCurlyBraces(PreferencesData.getBoolean("editor.auto_close_braces", true));
     textArea.setAntiAliasingEnabled(PreferencesData.getBoolean("editor.antialias"));
     textArea.setTabsEmulated(PreferencesData.getBoolean("editor.tabs.expand"));
-    textArea.setTabSize(PreferencesData.getInteger("editor.tabs.size"));
+    if (this.file.getFileName().endsWith(".ceu")) {
+      textArea.setTabSize(4);
+    } else {
+      textArea.setTabSize(PreferencesData.getInteger("editor.tabs.size"));
+    }
     textArea.addHyperlinkListener(evt -> {
       try {
         UpdatableBoardsLibsFakeURLsHandler boardLibHandler = new UpdatableBoardsLibsFakeURLsHandler(editor.base);

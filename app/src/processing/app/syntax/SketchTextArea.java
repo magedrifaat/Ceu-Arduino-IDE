@@ -79,10 +79,16 @@ public class SketchTextArea extends RSyntaxTextArea {
   private final static Logger LOG = Logger.getLogger(SketchTextArea.class.getName());
 
   private PdeKeywords pdeKeywords;
+  private boolean isCeuFile;
 
   public SketchTextArea(RSyntaxDocument document, PdeKeywords pdeKeywords) throws IOException {
+    this(document, pdeKeywords, false);
+  }
+  
+  public SketchTextArea(RSyntaxDocument document, PdeKeywords pdeKeywords, boolean isCeuFile) throws IOException {
     super(document);
     this.pdeKeywords = pdeKeywords;
+    this.isCeuFile = isCeuFile;
     installFeatures();
     fixCtrlDeleteBehavior();
   }
@@ -389,4 +395,11 @@ public class SketchTextArea extends RSyntaxTextArea {
     KeyStroke keyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, modifier);
     getInputMap().put(keyStroke, SketchTextAreaEditorKit.rtaDeleteNextWordAction);
   }
+  
+  // TODO: support Ceu auto-indentaion by overriding getShouldIndentNextLine function
+  /*
+  @Override
+  public boolean getShouldIndentNextLine(int linenum) {
+    return false;
+  }*/
 }

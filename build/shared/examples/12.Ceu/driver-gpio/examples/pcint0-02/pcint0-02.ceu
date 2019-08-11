@@ -1,0 +1,21 @@
+#include "out.ceu"
+#include "wclock.ceu"
+#include "pcint0.ceu"
+
+output high/low OUT_13;
+
+spawn do
+    loop do
+        call PCINT0_Enable(_PCINT4, on);   // UNO=D12, MEGA=D10
+        await 4s;
+        call PCINT0_Enable(_PCINT4, off);  // UNO=D12, MEGA=D10
+        await 4s;
+    end
+end
+
+emit OUT(13, call PCINT0_Get(_PCINT4));
+
+loop do
+    await PCINT0;
+    emit OUT(13, call PCINT0_Get(_PCINT4));
+end

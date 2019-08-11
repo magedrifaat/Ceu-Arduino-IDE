@@ -1,0 +1,14 @@
+#include "wclock.ceu"
+#include "usart.ceu"
+
+spawn USART_Init(9600);
+
+loop do
+    var[20] byte str = [].."Hello World!\n";
+    par/and do
+        await USART_Tx(&str);
+    with
+        await USART_Tx(&str);
+    end
+    await 1s;
+end

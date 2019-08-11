@@ -101,7 +101,7 @@ public class PdeKeywords {
     }
   }
 
-  private void parseKeywordsTxt(File input) throws Exception {
+  protected void parseKeywordsTxt(File input) throws Exception {
     BufferedReader reader = null;
     try {
       reader = new BufferedReader(new InputStreamReader(new FileInputStream(input)));

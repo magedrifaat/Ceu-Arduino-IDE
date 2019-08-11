@@ -54,6 +54,11 @@ public class SketchFile {
    * Is this the primary file in the sketch?
    */
   private boolean primary;
+  
+  /**
+   * Is this the primary ceu file in the sketch?
+   */
+  private boolean ceuPrimary;
 
   /**
    * Interface for an in-memory storage of text file contents. This is
@@ -97,6 +102,9 @@ public class SketchFile {
     FileUtils.SplitFile split = FileUtils.splitFilename(file);
     this.primary = split.basename.equals(sketch.getFolder().getName())
         && Sketch.SKETCH_EXTENSIONS.contains(split.extension);
+    this.ceuPrimary = split.basename.equals(sketch.getFolder().getName())
+        && split.extension.equals("ceu");
+    
   }
 
   /**
@@ -119,7 +127,16 @@ public class SketchFile {
   public boolean isPrimary() {
     return primary;
   }
+  
 
+  /**
+   * Is this the primary ceu file in the sketch?
+   */
+  public boolean isCeuPrimary() {
+    return ceuPrimary;
+  }
+
+  
   protected boolean fileExists() {
     return file.exists();
   }

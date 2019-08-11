@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Arrays;
 
 import com.github.zafarkhaja.semver.Version;
 
@@ -172,6 +173,7 @@ public class UserLibrary {
     res.architectures = archs;
     res.layout = layout;
     res.declaredTypes = typesList;
+    res.types = Arrays.asList(types.split(","));
     res.onGoingDevelopment = Files.exists(Paths.get(libFolder.getAbsolutePath(), Constants.LIBRARY_DEVELOPMENT_FLAG_FILE));
     res.includes = includes;
     res.location = location;

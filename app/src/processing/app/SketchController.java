@@ -28,15 +28,18 @@ import cc.arduino.CompilerProgressListener;
 import cc.arduino.UploaderUtils;
 import cc.arduino.packages.Uploader;
 import processing.app.debug.RunnerException;
+import processing.app.debug.*;
 import processing.app.forms.PasswordAuthorizationDialog;
 import processing.app.helpers.FileUtils;
 import processing.app.helpers.OSUtils;
 import processing.app.helpers.PreferencesMapException;
 import processing.app.packages.LibraryList;
 import processing.app.packages.UserLibrary;
+import processing.app.helpers.ProcessUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -48,6 +51,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.regex.*;
 
 import static processing.app.I18n.tr;
 
@@ -621,9 +625,17 @@ public class SketchController {
     // commented out, then this will be a problem.
     StringBuilder buffer = new StringBuilder();
     for (String aList : list) {
-      buffer.append("#include <");
-      buffer.append(aList);
-      buffer.append(">\n");
+      buffer.append("#include ");
+      if (lib.getTypes().get(0).equals("Ceu")) {
+        buffer.append("\"");
+        buffer.append(aList);
+        buffer.append("\"");
+      } else {
+        buffer.append("<");
+        buffer.append(aList);
+        buffer.append(">");
+      }
+      buffer.append("\n");
     }
     buffer.append('\n');
     buffer.append(editor.getCurrentTab().getText());
@@ -679,7 +691,218 @@ public class SketchController {
 
     return Paths.get(tempFolder.getAbsolutePath(), sketch.getPrimaryFile().getFileName()).toFile();
   }
+  
+  
+  /**
+   *  Compiles the ceu part of the sketch to a c header file
+   *  that is included in the environment(primary) .ino file.
+   *  This should be called before build function in case of ceu sketches.
+   *
+   */
+  public void buildCeu() throws RunnerException, IOException {
+    
+    List<String> cmd = new ArrayList<>();
+    // add the batch or shell file full path
+    if (OSUtils.isWindows()) {
+      cmd.add(BaseNoGui.getContentFile("ceu-compiler.bat").getAbsolutePath());
+    } else if (OSUtils.isLinux()) {
+      cmd.add(BaseNoGui.getContentFile("ceu-compiler.sh").getAbsolutePath());
+    } else {
+      throw new RunnerException("OS not supported for Ceu");
+    }
+    
+    // add the main ceu file as first argument
+    File ceuFile = sketch.getMainCeuFile().getFile();
+    String ceuFilePath = ceuFile.getAbsolutePath();
+    boolean deleteTemp = false;
+    if (sketch.isModified()) {
+      File tempFolder = FileUtils.createTempFolder("arduino_modified_sketch_");
+      FileUtils.copy(sketch.getFolder(), tempFolder);
 
+      for (SketchFile file : Stream.of(sketch.getFiles()).filter(SketchFile::isModified).collect(Collectors.toList())) {
+        Files.write(Paths.get(tempFolder.getAbsolutePath(), file.getFileName()), file.getProgram().getBytes("UTF-8"));
+      }
+      ceuFile = Paths.get(tempFolder.getAbsolutePath(), sketch.getMainCeuFile().getFileName()).toFile();
+      ceuFilePath = ceuFile.getAbsolutePath();
+      deleteTemp = true;
+    }
+    cmd.add(ceuFilePath);
+
+    try {
+      // upload flag
+      cmd.add(Boolean.toString(false));
+      
+      // The board name
+      TargetBoard board = BaseNoGui.getTargetBoard();
+      if (board == null) {
+        throw new RunnerException("Board is not selected");
+      }
+      cmd.add(board.getId());
+      
+      // The Architecture
+      TargetPlatform platform = board.getContainerPlatform();
+      cmd.add(platform.getId());
+      
+      // run the batch and process the output
+      int result;
+      RunnerException ex = null;
+      try {
+        Process process = ProcessUtils.exec(cmd.toArray(new String[0]));
+        
+        EditorConsole.setCurrentEditorConsole(editor.console);
+        
+        // process and output the input and error streams of the batch file
+        BufferedReader inBuf = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        BufferedReader errBuf = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+        
+        String line;
+        while ((line = inBuf.readLine())  != null) {
+          System.out.println(line);
+        }
+        inBuf.close();
+        
+        while ((line = errBuf.readLine())  != null) {
+          if (ex == null || !ex.hasCodeFile()) {
+            ex = parseCeuMessage(line);
+          }
+          
+          System.err.println(line);
+        }
+        System.err.println();
+        errBuf.close();
+        
+        result = process.waitFor();
+      } catch (Exception e) {
+        throw new RunnerException(e);
+      }
+      
+      if (ex != null && result != 0) {
+        System.err.println("Error compiling Ceu");
+        ex.hideStackTrace();
+        throw ex;
+      }
+      
+      if (result != 0) {
+        RunnerException re = new RunnerException("Error compiling Ceu");
+        re.hideStackTrace();
+        throw re;
+      }
+      
+      System.out.println("Done Compiling");
+    } finally {      
+      if (deleteTemp)
+        FileUtils.recursiveDelete(ceuFile.getParentFile());
+    }
+    
+  }
+  
+  private RunnerException parseCeuMessage(String msg) {
+    Pattern errPattern = Pattern.compile("^ERR.+:\\s+(.+)\\s+:\\s+line\\s+(\\d+)\\s+:\\s+(.*)");
+    Matcher m = errPattern.matcher(msg);
+    try {
+      if (m.find()) {
+        String fileName = m.group(1);
+        int line = Integer.parseInt(m.group(2));
+        String err = m.group(3);
+        for (SketchFile file : sketch.getFiles()) {
+          if (new File(fileName).getName().equals(file.getFileName())) {
+            return new RunnerException(err, file, line - 1);
+          }
+        }
+      }
+    }
+    catch (NumberFormatException nex) {
+      // skip
+    }
+    
+    return new RunnerException(msg);
+  }
+  
+  /**
+   * Handle Upload CeuSketch
+   *
+   */
+  public boolean uploadCeu() throws Exception {
+    
+    editor.status.progressNotice(tr("Compiling Sketch..."));
+    buildCeu();
+    
+    List<String> cmd = new ArrayList<>();
+    // add the batch or shell file full path
+    if (OSUtils.isWindows()) {
+      cmd.add(BaseNoGui.getContentFile("ceu-compiler.bat").getAbsolutePath());
+    } else if (OSUtils.isLinux()) {
+      cmd.add(BaseNoGui.getContentFile("ceu-compiler.sh").getAbsolutePath());
+    } else {
+      throw new RunnerException("OS not supported for Ceu");
+    }
+    
+    // add the main ceu file as first argument
+    cmd.add(sketch.getMainCeuFile().getFile().getAbsolutePath());
+    
+    // upload flag
+    cmd.add(Boolean.toString(true));
+    
+    // The board name
+    TargetBoard board = BaseNoGui.getTargetBoard();
+    if (board == null) {
+      throw new RunnerException("Board is not selected");
+    }
+    cmd.add(board.getId());
+    
+    // The Architecture
+    TargetPlatform platform = board.getContainerPlatform();
+    cmd.add(platform.getId());
+    
+    
+    // The serial port
+    String port = PreferencesData.get("serial.port");
+    if (port.isEmpty()) {
+      throw new SerialNotFoundException();
+    }
+    cmd.add(port);
+    
+    editor.status.progressNotice(tr("Uploading..."));
+    
+    // run the batch and process the output
+    int result;
+    RunnerException ex = null;
+    try {
+      Process process = ProcessUtils.exec(cmd.toArray(new String[0]));
+      
+      EditorConsole.setCurrentEditorConsole(editor.console);
+      
+      // process and output the input and error streams of the batch file
+      BufferedReader inBuf = new BufferedReader(new InputStreamReader(process.getInputStream()));
+      BufferedReader errBuf = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+      
+      String line;
+      while ((line = inBuf.readLine())  != null) {
+        System.out.println(line);
+      }
+      inBuf.close();
+      
+      while ((line = errBuf.readLine())  != null) {
+        System.err.println(line);
+      }
+      errBuf.close();
+      
+      result = process.waitFor();
+    } catch (Exception e) {
+      throw new RunnerException(e);
+    }
+    
+    if (result != 0) {
+      RunnerException re = new RunnerException("Error Uploading");
+      re.hideStackTrace();
+      throw re;
+    }
+    
+    editor.status.progressUpdate(100);
+    System.out.println("Done Uploading");
+    return true;
+  }
+  
   /**
    * Handle export to applet.
    */
@@ -687,17 +910,9 @@ public class SketchController {
     // build the sketch
     editor.status.progressNotice(tr("Compiling sketch..."));
     String foundName = build(false, false);
+    
     // (already reported) error during export, exit this function
     if (foundName == null) return false;
-
-//    // If name != exportSketchName, then that's weirdness
-//    // BUG unfortunately, that can also be a bug in the preproc :(
-//    if (!name.equals(foundName)) {
-//      Base.showWarning("Error during export",
-//                       "Sketch name is " + name + " but the sketch\n" +
-//                       "name in the code was " + foundName, null);
-//      return false;
-//    }
 
     editor.status.progressNotice(tr("Uploading..."));
     boolean success = upload(foundName, usingProgrammer);

@@ -59,6 +59,7 @@ import processing.app.packages.LibraryList;
 import processing.app.packages.UserLibrary;
 import processing.app.packages.UserLibraryFolder.Location;
 import processing.app.syntax.PdeKeywords;
+import processing.app.syntax.CeuKeywords;
 import processing.app.syntax.SketchTextAreaDefaultInputMap;
 import processing.app.tools.MenuScroller;
 import processing.app.tools.ZipDeflater;
@@ -124,6 +125,7 @@ public class Base {
   private List<JMenuItem> programmerMenus;
 
   private PdeKeywords pdeKeywords;
+  private CeuKeywords ceuKeywords;
   private final List<JMenuItem> recentSketchesMenuItems = new LinkedList<>();
 
   static public void main(String args[]) throws Exception {
@@ -285,6 +287,9 @@ public class Base {
 
     pdeKeywords = new PdeKeywords();
     pdeKeywords.reload();
+    
+    ceuKeywords = new CeuKeywords();
+    ceuKeywords.reload();
 
     contributionInstaller = new ContributionInstaller(BaseNoGui.getPlatform(), new GPGDetachedSignatureVerifier());
     libraryInstaller = new LibraryInstaller(BaseNoGui.getPlatform());
@@ -1323,10 +1328,14 @@ public class Base {
       if (priorPlatformFolder == null || !priorPlatformFolder.equals(platformFolder) || newLibraryImported) {
         pdeKeywords = new PdeKeywords();
         pdeKeywords.reload();
+                
+        ceuKeywords = new CeuKeywords();
+        ceuKeywords.reload();
+        
         priorPlatformFolder = platformFolder;
         newLibraryImported = false;
         for (Editor editor : editors) {
-          editor.updateKeywords(pdeKeywords);
+          editor.updateKeywords(pdeKeywords, ceuKeywords);
         }
       }
     }
@@ -1728,6 +1737,8 @@ public class Base {
     File entry = new File(folder, name + ".ino");
     if (!entry.exists() && (new File(folder, name + ".pde")).exists())
       entry = new File(folder, name + ".pde");
+    else if (!entry.exists() && (new File(folder, name + ".ceu")).exists())
+      entry = new File(folder, name + ".ceu");
 
     // if a .pde file of the same prefix as the folder exists..
     if (entry.exists()) {
@@ -2427,6 +2438,10 @@ public class Base {
 
   public PdeKeywords getPdeKeywords() {
     return pdeKeywords;
+  }
+  
+  public CeuKeywords getCeuKeywords() {
+    return ceuKeywords;
   }
 
   public List<JMenuItem> getRecentSketchesMenuItems() {

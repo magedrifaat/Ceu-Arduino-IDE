@@ -104,6 +104,7 @@ import processing.app.helpers.PreferencesMapException;
 import processing.app.helpers.StringReplacer;
 import processing.app.legacy.PApplet;
 import processing.app.syntax.PdeKeywords;
+import processing.app.syntax.CeuKeywords;
 import processing.app.syntax.SketchTextArea;
 import processing.app.tools.MenuScroller;
 import processing.app.tools.Tool;
@@ -936,9 +937,15 @@ public class Editor extends JFrame implements RunnerListener {
      return null;
    }
 
-  public void updateKeywords(PdeKeywords keywords) {
-    for (EditorTab tab : tabs)
-      tab.updateKeywords(keywords);
+  public void updateKeywords(PdeKeywords keywords, CeuKeywords ceuKeywords) {
+    for (EditorTab tab : tabs) {
+      if (tab.file.getFileName().endsWith(".ceu")) {
+        tab.updateKeywords(ceuKeywords);
+      }
+      else {
+        tab.updateKeywords(keywords);
+      }
+    }
   }
 
   JMenuItem createToolMenuItem(String className) {
@@ -1649,7 +1656,11 @@ public class Editor extends JFrame implements RunnerListener {
     public void run() {
       try {
         removeAllLineHighlights();
-        sketchController.build(verbose, saveHex);
+        if (sketch.isCeuSketch()) {
+          sketchController.buildCeu();
+        } else {
+          sketchController.build(verbose, saveHex);
+        }
         statusNotice(tr("Done compiling."));
       } catch (PreferencesMapException e) {
         statusError(I18n.format(
@@ -1781,64 +1792,70 @@ public class Editor extends JFrame implements RunnerListener {
     // check to make sure that this .pde file is
     // in a folder of the same name
     String fileName = sketchFile.getName();
+    
 
     File file = Sketch.checkSketchFile(sketchFile);
 
     if (file == null) {
-      if (!fileName.endsWith(".ino") && !fileName.endsWith(".pde")) {
+      if (!fileName.endsWith(".ino") && !fileName.endsWith(".pde") && !fileName.endsWith(".ceu")) {
 
         Base.showWarning(tr("Bad file selected"), tr("Arduino can only open its own sketches\n" +
           "and other files ending in .ino or .pde"), null);
         return false;
 
       } else {
+        boolean isCeu = fileName.endsWith(".ceu");
         String properParent = fileName.substring(0, fileName.length() - 4);
+        
+        if (!(isCeu && properParent.equals(sketchFile.getParentFile().getName())))
+        {
+          Object[] options = {tr("OK"), tr("Cancel")};
+          String prompt = I18n.format(tr("The file \"{0}\" needs to be inside\n" +
+              "a sketch folder named \"{1}\".\n" +
+              "Create this folder, move the file, and continue?"),
+            fileName,
+            properParent);
 
-        Object[] options = {tr("OK"), tr("Cancel")};
-        String prompt = I18n.format(tr("The file \"{0}\" needs to be inside\n" +
-            "a sketch folder named \"{1}\".\n" +
-            "Create this folder, move the file, and continue?"),
-          fileName,
-          properParent);
+          int result = JOptionPane.showOptionDialog(this, prompt, tr("Moving"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
-        int result = JOptionPane.showOptionDialog(this, prompt, tr("Moving"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+          if (result != JOptionPane.YES_OPTION) {
+            return false;
+          }
 
-        if (result != JOptionPane.YES_OPTION) {
-          return false;
+          // create properly named folder
+          File properFolder = new File(sketchFile.getParent(), properParent);
+          if (properFolder.exists()) {
+            Base.showWarning(tr("Error"), I18n.format(tr("A folder named \"{0}\" already exists. " +
+              "Can't open sketch."), properParent), null);
+            return false;
+          }
+          if (!properFolder.mkdirs()) {
+            //throw new IOException("Couldn't create sketch folder");
+            Base.showWarning(tr("Error"), tr("Could not create the sketch folder."), null);
+            return false;
+          }
+          // copy the sketch inside
+          File properPdeFile = new File(properFolder, sketchFile.getName());
+          try {
+            Base.copyFile(sketchFile, properPdeFile);
+          } catch (IOException e) {
+            Base.showWarning(tr("Error"), tr("Could not copy to a proper location."), e);
+            return false;
+          }
+
+          // remove the original file, so user doesn't get confused
+          sketchFile.delete();
+
+          // update with the new path
+          file = properPdeFile;
+        } else {
+          file = sketchFile;
         }
-
-        // create properly named folder
-        File properFolder = new File(sketchFile.getParent(), properParent);
-        if (properFolder.exists()) {
-          Base.showWarning(tr("Error"), I18n.format(tr("A folder named \"{0}\" already exists. " +
-            "Can't open sketch."), properParent), null);
-          return false;
-        }
-        if (!properFolder.mkdirs()) {
-          //throw new IOException("Couldn't create sketch folder");
-          Base.showWarning(tr("Error"), tr("Could not create the sketch folder."), null);
-          return false;
-        }
-        // copy the sketch inside
-        File properPdeFile = new File(properFolder, sketchFile.getName());
-        try {
-          Base.copyFile(sketchFile, properPdeFile);
-        } catch (IOException e) {
-          Base.showWarning(tr("Error"), tr("Could not copy to a proper location."), e);
-          return false;
-        }
-
-        // remove the original file, so user doesn't get confused
-        sketchFile.delete();
-
-        // update with the new path
-        file = properPdeFile;
-
       }
     }
 
     try {
-      sketch = new Sketch(file);
+      sketch = new Sketch(file, fileName.endsWith(".ceu"));
     } catch (IOException e) {
       Base.showWarning(tr("Error"), tr("Could not create the sketch."), e);
       return false;
@@ -2072,7 +2089,13 @@ public class Editor extends JFrame implements RunnerListener {
 
         uploading = true;
 
-        boolean success = sketchController.exportApplet(usingProgrammer);
+        boolean success;
+        if (sketch.isCeuSketch()) {
+          success = sketchController.uploadCeu();
+        } else {
+          success = sketchController.exportApplet(usingProgrammer);
+        }
+        
         if (success) {
           statusNotice(tr("Done uploading."));
         }
