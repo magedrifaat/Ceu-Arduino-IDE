@@ -1,0 +1,8 @@
+#include "i2c.ceu"
+emit I2C(on,8); // begin I2C
+loop do
+    await I2C_SLAVE_SEND_ACKED;
+    tx_buf = [4,5,6,7]; // transmit buffer contains values to transfer
+    emit I2C_SLAVE_SEND(); // send the data to master
+    await I2C_DONE; // await for the request to be completed
+end

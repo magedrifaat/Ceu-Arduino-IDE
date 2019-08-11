@@ -1,0 +1,23 @@
+#include "int0.ceu"
+#include "spi.ceu"
+
+#define NRF24L01_IRQ INT0
+#include "nrf24l01.ceu"
+
+{Serial.begin(9600);}
+{Serial.println("Ceu - nrf-tx");}
+{_DELAY(20);}
+
+var Lock spi = _;
+
+var NRF24L01_Data nrf = val NRF24L01_Data(&spi, 8,7, _,_,_,_,_,_,_);
+spawn NRF24L01_Init(&nrf);
+await nrf.ok;
+
+var int i;
+loop i do
+    await 1s;
+    var[1] byte buf = [i];
+    await NRF24L01_Tx(&nrf, &buf);
+    {Serial.print("< "); Serial.println(@i); _DELAY(10);}
+end
