@@ -114,7 +114,6 @@ public class EditorTab extends JPanel implements SketchFile.TextStorage {
   }
 
   private RSyntaxDocument createDocument(String contents) {
-    // TODO: replace getPdeKeywords with getCeuKeywords for ceu sketches
     RSyntaxDocument document;
     if (this.file.getFileName().endsWith(".ceu")) {
       document = new RSyntaxDocument(new ArduinoTokenMakerFactory(editor.base.getCeuKeywords()), RSyntaxDocument.SYNTAX_STYLE_CPLUSPLUS);

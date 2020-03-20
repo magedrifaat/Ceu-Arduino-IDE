@@ -857,7 +857,7 @@ public class SketchController {
     
     // The serial port
     String port = PreferencesData.get("serial.port");
-    if (port.isEmpty()) {
+    if (port == null || port.isEmpty()) {
       throw new SerialNotFoundException();
     }
     cmd.add(port);
