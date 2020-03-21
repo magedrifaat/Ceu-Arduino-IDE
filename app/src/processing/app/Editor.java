@@ -564,6 +564,9 @@ public class Editor extends JFrame implements RunnerListener {
     menubar.add(toolsMenu);
 
     menubar.add(buildHelpMenu());
+	
+	menubar.add(new JMenu("dummy"));
+	
     setJMenuBar(menubar);
   }
 
