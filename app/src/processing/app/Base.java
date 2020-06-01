@@ -453,7 +453,17 @@ public class Base {
       System.exit(0);
     } else if (parser.isGuiMode()) {
       splash.splashText(tr("Starting..."));
-
+      
+      // TODO: GUI for choose project
+      JFrame temp = new JFrame("temp");
+      temp.setLayout(new GridLayout(0,2));
+      ChooseProjectDialog dialog = new ChooseProjectDialog(temp);
+      dialog.setVisible(true);
+      if (dialog.getProjectType().equals("exit")) {
+        System.exit(0);
+      }
+      System.out.println("Project type is: " + dialog.getProjectType());
+      
       for (String path : parser.getFilenames()) {
         // Correctly resolve relative paths
         File file = absoluteFile(path);
@@ -498,6 +508,7 @@ public class Base {
       new Thread(new NewBoardListener(this)).start();
 
       // Check for updates
+      // TODO: disable updates entirely without breaking logic
       if (PreferencesData.getBoolean("update.check")) {
         new UpdateCheck(this);
 
@@ -800,6 +811,8 @@ public class Base {
    * @throws Exception
    */
   public void handleOpenPrompt() throws Exception {
+    // TODO: handle other extensions in opening
+    
     // get the frontmost window frame for placing file dialog
     FileDialog fd = new FileDialog(activeEditor, tr("Open an Arduino sketch..."), FileDialog.LOAD);
     File lastFolder = new File(PreferencesData.get("last.folder", BaseNoGui.getSketchbookFolder().getAbsolutePath()));
