@@ -56,7 +56,7 @@ public class ProjectConfig {
   }
   
   private ArrayList<String> getPrefExtensions() {
-    String csvExtensions = PreferencesData.get(projectType + "-" + "extensions");
+    String csvExtensions = PreferencesData.get(projectType + "-extensions");
     return new ArrayList<String> (Arrays.asList(csvExtensions.replaceAll(" ", "").split(",")));
   }
   

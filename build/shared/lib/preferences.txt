@@ -289,3 +289,8 @@ preferences.readonly=false
 # Disable signature check on packages_index.json, use only for
 # development/debugging purposes. Do not enable in production.
 #allow_insecure_packages=true
+
+
+project-types = legacy, ceu-arduino
+legacy-title = Legacy Arduino
+ceu-arduino-title = Ceu-Arduino

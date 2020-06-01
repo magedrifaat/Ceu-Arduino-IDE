@@ -4,36 +4,44 @@ import javax.swing.*;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
+
 
 public class ChooseProjectDialog extends JDialog implements ActionListener {
   
   String projectType;
-  JButton ceuBtn, legacyBtn;
   public ChooseProjectDialog(JFrame parent) {
+    
     super(parent, "Choose project type...", true);
-    GridLayout layout = new GridLayout(0, 2);
-    setLayout(layout);
-    ceuBtn = new JButton("Ceu-Arduino");
-    ceuBtn.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        projectType = "Ceu-Arduino";
-      }
-    });
-    ceuBtn.addActionListener(this);
     
-    legacyBtn = new JButton("Legacy Arduino");
-    legacyBtn.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        projectType = "Legacy";
-      }
-    });
-    legacyBtn.addActionListener(this);
+    JScrollPane mainPane = new JScrollPane();
+    JPanel mainPanel = new JPanel();
     
-    add(ceuBtn);
-    add(legacyBtn);
+    GridLayout layout = new GridLayout(1, 0);
+    mainPanel.setLayout(layout);
+    
+    ArrayList<String> projects = getProjectTypes();
+    for (String project : projects) {
+      String title = PreferencesData.get(project + "-title");
+      
+      JButton projectBtn = new JButton(title);
+      projectBtn.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          projectType = project;
+        }
+      });
+      projectBtn.addActionListener(this);
+      
+      mainPanel.add(projectBtn);
+    }
+    
+    mainPane.setViewportView(mainPanel);
+    this.add(mainPane);
+    
     setSize(300, 200);
+    
     setLocationRelativeTo(null);
     projectType = "exit";
   }
@@ -45,5 +53,9 @@ public class ChooseProjectDialog extends JDialog implements ActionListener {
   @Override
   public void actionPerformed(ActionEvent e) {
     setVisible(false);
+  }
+  
+  private ArrayList<String> getProjectTypes() {
+    return new ArrayList<String> (Arrays.asList(PreferencesData.get("project-types").replaceAll(" ", "").split(",")));
   }
 }
