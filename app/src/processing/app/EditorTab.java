@@ -115,8 +115,9 @@ public class EditorTab extends JPanel implements SketchFile.TextStorage {
 
   private RSyntaxDocument createDocument(String contents) {
     RSyntaxDocument document;
-    if (this.file.getFileName().endsWith(".ceu")) {
-      document = new RSyntaxDocument(new ArduinoTokenMakerFactory(editor.base.getCeuKeywords()), RSyntaxDocument.SYNTAX_STYLE_CPLUSPLUS);
+    String extension = editor.base.getProjectConfig().getDefaultExtension();
+    if (this.file.getFileName().endsWith("." + extension)) {
+      document = new RSyntaxDocument(new ArduinoTokenMakerFactory(editor.base.getCustomKeywords()), RSyntaxDocument.SYNTAX_STYLE_CPLUSPLUS);
     } else {
       document = new RSyntaxDocument(new ArduinoTokenMakerFactory(editor.base.getPdeKeywords()), RSyntaxDocument.SYNTAX_STYLE_CPLUSPLUS);
     }
@@ -161,6 +162,7 @@ public class EditorTab extends JPanel implements SketchFile.TextStorage {
     textArea.setCloseCurlyBraces(PreferencesData.getBoolean("editor.auto_close_braces", true));
     textArea.setAntiAliasingEnabled(PreferencesData.getBoolean("editor.antialias"));
     textArea.setTabsEmulated(PreferencesData.getBoolean("editor.tabs.expand"));
+    // TODO: make this preference dependant or ddefault to tab.size
     if (this.file.getFileName().endsWith(".ceu")) {
       textArea.setTabSize(4);
     } else {

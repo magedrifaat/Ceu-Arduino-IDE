@@ -59,7 +59,7 @@ import processing.app.packages.LibraryList;
 import processing.app.packages.UserLibrary;
 import processing.app.packages.UserLibraryFolder.Location;
 import processing.app.syntax.PdeKeywords;
-import processing.app.syntax.CeuKeywords;
+import processing.app.syntax.CustomKeywords;
 import processing.app.syntax.SketchTextAreaDefaultInputMap;
 import processing.app.tools.MenuScroller;
 import processing.app.tools.ZipDeflater;
@@ -125,7 +125,9 @@ public class Base {
   private List<JMenuItem> programmerMenus;
 
   private PdeKeywords pdeKeywords;
-  private CeuKeywords ceuKeywords;
+  private CustomKeywords customKeywords;
+  private ProjectConfig projectConfig;
+  
   private final List<JMenuItem> recentSketchesMenuItems = new LinkedList<>();
 
   static public void main(String args[]) throws Exception {
@@ -287,9 +289,6 @@ public class Base {
 
     pdeKeywords = new PdeKeywords();
     pdeKeywords.reload();
-    
-    ceuKeywords = new CeuKeywords();
-    ceuKeywords.reload();
 
     contributionInstaller = new ContributionInstaller(BaseNoGui.getPlatform(), new GPGDetachedSignatureVerifier());
     libraryInstaller = new LibraryInstaller(BaseNoGui.getPlatform());
@@ -462,7 +461,10 @@ public class Base {
       if (dialog.getProjectType().equals("exit")) {
         System.exit(0);
       }
-      System.out.println("Project type is: " + dialog.getProjectType());
+      projectConfig = new ProjectConfig(dialog.getProjectType());
+      
+      customKeywords = new CustomKeywords(projectConfig.getKeywordsFile());
+      customKeywords.reload();
       
       for (String path : parser.getFilenames()) {
         // Correctly resolve relative paths
@@ -776,11 +778,13 @@ public class Base {
     newbieDir.mkdirs();
 
     // Make an empty pde file
-    File newbieFile = new File(newbieDir, newbieName + ".ino");
+    File newbieFile = new File(newbieDir, newbieName + "." + projectConfig.getDefaultExtension());
     if (!newbieFile.createNewFile()) {
       throw new IOException();
     }
-    FileUtils.copyFile(new File(getContentFile("examples"), "01.Basics" + File.separator + "BareMinimum" + File.separator + "BareMinimum.ino"), newbieFile);
+    if (projectConfig.isLegacy()) {
+      FileUtils.copyFile(new File(getContentFile("examples"), "01.Basics" + File.separator + "BareMinimum" + File.separator + "BareMinimum.ino"), newbieFile);
+    }
     return newbieFile;
   }
 
@@ -824,8 +828,7 @@ public class Base {
     // Only show .pde files as eligible bachelors
     fd.setFilenameFilter(new FilenameFilter() {
       public boolean accept(File dir, String name) {
-        return name.toLowerCase().endsWith(".ino")
-                || name.toLowerCase().endsWith(".pde");
+        return projectConfig.hasAcceptableExtension(name.toLowerCase());
       }
     });
 
@@ -1341,14 +1344,16 @@ public class Base {
       if (priorPlatformFolder == null || !priorPlatformFolder.equals(platformFolder) || newLibraryImported) {
         pdeKeywords = new PdeKeywords();
         pdeKeywords.reload();
-                
-        ceuKeywords = new CeuKeywords();
-        ceuKeywords.reload();
+        
+        if (projectConfig != null) {
+          customKeywords = new CustomKeywords(projectConfig.getKeywordsFile());
+          customKeywords.reload();
+        }
         
         priorPlatformFolder = platformFolder;
         newLibraryImported = false;
         for (Editor editor : editors) {
-          editor.updateKeywords(pdeKeywords, ceuKeywords);
+          editor.updateKeywords(pdeKeywords, customKeywords);
         }
       }
     }
@@ -1746,7 +1751,8 @@ public class Base {
         }
       }
     };
-
+  
+    // TODO: look into supporting project relevant extensions
     File entry = new File(folder, name + ".ino");
     if (!entry.exists() && (new File(folder, name + ".pde")).exists())
       entry = new File(folder, name + ".pde");
@@ -2453,12 +2459,16 @@ public class Base {
     return pdeKeywords;
   }
   
-  public CeuKeywords getCeuKeywords() {
-    return ceuKeywords;
+  public CustomKeywords getCustomKeywords() {
+    return customKeywords;
   }
-
+  
   public List<JMenuItem> getRecentSketchesMenuItems() {
     return recentSketchesMenuItems;
+  }
+  
+  public ProjectConfig getProjectConfig() {
+    return projectConfig;
   }
 
 }

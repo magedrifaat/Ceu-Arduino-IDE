@@ -62,10 +62,13 @@ import static processing.app.I18n.tr;
 public class SketchController {
   private final Editor editor;
   private final Sketch sketch;
+  private final ProjectConfig projectConfig;
 
   public SketchController(Editor _editor, Sketch _sketch) {
     editor = _editor;
     sketch = _sketch;
+    // TODO: refactor editor add projectConfig field to decrease indirection
+    projectConfig = editor.base.getProjectConfig();
   }
 
   private boolean renamingCode;
@@ -392,6 +395,7 @@ public class SketchController {
     newName = SketchController.checkName(newName);
 
     File newFolder;
+    // TODO: look into this case
     // User may want to overwrite a .ino
     // check if the parent folder name ends with the sketch name
     if (newName.endsWith(".ino") && newParentDir.endsWith(newName.substring(0, newName.lastIndexOf('.'))+ File.separator)) {
@@ -626,6 +630,7 @@ public class SketchController {
     StringBuilder buffer = new StringBuilder();
     for (String aList : list) {
       buffer.append("#include ");
+      // TODO: support local includes for all non-legacy libraries
       if (lib.getTypes().get(0).equals("Ceu")) {
         buffer.append("\"");
         buffer.append(aList);
@@ -694,54 +699,46 @@ public class SketchController {
   
   
   /**
-   *  Compiles the ceu part of the sketch to a c header file
-   *  that is included in the environment(primary) .ino file.
-   *  This should be called before build function in case of ceu sketches.
+   *  Compiles the custom sketch using preference compile file
    *
    */
-  public void buildCeu() throws RunnerException, IOException {
+  public void buildCustom() throws RunnerException, IOException {
     
     List<String> cmd = new ArrayList<>();
-    // add the batch or shell file full path
-    if (OSUtils.isWindows()) {
-      cmd.add(BaseNoGui.getContentFile("ceu-compiler.bat").getAbsolutePath());
-    } else if (OSUtils.isLinux()) {
-      cmd.add(BaseNoGui.getContentFile("ceu-compiler.sh").getAbsolutePath());
-    } else {
-      throw new RunnerException("OS not supported for Ceu");
-    }
     
-    // add the main ceu file as first argument
-    File ceuFile = sketch.getMainCeuFile().getFile();
-    String ceuFilePath = ceuFile.getAbsolutePath();
+    cmd.add(BaseNoGui.getContentFile(projectConfig.getCompileCommand()).getAbsolutePath());
+    
+    // add the main file as first argument
+    File file = sketch.getMainFile().getFile();
+    String filePath = file.getAbsolutePath();
     boolean deleteTemp = false;
     if (sketch.isModified()) {
       File tempFolder = FileUtils.createTempFolder("arduino_modified_sketch_");
       FileUtils.copy(sketch.getFolder(), tempFolder);
 
-      for (SketchFile file : Stream.of(sketch.getFiles()).filter(SketchFile::isModified).collect(Collectors.toList())) {
-        Files.write(Paths.get(tempFolder.getAbsolutePath(), file.getFileName()), file.getProgram().getBytes("UTF-8"));
+      for (SketchFile afile : Stream.of(sketch.getFiles()).filter(SketchFile::isModified).collect(Collectors.toList())) {
+        Files.write(Paths.get(tempFolder.getAbsolutePath(), afile.getFileName()), afile.getProgram().getBytes("UTF-8"));
       }
-      ceuFile = Paths.get(tempFolder.getAbsolutePath(), sketch.getMainCeuFile().getFileName()).toFile();
-      ceuFilePath = ceuFile.getAbsolutePath();
+      file = Paths.get(tempFolder.getAbsolutePath(), sketch.getMainFile().getFileName()).toFile();
+      filePath = file.getAbsolutePath();
       deleteTemp = true;
     }
-    cmd.add(ceuFilePath);
+    cmd.add(filePath);
 
     try {
-      // upload flag
-      cmd.add(Boolean.toString(false));
+      // // upload flag
+      // cmd.add(Boolean.toString(false));
       
-      // The board name
-      TargetBoard board = BaseNoGui.getTargetBoard();
-      if (board == null) {
-        throw new RunnerException("Board is not selected");
-      }
-      cmd.add(board.getId());
+      // // The board name
+      // TargetBoard board = BaseNoGui.getTargetBoard();
+      // if (board == null) {
+        // throw new RunnerException("Board is not selected");
+      // }
+      // cmd.add(board.getId());
       
-      // The Architecture
-      TargetPlatform platform = board.getContainerPlatform();
-      cmd.add(platform.getId());
+      // // The Architecture
+      // TargetPlatform platform = board.getContainerPlatform();
+      // cmd.add(platform.getId());
       
       // run the batch and process the output
       int result;
@@ -763,7 +760,7 @@ public class SketchController {
         
         while ((line = errBuf.readLine())  != null) {
           if (ex == null || !ex.hasCodeFile()) {
-            ex = parseCeuMessage(line);
+            ex = parseCustomMessage(line);
           }
           
           System.err.println(line);
@@ -777,13 +774,13 @@ public class SketchController {
       }
       
       if (ex != null && result != 0) {
-        System.err.println("Error compiling Ceu");
+        System.err.println("Error compiling Project");
         ex.hideStackTrace();
         throw ex;
       }
       
       if (result != 0) {
-        RunnerException re = new RunnerException("Error compiling Ceu");
+        RunnerException re = new RunnerException("Error compiling Project");
         re.hideStackTrace();
         throw re;
       }
@@ -791,12 +788,13 @@ public class SketchController {
       System.out.println("Done Compiling");
     } finally {      
       if (deleteTemp)
-        FileUtils.recursiveDelete(ceuFile.getParentFile());
+        FileUtils.recursiveDelete(file.getParentFile());
     }
     
   }
   
-  private RunnerException parseCeuMessage(String msg) {
+  private RunnerException parseCustomMessage(String msg) {
+    // TODO: make this abstract by specifying a pattern in projectConfig
     Pattern errPattern = Pattern.compile("^ERR.+:\\s+(.+)\\s+:\\s+line\\s+(\\d+)\\s+:\\s+(.*)");
     Matcher m = errPattern.matcher(msg);
     try {
@@ -819,48 +817,41 @@ public class SketchController {
   }
   
   /**
-   * Handle Upload CeuSketch
+   * Handle Upload CustomSketch
    *
    */
-  public boolean uploadCeu() throws Exception {
+  public boolean uploadCustom() throws Exception {
     
     editor.status.progressNotice(tr("Compiling Sketch..."));
-    buildCeu();
+    buildCustom();
     
     List<String> cmd = new ArrayList<>();
-    // add the batch or shell file full path
-    if (OSUtils.isWindows()) {
-      cmd.add(BaseNoGui.getContentFile("ceu-compiler.bat").getAbsolutePath());
-    } else if (OSUtils.isLinux()) {
-      cmd.add(BaseNoGui.getContentFile("ceu-compiler.sh").getAbsolutePath());
-    } else {
-      throw new RunnerException("OS not supported for Ceu");
-    }
+    cmd.add(BaseNoGui.getContentFile(projectConfig.getUploadCommand()).getAbsolutePath());
     
-    // add the main ceu file as first argument
-    cmd.add(sketch.getMainCeuFile().getFile().getAbsolutePath());
+    // add the main file as first argument
+    cmd.add(sketch.getMainFile().getFile().getAbsolutePath());
     
-    // upload flag
-    cmd.add(Boolean.toString(true));
+    // // upload flag
+    // cmd.add(Boolean.toString(true));
     
-    // The board name
-    TargetBoard board = BaseNoGui.getTargetBoard();
-    if (board == null) {
-      throw new RunnerException("Board is not selected");
-    }
-    cmd.add(board.getId());
+    // // The board name
+    // TargetBoard board = BaseNoGui.getTargetBoard();
+    // if (board == null) {
+      // throw new RunnerException("Board is not selected");
+    // }
+    // cmd.add(board.getId());
     
-    // The Architecture
-    TargetPlatform platform = board.getContainerPlatform();
-    cmd.add(platform.getId());
+    // // The Architecture
+    // TargetPlatform platform = board.getContainerPlatform();
+    // cmd.add(platform.getId());
     
     
-    // The serial port
-    String port = PreferencesData.get("serial.port");
-    if (port == null || port.isEmpty()) {
-      throw new SerialNotFoundException();
-    }
-    cmd.add(port);
+    // // The serial port
+    // String port = PreferencesData.get("serial.port");
+    // if (port == null || port.isEmpty()) {
+      // throw new SerialNotFoundException();
+    // }
+    // cmd.add(port);
     
     editor.status.progressNotice(tr("Uploading..."));
     

@@ -104,7 +104,7 @@ import processing.app.helpers.PreferencesMapException;
 import processing.app.helpers.StringReplacer;
 import processing.app.legacy.PApplet;
 import processing.app.syntax.PdeKeywords;
-import processing.app.syntax.CeuKeywords;
+import processing.app.syntax.CustomKeywords;
 import processing.app.syntax.SketchTextArea;
 import processing.app.tools.MenuScroller;
 import processing.app.tools.Tool;
@@ -938,10 +938,11 @@ public class Editor extends JFrame implements RunnerListener {
      return null;
    }
 
-  public void updateKeywords(PdeKeywords keywords, CeuKeywords ceuKeywords) {
+  public void updateKeywords(PdeKeywords keywords, CustomKeywords customKeywords) {
+    String extension = base.getProjectConfig().getDefaultExtension();
     for (EditorTab tab : tabs) {
-      if (tab.file.getFileName().endsWith(".ceu")) {
-        tab.updateKeywords(ceuKeywords);
+      if (tab.file.getFileName().endsWith("." + extension)) {
+        tab.updateKeywords(customKeywords);
       }
       else {
         tab.updateKeywords(keywords);
@@ -1657,10 +1658,10 @@ public class Editor extends JFrame implements RunnerListener {
     public void run() {
       try {
         removeAllLineHighlights();
-        if (sketch.isCeuSketch()) {
-          sketchController.buildCeu();
-        } else {
+        if (sketch.isLegacy()) {
           sketchController.build(verbose, saveHex);
+        } else {
+          sketchController.buildCustom();
         }
         statusNotice(tr("Done compiling."));
       } catch (PreferencesMapException e) {
@@ -1794,21 +1795,22 @@ public class Editor extends JFrame implements RunnerListener {
     // in a folder of the same name
     String fileName = sketchFile.getName();
     
-
-    File file = Sketch.checkSketchFile(sketchFile);
+    
+    File file = Sketch.checkSketchFile(sketchFile, base.getProjectConfig().getDefaultExtension());
 
     if (file == null) {
-      if (!fileName.endsWith(".ino") && !fileName.endsWith(".pde") && !fileName.endsWith(".ceu")) {
+      // TODO: customize error message
+      if (!base.getProjectConfig().hasAcceptableExtension(fileName)) {
 
         Base.showWarning(tr("Bad file selected"), tr("Arduino can only open its own sketches\n" +
           "and other files ending in .ino or .pde"), null);
         return false;
 
       } else {
-        boolean isCeu = fileName.endsWith(".ceu");
+        // TODO: handle extensions that aren't 3 characters long
         String properParent = fileName.substring(0, fileName.length() - 4);
         
-        if (!(isCeu && properParent.equals(sketchFile.getParentFile().getName())))
+        if (!properParent.equals(sketchFile.getParentFile().getName()))
         {
           Object[] options = {tr("OK"), tr("Cancel")};
           String prompt = I18n.format(tr("The file \"{0}\" needs to be inside\n" +
@@ -1856,7 +1858,8 @@ public class Editor extends JFrame implements RunnerListener {
     }
 
     try {
-      sketch = new Sketch(file, fileName.endsWith(".ceu"));
+      // TODO: change sketch implementation to take a "legacy" flag instead
+      sketch = new Sketch(file, base.getProjectConfig());
     } catch (IOException e) {
       Base.showWarning(tr("Error"), tr("Could not create the sketch."), e);
       return false;
@@ -2091,10 +2094,10 @@ public class Editor extends JFrame implements RunnerListener {
         uploading = true;
 
         boolean success;
-        if (sketch.isCeuSketch()) {
-          success = sketchController.uploadCeu();
-        } else {
+        if (sketch.isLegacy()) {
           success = sketchController.exportApplet(usingProgrammer);
+        } else {
+          success = sketchController.uploadCustom();
         }
         
         if (success) {

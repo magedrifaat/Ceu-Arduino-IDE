@@ -28,22 +28,22 @@ public class Sketch {
   private File folder;
 
   private List<SketchFile> files = new ArrayList<>();
-  private List<SketchFile> ceuFiles = new ArrayList<>();
 
   private File buildPath;
   
-  private boolean ceuSketch;
+  private ProjectConfig projectConfig;
 
   public static final Comparator<SketchFile> CODE_DOCS_COMPARATOR = new Comparator<SketchFile>() {
     @Override
     public int compare(SketchFile x, SketchFile y) {
+      String extension = x.getDefaultExtension();
       if (x.isPrimary() && !y.isPrimary())
         return -1;
       if (y.isPrimary() && !x.isPrimary())
         return 1;
-      if (x.getFileName().endsWith(".ceu") && !y.getFileName().endsWith(".ceu"))
+      if (x.getFileName().endsWith("." + extension) && !y.getFileName().endsWith("." + extension))
         return -1;
-      if (y.getFileName().endsWith(".ceu") && !x.getFileName().endsWith(".ceu"))
+      if (y.getFileName().endsWith("." + extension) && !x.getFileName().endsWith("." + extension))
         return 1;
       return x.getFileName().compareTo(y.getFileName());
     }
@@ -57,32 +57,35 @@ public class Sketch {
    *          Any file inside the sketch directory.
    */
    
+   // TODO: check for calls that don't set projecttype for sketch
    Sketch(File file) throws IOException {
-     this(file, false);
+     this(file, new ProjectConfig("legacy"));
    }
    
-  Sketch(File file, boolean _ceuSketch) throws IOException {
-    ceuSketch = _ceuSketch;
+  Sketch(File file, ProjectConfig projectConfig) throws IOException {
+    
+    if (projectConfig == null) {
+      this.projectConfig = new ProjectConfig("legacy");
+    }
+    else {
+      this.projectConfig = projectConfig;
+    }
+    
     folder = file.getParentFile();
     files = listSketchFiles(true);
   }
 
-  static public File checkSketchFile(File file) {
+  static public File checkSketchFile(File file, String extension) {
     // check to make sure that this .pde file is
     // in a folder of the same name
     String fileName = file.getName();
     File parent = file.getParentFile();
     String parentName = parent.getName();
-    String pdeName = parentName + ".pde";
-    File altPdeFile = new File(parent, pdeName);
-    String inoName = parentName + ".ino";
+    String inoName = parentName + "." + extension;
     File altInoFile = new File(parent, inoName);
 
-    if (pdeName.equals(fileName) || inoName.equals(fileName))
+    if (inoName.equals(fileName))
       return file;
-
-    if (altPdeFile.exists())
-      return altPdeFile;
 
     if (altInoFile.exists())
       return altInoFile;
@@ -118,15 +121,27 @@ public class Sketch {
    */
   private List<SketchFile> listSketchFiles(boolean showWarnings) throws IOException {
     Set<SketchFile> result = new TreeSet<>(CODE_DOCS_COMPARATOR);
-    List<String> extensions = new ArrayList<String>(EXTENSIONS);
-    if (ceuSketch) {
-      extensions.add("ceu");
+    
+    if (isLegacy()) {
+      List<String> extensions = new ArrayList<String>(EXTENSIONS);
+      
+      for (File file : FileUtils.listFiles(folder, false, extensions)) {
+        if (BaseNoGui.isSanitaryName(FileUtils.splitFilename(file).basename)) {
+          result.add(new SketchFile(this, file));
+        } else if (showWarnings) {
+          System.err.println(I18n.format(tr("File name {0} is invalid: ignored"), file.getName()));
+        }
+      }
     }
-    for (File file : FileUtils.listFiles(folder, false, extensions)) {
-      if (BaseNoGui.isSanitaryName(FileUtils.splitFilename(file).basename)) {
-        result.add(new SketchFile(this, file));
-      } else if (showWarnings) {
-        System.err.println(I18n.format(tr("File name {0} is invalid: ignored"), file.getName()));
+    else {
+      for (File file : FileUtils.listFiles(folder, false, new ArrayList<String>())) {
+        if (projectConfig.hasAcceptableExtension(file.getName())) {
+          if (BaseNoGui.isSanitaryName(FileUtils.splitFilename(file).basename)) {
+            result.add(new SketchFile(this, file));
+          } else if (showWarnings) {
+            System.err.println(I18n.format(tr("File name {0} is invalid: ignored"), file.getName()));
+          }
+        }
       }
     }
 
@@ -171,13 +186,12 @@ public class Sketch {
     return files.get(0);
   }
   
-  public SketchFile getMainCeuFile() {
+  public SketchFile getMainFile() {
     for (SketchFile file : files) {
-      if (file.isCeuPrimary())
+      if (file.isMainFile())
         return file;
     }
     
-    // For compiler warning. This function assumes the sketch is a correct Ceu sketch
     return null;
   }
 
@@ -192,8 +206,8 @@ public class Sketch {
     return files.get(i);
   }
   
-  public boolean isCeuSketch() {
-    return ceuSketch;
+  public boolean isLegacy() {
+    return projectConfig.isLegacy();
   }
 
   /**
@@ -236,6 +250,10 @@ public class Sketch {
 
   public File getDataFolder() {
     return new File(folder, "data");
+  }
+  
+  public String getDefaultExtension() {
+    return projectConfig.getDefaultExtension();
   }
 
   /**

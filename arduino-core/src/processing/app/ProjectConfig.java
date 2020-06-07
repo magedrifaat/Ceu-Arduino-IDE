@@ -2,14 +2,12 @@ package processing.app;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import processing.app.syntax.CustomKeywords;
 import java.io.File;
 
 
 public class ProjectConfig {
   private String projectType;
   private ArrayList<String> extensions;
-  private CustomKeywords keywords;
   private String compileCommand;
   private String runCommand;
   private String uploadCommand;
@@ -20,7 +18,6 @@ public class ProjectConfig {
     // TODO: add all data as preferences instead of config files
     this.projectType = projectType;
     extensions = getPrefExtensions();
-    keywords = new CustomKeywords(getKeywordsFile());
     compileCommand = getPrefCommand("compile");
     runCommand = getPrefCommand("run");
     uploadCommand = getPrefCommand("upload");
@@ -51,8 +48,24 @@ public class ProjectConfig {
     return extensions.contains(extension);
   }
   
-  public CustomKeywords getKeywords() {
-    return keywords;
+  public String getDefaultExtension() {
+    return extensions.get(0);
+  }
+  
+  public boolean isLegacy() {
+    return projectType.equals("legacy");
+  }
+  
+  public boolean hasAcceptableExtension(String name) {
+    boolean acceptable = false;
+    for (String extension : extensions) {
+      if (name.endsWith(extension)) {
+        acceptable = true;
+        break;
+      } 
+    }
+    
+    return acceptable;
   }
   
   private ArrayList<String> getPrefExtensions() {
@@ -64,7 +77,15 @@ public class ProjectConfig {
     return PreferencesData.get(projectType + "-" + command);
   }
   
-  private File getKeywordsFile() {
-    return new File(BaseNoGui.getContentFile("lib"), "keywords_" + projectType + ".txt");
+  public File getKeywordsFile() {
+    String fileName;
+    if (isLegacy()) {
+      fileName = "keywords.txt";
+    }
+    else {
+      fileName = getPrefCommand("keywords");
+    }
+    
+    return new File(BaseNoGui.getContentFile("lib"), fileName);
   }
 }

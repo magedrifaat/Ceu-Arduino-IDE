@@ -56,9 +56,9 @@ public class SketchFile {
   private boolean primary;
   
   /**
-   * Is this the primary ceu file in the sketch?
+   * Is this the main file in the sketch?
    */
-  private boolean ceuPrimary;
+  private boolean mainFile;
 
   /**
    * Interface for an in-memory storage of text file contents. This is
@@ -102,9 +102,13 @@ public class SketchFile {
     FileUtils.SplitFile split = FileUtils.splitFilename(file);
     this.primary = split.basename.equals(sketch.getFolder().getName())
         && Sketch.SKETCH_EXTENSIONS.contains(split.extension);
-    this.ceuPrimary = split.basename.equals(sketch.getFolder().getName())
-        && split.extension.equals("ceu");
+    this.mainFile = split.basename.equals(sketch.getFolder().getName())
+        && split.extension.equals(sketch.getDefaultExtension());
     
+  }
+  
+  public String getDefaultExtension() {
+    return sketch.getDefaultExtension();
   }
 
   /**
@@ -130,10 +134,10 @@ public class SketchFile {
   
 
   /**
-   * Is this the primary ceu file in the sketch?
+   * Is this the main file in the sketch?
    */
-  public boolean isCeuPrimary() {
-    return ceuPrimary;
+  public boolean isMainFile() {
+    return mainFile;
   }
 
   
