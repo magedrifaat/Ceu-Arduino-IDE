@@ -1892,11 +1892,12 @@ public class Editor extends JFrame implements RunnerListener {
       setTitle(StringReplacer.replaceFromMapping(customFormat, titleMap));
     } else {
       if (current.isPrimary()) {
-        setTitle(I18n.format(tr("{0} | Arduino {1}"), sketch.getName(),
-                             BaseNoGui.VERSION_NAME_LONG));
+        setTitle(I18n.format(tr("{0} | {1} {2}"), sketch.getName(),
+                  base.getProjectConfig().getTitle(), BaseNoGui.VERSION_NAME_LONG));
       } else {
-        setTitle(I18n.format(tr("{0} - {1} | Arduino {2}"), sketch.getName(),
-                             current.getFileName(), BaseNoGui.VERSION_NAME_LONG));
+        setTitle(I18n.format(tr("{0} - {1} | {2} {3}"), sketch.getName(),
+                          current.getFileName(), base.getProjectConfig().getTitle(),
+                          BaseNoGui.VERSION_NAME_LONG));
       }
     }
   }

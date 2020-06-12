@@ -7,6 +7,7 @@ import java.io.File;
 
 public class ProjectConfig {
   private String projectType;
+  private String projectTitle;
   private ArrayList<String> extensions;
   private String compileCommand;
   private String runCommand;
@@ -17,11 +18,16 @@ public class ProjectConfig {
     
     // TODO: add all data as preferences instead of config files
     this.projectType = projectType;
+    projectTitle = getPrefCommand("title");
     extensions = getPrefExtensions();
     compileCommand = getPrefCommand("compile");
     runCommand = getPrefCommand("run");
     uploadCommand = getPrefCommand("upload");
     
+  }
+  
+  public String getTitle() {
+    return projectTitle;
   }
   
   public String getCompileCommand() {
