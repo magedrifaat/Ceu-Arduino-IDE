@@ -396,6 +396,7 @@ public class SketchController {
 
     File newFolder;
     // TODO: look into this case
+    // TODO: this probably produces a bug, file name is not modified
     // User may want to overwrite a .ino
     // check if the parent folder name ends with the sketch name
     if (newName.endsWith(".ino") && newParentDir.endsWith(newName.substring(0, newName.lastIndexOf('.'))+ File.separator)) {
@@ -709,7 +710,7 @@ public class SketchController {
     cmd.add(BaseNoGui.getContentFile(projectConfig.getCompileCommand()).getAbsolutePath());
     
     // add the main file as first argument
-    File file = sketch.getMainFile().getFile();
+    File file = sketch.getPrimaryFile().getFile();
     String filePath = file.getAbsolutePath();
     boolean deleteTemp = false;
     if (sketch.isModified()) {
@@ -719,7 +720,7 @@ public class SketchController {
       for (SketchFile afile : Stream.of(sketch.getFiles()).filter(SketchFile::isModified).collect(Collectors.toList())) {
         Files.write(Paths.get(tempFolder.getAbsolutePath(), afile.getFileName()), afile.getProgram().getBytes("UTF-8"));
       }
-      file = Paths.get(tempFolder.getAbsolutePath(), sketch.getMainFile().getFileName()).toFile();
+      file = Paths.get(tempFolder.getAbsolutePath(), sketch.getPrimaryFile().getFileName()).toFile();
       filePath = file.getAbsolutePath();
       deleteTemp = true;
     }
@@ -829,7 +830,7 @@ public class SketchController {
     cmd.add(BaseNoGui.getContentFile(projectConfig.getUploadCommand()).getAbsolutePath());
     
     // add the main file as first argument
-    cmd.add(sketch.getMainFile().getFile().getAbsolutePath());
+    cmd.add(sketch.getPrimaryFile().getFile().getAbsolutePath());
     
     // // upload flag
     // cmd.add(Boolean.toString(true));

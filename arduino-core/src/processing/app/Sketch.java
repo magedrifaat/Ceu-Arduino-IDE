@@ -185,15 +185,6 @@ public class Sketch {
   public SketchFile getPrimaryFile() {
     return files.get(0);
   }
-  
-  public SketchFile getMainFile() {
-    for (SketchFile file : files) {
-      if (file.isMainFile())
-        return file;
-    }
-    
-    return null;
-  }
 
   /**
    * Returns path to the main .pde file for this sketch.
@@ -289,7 +280,7 @@ public class Sketch {
    * primary file is returned.
    */
   protected File checkNewFoldername(File newFolder) throws IOException {
-    String newPrimary = FileUtils.addExtension(newFolder.getName(), DEFAULT_SKETCH_EXTENSION);
+    String newPrimary = FileUtils.addExtension(newFolder.getName(), getDefaultExtension());
     // Verify the new folder does not exist yet
     if (newFolder.exists()) {
       String msg = I18n.format(tr("Sorry, the folder \"{0}\" already exists."), newFolder.getAbsoluteFile());

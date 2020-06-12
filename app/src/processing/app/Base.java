@@ -453,7 +453,6 @@ public class Base {
     } else if (parser.isGuiMode()) {
       splash.splashText(tr("Starting..."));
       
-      // TODO: GUI for choose project
       JFrame temp = new JFrame("temp");
       temp.setLayout(new GridLayout(0,2));
       ChooseProjectDialog dialog = new ChooseProjectDialog(temp);
@@ -461,6 +460,7 @@ public class Base {
       if (dialog.getProjectType().equals("exit")) {
         System.exit(0);
       }
+      // TODO: indictor for project type, using project title
       projectConfig = new ProjectConfig(dialog.getProjectType());
       
       customKeywords = new CustomKeywords(projectConfig.getKeywordsFile());

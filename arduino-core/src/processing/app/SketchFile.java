@@ -101,9 +101,7 @@ public class SketchFile {
     this.file = file;
     FileUtils.SplitFile split = FileUtils.splitFilename(file);
     this.primary = split.basename.equals(sketch.getFolder().getName())
-        && Sketch.SKETCH_EXTENSIONS.contains(split.extension);
-    this.mainFile = split.basename.equals(sketch.getFolder().getName())
-        && split.extension.equals(sketch.getDefaultExtension());
+        && sketch.getDefaultExtension().equals(split.extension);
     
   }
   
@@ -132,14 +130,6 @@ public class SketchFile {
     return primary;
   }
   
-
-  /**
-   * Is this the main file in the sketch?
-   */
-  public boolean isMainFile() {
-    return mainFile;
-  }
-
   
   protected boolean fileExists() {
     return file.exists();
