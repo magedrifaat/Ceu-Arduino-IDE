@@ -6,6 +6,10 @@ import java.io.File;
 
 
 public class ProjectConfig {
+  
+  static ArrayList<ProjectConfig> configs = new ArrayList<>();
+  static ProjectConfig LEGACY_CONFIG;
+  
   private String projectType;
   private String projectTitle;
   private ArrayList<String> extensions;
@@ -24,6 +28,31 @@ public class ProjectConfig {
     runCommand = getPrefCommand("run");
     uploadCommand = getPrefCommand("upload");
     
+  }
+  
+  public static void loadConfigs() {
+    String types = PreferencesData.get("project-types");
+    for (String type : types.replaceAll(" ", "").split(",")) {
+      ProjectConfig newConfig = new ProjectConfig(type);
+      configs.add(newConfig);
+      if (newConfig.isLegacy()) {
+        LEGACY_CONFIG = newConfig;
+      }
+    }
+  }
+  
+  public static ProjectConfig inferConfig(String extension) {
+    if (extension == null) {
+      return LEGACY_CONFIG;
+    }
+    
+    for (ProjectConfig conf : configs) {
+      if (conf.getDefaultExtension().equals(extension)) {
+        return conf;
+      }
+    }
+    
+    return LEGACY_CONFIG;
   }
   
   public String getTitle() {

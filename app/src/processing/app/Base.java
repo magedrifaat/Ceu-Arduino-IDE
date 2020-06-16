@@ -453,15 +453,20 @@ public class Base {
     } else if (parser.isGuiMode()) {
       splash.splashText(tr("Starting..."));
       
-      JFrame temp = new JFrame("temp");
-      temp.setLayout(new GridLayout(0,2));
-      ChooseProjectDialog dialog = new ChooseProjectDialog(temp);
-      dialog.setVisible(true);
-      if (dialog.getProjectType().equals("exit")) {
-        System.exit(0);
-      }
       // TODO: indictor for project type, using project title
-      projectConfig = new ProjectConfig(dialog.getProjectType());
+      ProjectConfig.loadConfigs();
+      if (parser.getFilenames().size() != 0) {
+        String firstName = parser.getFilenames().get(0);
+        String extension = null;
+        if (firstName.lastIndexOf('.') != -1) {
+          extension = firstName.substring(firstName.lastIndexOf('.') + 1, firstName.length());
+        }
+        System.out.println(extension);
+        projectConfig = ProjectConfig.inferConfig(extension);
+      }
+      else {
+        projectConfig = ProjectConfig.inferConfig(null);
+      }
       
       customKeywords = new CustomKeywords(projectConfig.getKeywordsFile());
       customKeywords.reload();
