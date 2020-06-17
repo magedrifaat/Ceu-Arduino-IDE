@@ -124,6 +124,7 @@ public class Base {
   private List<JMenuItem> programmerMenus;
 
   private PdeKeywords pdeKeywords;
+  private PluginManager pluginManager;
   
   private final List<JMenuItem> recentSketchesMenuItems = new LinkedList<>();
 
@@ -451,6 +452,9 @@ public class Base {
       splash.splashText(tr("Starting..."));
       
       ProjectConfig.loadConfigs();
+      
+      pluginManager = new PluginManager();
+      pluginManager.fire(PluginManager.Hook.START);
       
       for (String path : parser.getFilenames()) {
         // Correctly resolve relative paths
