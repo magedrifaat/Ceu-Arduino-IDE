@@ -70,6 +70,9 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.ButtonGroup;
+import javax.swing.JSeparator;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -575,11 +578,31 @@ public class Editor extends JFrame implements RunnerListener {
     menubar.add(toolsMenu);
 
     menubar.add(buildHelpMenu());
+    
+    menubar.add(buildProjectTypeMenu());
 	
     setJMenuBar(menubar);
   }
 
-
+  private JMenu buildProjectTypeMenu() {
+    JMenu menu = new JMenu("Project Type");
+    
+    ButtonGroup group  = new ButtonGroup();
+    for (String title : ProjectConfig.getTitles()) {
+      boolean selected = title.equals(projectConfig.getTitle());
+      JRadioButtonMenuItem item = new JRadioButtonMenuItem(title, selected);
+      item.addActionListener(event -> {
+        if (item.isSelected()) {
+          changeProjectConfig(ProjectConfig.fromTitle(title));
+        }
+      });
+      group.add(item);
+      menu.add(item);
+    }
+    
+    return menu;
+  }
+  
   private JMenu buildFileMenu() {
     JMenuItem item;
     fileMenu = new JMenu(tr("File"));
@@ -2657,6 +2680,17 @@ public class Editor extends JFrame implements RunnerListener {
   
   public CustomKeywords getCustomKeywords() {
     return customKeywords;
+  }
+  
+  private void changeProjectConfig(ProjectConfig newConfig) {
+    if (newConfig == projectConfig)
+      return;
+    
+    // TODO: allow changing only when extension allows it
+    projectConfig = newConfig;
+    sketch.setProjectConfig(newConfig);
+    updateKeywords(base.getPdeKeywords());
+    updateTitle();
   }
   
 }

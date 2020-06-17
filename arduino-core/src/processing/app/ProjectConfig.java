@@ -69,6 +69,31 @@ public class ProjectConfig {
     return false;
   }
   
+  /** 
+  *   Return a list of titles for all the project types.
+  */
+  public static ArrayList<String> getTitles() {
+    ArrayList<String> titles = new ArrayList<> ();
+    for (ProjectConfig config : configs) {
+      titles.add(config.getTitle());
+    }
+    
+    return titles;
+  }
+  
+  /**
+  *   Return the project config of the given title.
+  */
+  public static ProjectConfig fromTitle(String title) {
+    for (ProjectConfig config : configs) {
+      if (config.getTitle().equals(title)) {
+        return config;
+      }
+    }
+    
+    return LEGACY_CONFIG;
+  }
+  
   public String getTitle() {
     return projectTitle;
   }
