@@ -59,7 +59,6 @@ import processing.app.packages.LibraryList;
 import processing.app.packages.UserLibrary;
 import processing.app.packages.UserLibraryFolder.Location;
 import processing.app.syntax.PdeKeywords;
-import processing.app.syntax.CustomKeywords;
 import processing.app.syntax.SketchTextAreaDefaultInputMap;
 import processing.app.tools.MenuScroller;
 import processing.app.tools.ZipDeflater;
@@ -125,8 +124,6 @@ public class Base {
   private List<JMenuItem> programmerMenus;
 
   private PdeKeywords pdeKeywords;
-  private CustomKeywords customKeywords;
-  private ProjectConfig projectConfig;
   
   private final List<JMenuItem> recentSketchesMenuItems = new LinkedList<>();
 
@@ -453,23 +450,7 @@ public class Base {
     } else if (parser.isGuiMode()) {
       splash.splashText(tr("Starting..."));
       
-      // TODO: indictor for project type, using project title
       ProjectConfig.loadConfigs();
-      if (parser.getFilenames().size() != 0) {
-        String firstName = parser.getFilenames().get(0);
-        String extension = null;
-        if (firstName.lastIndexOf('.') != -1) {
-          extension = firstName.substring(firstName.lastIndexOf('.') + 1, firstName.length());
-        }
-        System.out.println(extension);
-        projectConfig = ProjectConfig.inferConfig(extension);
-      }
-      else {
-        projectConfig = ProjectConfig.inferConfig(null);
-      }
-      
-      customKeywords = new CustomKeywords(projectConfig.getKeywordsFile());
-      customKeywords.reload();
       
       for (String path : parser.getFilenames()) {
         // Correctly resolve relative paths
@@ -782,7 +763,17 @@ public class Base {
     // Make the directory for the new sketch
     newbieDir.mkdirs();
 
-    // Make an empty pde file
+    // Make an empty file
+    // Use whatever project config used in the active editor
+    // or default to legacy.
+    ProjectConfig projectConfig;
+    if (activeEditor != null) {
+      projectConfig = ProjectConfig.inferConfig(activeEditor.getProjectConfig().getDefaultExtension());
+    }
+    else {
+      projectConfig = ProjectConfig.inferConfig(null);
+    }
+    
     File newbieFile = new File(newbieDir, newbieName + "." + projectConfig.getDefaultExtension());
     if (!newbieFile.createNewFile()) {
       throw new IOException();
@@ -830,10 +821,10 @@ public class Base {
     }
     fd.setDirectory(lastFolder.getAbsolutePath());
 
-    // Only show .pde files as eligible bachelors
+    // Only show files with extensions we know of
     fd.setFilenameFilter(new FilenameFilter() {
       public boolean accept(File dir, String name) {
-        return projectConfig.hasAcceptableExtension(name.toLowerCase());
+        return ProjectConfig.acceptName(name.toLowerCase());
       }
     });
 
@@ -1350,15 +1341,10 @@ public class Base {
         pdeKeywords = new PdeKeywords();
         pdeKeywords.reload();
         
-        if (projectConfig != null) {
-          customKeywords = new CustomKeywords(projectConfig.getKeywordsFile());
-          customKeywords.reload();
-        }
-        
         priorPlatformFolder = platformFolder;
         newLibraryImported = false;
         for (Editor editor : editors) {
-          editor.updateKeywords(pdeKeywords, customKeywords);
+          editor.updateKeywords(pdeKeywords);
         }
       }
     }
@@ -2464,16 +2450,8 @@ public class Base {
     return pdeKeywords;
   }
   
-  public CustomKeywords getCustomKeywords() {
-    return customKeywords;
-  }
-  
   public List<JMenuItem> getRecentSketchesMenuItems() {
     return recentSketchesMenuItems;
-  }
-  
-  public ProjectConfig getProjectConfig() {
-    return projectConfig;
   }
 
 }

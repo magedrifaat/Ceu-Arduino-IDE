@@ -151,6 +151,8 @@ public class Editor extends JFrame implements RunnerListener {
   }
 
   final Base base;
+  private ProjectConfig projectConfig;
+  private CustomKeywords customKeywords;
 
   // otherwise, if the window is resized with the message label
   // set to blank, it's preferredSize() will be fukered
@@ -244,6 +246,15 @@ public class Editor extends JFrame implements RunnerListener {
     this.platform = platform;
 
     Base.setIcon(this);
+    
+    String firstName = file.getName();
+    String extension = null;
+    if (firstName.lastIndexOf('.') != -1) {
+      extension = firstName.substring(firstName.lastIndexOf('.') + 1, firstName.length());
+    }
+    projectConfig = ProjectConfig.inferConfig(extension);    
+    customKeywords = new CustomKeywords(projectConfig.getKeywordsFile());
+    customKeywords.reload();
 
     // Install default actions for Run, Present, etc.
     resetHandlers();
@@ -938,8 +949,11 @@ public class Editor extends JFrame implements RunnerListener {
      return null;
    }
 
-  public void updateKeywords(PdeKeywords keywords, CustomKeywords customKeywords) {
-    String extension = base.getProjectConfig().getDefaultExtension();
+  public void updateKeywords(PdeKeywords keywords) {            
+    customKeywords = new CustomKeywords(projectConfig.getKeywordsFile());
+    customKeywords.reload();
+    
+    String extension = projectConfig.getDefaultExtension();
     for (EditorTab tab : tabs) {
       if (tab.file.getFileName().endsWith("." + extension)) {
         tab.updateKeywords(customKeywords);
@@ -1796,11 +1810,11 @@ public class Editor extends JFrame implements RunnerListener {
     String fileName = sketchFile.getName();
     
     
-    File file = Sketch.checkSketchFile(sketchFile, base.getProjectConfig().getDefaultExtension());
+    File file = Sketch.checkSketchFile(sketchFile, projectConfig.getDefaultExtension());
 
     if (file == null) {
       // TODO: customize error message
-      if (!base.getProjectConfig().hasAcceptableExtension(fileName)) {
+      if (!projectConfig.hasAcceptableExtension(fileName)) {
 
         Base.showWarning(tr("Bad file selected"), tr("Arduino can only open its own sketches\n" +
           "and other files ending in .ino or .pde"), null);
@@ -1858,8 +1872,7 @@ public class Editor extends JFrame implements RunnerListener {
     }
 
     try {
-      // TODO: change sketch implementation to take a "legacy" flag instead
-      sketch = new Sketch(file, base.getProjectConfig());
+      sketch = new Sketch(file, projectConfig);
     } catch (IOException e) {
       Base.showWarning(tr("Error"), tr("Could not create the sketch."), e);
       return false;
@@ -1893,10 +1906,10 @@ public class Editor extends JFrame implements RunnerListener {
     } else {
       if (current.isPrimary()) {
         setTitle(I18n.format(tr("{0} | {1} {2}"), sketch.getName(),
-                  base.getProjectConfig().getTitle(), BaseNoGui.VERSION_NAME_LONG));
+                  projectConfig.getTitle(), BaseNoGui.VERSION_NAME_LONG));
       } else {
         setTitle(I18n.format(tr("{0} - {1} | {2} {3}"), sketch.getName(),
-                          current.getFileName(), base.getProjectConfig().getTitle(),
+                          current.getFileName(), projectConfig.getTitle(),
                           BaseNoGui.VERSION_NAME_LONG));
       }
     }
@@ -2637,5 +2650,13 @@ public class Editor extends JFrame implements RunnerListener {
   public void addCompilerProgressListener(CompilerProgressListener listener){
     this.status.addCompilerProgressListener(listener);
   }
-
+  
+  public ProjectConfig getProjectConfig() {
+    return projectConfig;
+  }
+  
+  public CustomKeywords getCustomKeywords() {
+    return customKeywords;
+  }
+  
 }

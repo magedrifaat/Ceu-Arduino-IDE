@@ -55,6 +55,20 @@ public class ProjectConfig {
     return LEGACY_CONFIG;
   }
   
+  /**
+  *  Checks to see if this file's extension is available in any
+  *  project type.
+  */
+  public static boolean acceptName(String fileName) {
+    for (ProjectConfig config : configs) {
+      if (config.hasAcceptableExtension(fileName)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+  
   public String getTitle() {
     return projectTitle;
   }

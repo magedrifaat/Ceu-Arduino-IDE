@@ -115,9 +115,9 @@ public class EditorTab extends JPanel implements SketchFile.TextStorage {
 
   private RSyntaxDocument createDocument(String contents) {
     RSyntaxDocument document;
-    String extension = editor.base.getProjectConfig().getDefaultExtension();
+    String extension = editor.getProjectConfig().getDefaultExtension();
     if (this.file.getFileName().endsWith("." + extension)) {
-      document = new RSyntaxDocument(new ArduinoTokenMakerFactory(editor.base.getCustomKeywords()), RSyntaxDocument.SYNTAX_STYLE_CPLUSPLUS);
+      document = new RSyntaxDocument(new ArduinoTokenMakerFactory(editor.getCustomKeywords()), RSyntaxDocument.SYNTAX_STYLE_CPLUSPLUS);
     } else {
       document = new RSyntaxDocument(new ArduinoTokenMakerFactory(editor.base.getPdeKeywords()), RSyntaxDocument.SYNTAX_STYLE_CPLUSPLUS);
     }

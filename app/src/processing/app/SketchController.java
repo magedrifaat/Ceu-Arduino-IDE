@@ -62,13 +62,10 @@ import static processing.app.I18n.tr;
 public class SketchController {
   private final Editor editor;
   private final Sketch sketch;
-  private final ProjectConfig projectConfig;
 
   public SketchController(Editor _editor, Sketch _sketch) {
     editor = _editor;
     sketch = _sketch;
-    // TODO: refactor editor add projectConfig field to decrease indirection
-    projectConfig = editor.base.getProjectConfig();
   }
 
   private boolean renamingCode;
@@ -707,7 +704,7 @@ public class SketchController {
     
     List<String> cmd = new ArrayList<>();
     
-    cmd.add(BaseNoGui.getContentFile(projectConfig.getCompileCommand()).getAbsolutePath());
+    cmd.add(BaseNoGui.getContentFile(editor.getProjectConfig().getCompileCommand()).getAbsolutePath());
     
     // add the main file as first argument
     File file = sketch.getPrimaryFile().getFile();
@@ -827,7 +824,7 @@ public class SketchController {
     buildCustom();
     
     List<String> cmd = new ArrayList<>();
-    cmd.add(BaseNoGui.getContentFile(projectConfig.getUploadCommand()).getAbsolutePath());
+    cmd.add(BaseNoGui.getContentFile(editor.getProjectConfig().getUploadCommand()).getAbsolutePath());
     
     // add the main file as first argument
     cmd.add(sketch.getPrimaryFile().getFile().getAbsolutePath());

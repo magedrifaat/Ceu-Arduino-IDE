@@ -122,6 +122,7 @@ public class Sketch {
   private List<SketchFile> listSketchFiles(boolean showWarnings) throws IOException {
     Set<SketchFile> result = new TreeSet<>(CODE_DOCS_COMPARATOR);
     
+    // TODO: find a better way to list correct files for inferred project type
     if (isLegacy()) {
       List<String> extensions = new ArrayList<String>(EXTENSIONS);
       
@@ -200,7 +201,11 @@ public class Sketch {
   public boolean isLegacy() {
     return projectConfig.isLegacy();
   }
-
+  
+  // TODO: call this whenever the editor's projectConfig changes
+  public void setProjectConfig(ProjectConfig projectConfig) {
+    this.projectConfig = projectConfig;
+  }
   /**
    * Gets the build path for this sketch. The first time this is called,
    * a build path is generated and created and the same path is returned
