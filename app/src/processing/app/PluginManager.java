@@ -6,13 +6,21 @@ import processing.app.helpers.FileUtils;
 import java.net.URL;
 import java.net.URLClassLoader;
 
+import javax.swing.JMenu;
+
 public class PluginManager {
-  public enum Hook {MENU, TOOL, SIDE, FORMAT, COMPILE, UPLOAD, 
+  public enum Hooks {MENU, TOOL, SIDE, FORMAT, COMPILE, UPLOAD, 
                     RUN, ENTER, START, QUIT}
   
   ArrayList<Plugin> plugins;
+  Editor editor;
+  PluginAPI pluginAPI;
   
-  public PluginManager() {
+  public PluginManager(Editor editor) {
+    
+    this.editor = editor;
+    pluginAPI = new PluginAPI(editor);
+    
     plugins = new ArrayList<> ();
     
     File pluginFolder = BaseNoGui.getContentFile("Plugins");
@@ -31,11 +39,17 @@ public class PluginManager {
     
   }
   
-  public void fire(Hook hook) {
+  public void fire(Hooks hook) {
     switch (hook) {
       case START:
         for (Plugin p : plugins) {
-          p.start();
+          p.start(pluginAPI);
+        }
+        break;
+        
+      case MENU:
+        for (Plugin p : plugins) {
+          p.addmenu(pluginAPI);
         }
         break;
     }

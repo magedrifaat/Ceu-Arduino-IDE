@@ -67,6 +67,7 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -156,6 +157,7 @@ public class Editor extends JFrame implements RunnerListener {
   final Base base;
   private ProjectConfig projectConfig;
   private CustomKeywords customKeywords;
+  PluginManager pluginManager;
 
   // otherwise, if the window is resized with the message label
   // set to blank, it's preferredSize() will be fukered
@@ -258,6 +260,9 @@ public class Editor extends JFrame implements RunnerListener {
     projectConfig = ProjectConfig.inferConfig(extension);    
     customKeywords = new CustomKeywords(projectConfig.getKeywordsFile());
     customKeywords.reload();
+    
+    pluginManager = new PluginManager(this);
+    pluginManager.fire(PluginManager.Hooks.START);
 
     // Install default actions for Run, Present, etc.
     resetHandlers();
@@ -582,6 +587,19 @@ public class Editor extends JFrame implements RunnerListener {
     menubar.add(buildProjectTypeMenu());
 	
     setJMenuBar(menubar);
+    
+    JLabel sep = new JLabel("|");
+    menubar.add(sep);
+    
+    int count = menubar.getMenuCount();
+    pluginManager.fire(PluginManager.Hooks.MENU);
+    
+    // No menus were added, remove the separator
+    if (count == menubar.getMenuCount()) {
+      menubar.remove(sep);
+      menubar.revalidate();
+      menubar.repaint();
+    }
   }
 
   private JMenu buildProjectTypeMenu() {
@@ -2691,6 +2709,12 @@ public class Editor extends JFrame implements RunnerListener {
     sketch.setProjectConfig(newConfig);
     updateKeywords(base.getPdeKeywords());
     updateTitle();
+  }
+  
+  
+  /* -------------- Helpers for Plugins API -------------*/
+  public void addMenu(JMenu newMenu) {
+    this.getJMenuBar().add(newMenu);
   }
   
 }
