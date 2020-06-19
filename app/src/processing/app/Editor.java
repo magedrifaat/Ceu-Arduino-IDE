@@ -112,6 +112,9 @@ import processing.app.syntax.CustomKeywords;
 import processing.app.syntax.SketchTextArea;
 import processing.app.tools.MenuScroller;
 import processing.app.tools.Tool;
+import processing.app.packages.UserLibrary;
+import processing.app.packages.UserLibraryFolder;
+import processing.app.packages.UserLibraryFolder.Location;
 
 /**
  * Main editor panel for the Processing Development Environment.
@@ -2717,4 +2720,25 @@ public class Editor extends JFrame implements RunnerListener {
     this.getJMenuBar().add(newMenu);
   }
   
+  public AbstractAction getIncludeAction(File folder) {
+    // create a UserLibrary from the given folder with a dummy location
+    UserLibrary lib;
+    try {
+      lib = UserLibrary.create(new UserLibraryFolder(folder, Location.SKETCHBOOK));
+    }
+    catch (IOException e) {
+      System.out.println("Unable to access library in " + folder.getAbsolutePath() + " : " + e.getMessage());
+      return null;
+    }
+    
+    return new AbstractAction(lib.getName()) {
+      public void actionPerformed(ActionEvent event) {
+        try {
+          sketchController.importLibrary(lib);
+        } catch (IOException e) {
+          statusError("Unable to list header files in " + lib.getSrcFolder());
+        }
+      }
+    };
+  }
 }

@@ -1,6 +1,7 @@
 package processing.app;
 
 import javax.swing.JMenu;
+import javax.swing.AbstractAction;
 import java.io.File;
 
 public class PluginAPI {
@@ -28,5 +29,16 @@ public class PluginAPI {
       editor.statusError("Couldn't find the file specified");
     }
   }
-}
   
+  public AbstractAction getIncludeAction(String folderName) {
+    File folder = new File(folderName);
+    
+    if (folder.exists()) {
+      return editor.getIncludeAction(folder);
+    }
+    else {
+      editor.statusError("Couldn't find the file specified: " + folderName);
+      return null;
+    }
+  }
+}
