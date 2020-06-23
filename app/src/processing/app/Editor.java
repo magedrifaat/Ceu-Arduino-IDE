@@ -223,6 +223,9 @@ public class Editor extends JFrame implements RunnerListener {
 
   /** Contains all EditorTabs, of which only one will be visible */
   private JPanel codePanel;
+  
+  private JSplitPane middleSplit;
+  private JPanel sidePanel;
 
   //Runner runtime;
 
@@ -320,13 +323,15 @@ public class Editor extends JFrame implements RunnerListener {
 
     Box box = Box.createVerticalBox();
     upper = Box.createVerticalBox();
+    
+    JPanel toolbarPanel = new JPanel(new BorderLayout());
 
     if (toolbarMenu == null) {
       toolbarMenu = new JMenu();
       base.rebuildToolbarMenu(toolbarMenu);
     }
     toolbar = new EditorToolbar(this, toolbarMenu);
-    upper.add(toolbar);
+    toolbarPanel.add(toolbar, BorderLayout.CENTER);
 
     header = new EditorHeader(this);
     upper.add(header);
@@ -346,11 +351,12 @@ public class Editor extends JFrame implements RunnerListener {
 
     lineStatus = new EditorLineStatus();
     consolePanel.add(lineStatus, BorderLayout.SOUTH);
-
+  
     codePanel = new JPanel(new BorderLayout());
     upper.add(codePanel);
-
+    
     splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, upper, consolePanel);
+    
 
     // repaint child panes while resizing
     splitPane.setContinuousLayout(true);
@@ -373,7 +379,24 @@ public class Editor extends JFrame implements RunnerListener {
     // the following changed from 600, 400 for netbooks
     // http://code.google.com/p/arduino/issues/detail?id=52
     splitPane.setMinimumSize(scale(new Dimension(600, 100)));
-    box.add(splitPane);
+    
+    sidePanel = new JPanel();
+    sidePanel.setMinimumSize(new Dimension(200, 0));
+    sidePanel.setVisible(false);
+    sidePanel.setEnabled(false);
+    sidePanel.setBackground(Theme.getColor("header.bgcolor"));
+    
+    middleSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sidePanel, splitPane);
+    middleSplit.setContinuousLayout(true);
+    middleSplit.setBorder(null);
+    Keys.killBinding(middleSplit, Keys.ctrl(KeyEvent.VK_TAB));
+    Keys.killBinding(middleSplit, Keys.ctrlShift(KeyEvent.VK_TAB));
+    middleSplit.setDividerSize(scale(middleSplit.getDividerSize() / 2));
+    
+    JPanel pnl = new JPanel(new BorderLayout());
+    pnl.add(toolbarPanel, BorderLayout.NORTH);
+    pnl.add(middleSplit, BorderLayout.CENTER);
+    box.add(pnl);
 
     // hopefully these are no longer needed w/ swing
     // (har har har.. that was wishful thinking)
@@ -1641,6 +1664,14 @@ public class Editor extends JFrame implements RunnerListener {
   protected void removeTab(SketchFile file) throws IOException {
     int index = findTabIndex(file);
     tabs.remove(index);
+  }
+  
+  public void setToolState(boolean show) {
+    sidePanel.setVisible(show);
+    sidePanel.setEnabled(show);
+    if (show) {
+      middleSplit.setDividerLocation(0.2);
+    }
   }
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .

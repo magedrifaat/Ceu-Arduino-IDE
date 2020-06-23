@@ -59,6 +59,8 @@ public class EditorHeader extends JComponent {
 
   int menuLeft;
   int menuRight;
+  int toolLeft;
+  int toolRight;
 
   //
 
@@ -80,6 +82,9 @@ public class EditorHeader extends JComponent {
 
   static Image[][] pieces;
   static Image menuButtons[];
+  static Image toolButtons[];
+  
+  private boolean toolSelected;
 
   Image offscreen;
   int sizeW, sizeH;
@@ -149,6 +154,7 @@ public class EditorHeader extends JComponent {
     if (pieces == null) {
       pieces = new Image[STATUS.length][WHERE.length];
       menuButtons = new Image[STATUS.length];
+      toolButtons = new Image[STATUS.length];
       for (int i = 0; i < STATUS.length; i++) {
         for (int j = 0; j < WHERE.length; j++) {
           String path = "tab-" + STATUS[i] + "-" + WHERE[j];
@@ -158,6 +164,10 @@ public class EditorHeader extends JComponent {
         String path = "tab-" + STATUS[i] + "-menu";
         menuButtons[i] = Theme.getThemeImage(path, this, PIECE_HEIGHT,
                                              PIECE_HEIGHT);
+        path = "tab-" + STATUS[i] + "-tool";
+        toolButtons[i] = Theme.getThemeImage(path, this, PIECE_HEIGHT,
+                                             PIECE_HEIGHT);     
+        toolSelected = false;
       }
     }
 
@@ -178,6 +188,10 @@ public class EditorHeader extends JComponent {
           if ((x > menuLeft) && (x < menuRight)) {
             popup.show(EditorHeader.this, x, y);
 
+          } else if ((x > toolLeft) && (x < toolRight)) {
+            toolSelected = !toolSelected;
+            editor.setToolState(toolSelected);
+            repaint();
           } else {
             int numTabs = editor.getTabs().size();
             for (int i = 0; i < numTabs; i++) {
@@ -232,6 +246,11 @@ public class EditorHeader extends JComponent {
     // set the background for the offscreen
     g.setColor(backgroundColor);
     g.fillRect(0, 0, imageW, imageH);
+    
+    toolLeft = 6;
+    toolRight = 36;
+    g.drawImage(toolButtons[toolSelected? SELECTED: UNSELECTED],
+      toolLeft, 0, null);
 
     List<EditorTab> tabs = editor.getTabs();
 
@@ -241,7 +260,7 @@ public class EditorHeader extends JComponent {
       tabRight = new int[codeCount];
     }
 
-    int x = scale(6); // offset from left edge of the component
+    int x = scale(6 + toolRight); // offset from left edge of the component
     int i = 0;
     for (EditorTab tab : tabs) {
       SketchFile file = tab.getSketchFile();
