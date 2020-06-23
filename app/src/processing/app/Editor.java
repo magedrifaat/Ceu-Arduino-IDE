@@ -50,6 +50,7 @@ import java.net.ConnectException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -130,6 +131,7 @@ public class Editor extends JFrame implements RunnerListener {
   private final Box upper;
   private ArrayList<EditorTab> tabs = new ArrayList<>();
   private int currentTabIndex = -1;
+  private int currentSideTabIndex = -1;
 
   private static class ShouldSaveIfModified
       implements Predicate<SketchController> {
@@ -226,6 +228,14 @@ public class Editor extends JFrame implements RunnerListener {
   
   private JSplitPane middleSplit;
   private JPanel sidePanel;
+  private SideBarHeader sideHeader;
+  private JPanel sideHeaderPanel;
+  
+  private class SideTab {
+    public String tabName;
+    public JPanel tabPanel;
+  }
+  private ArrayList<SideTab> sidePanelTabs;
 
   //Runner runtime;
 
@@ -257,6 +267,8 @@ public class Editor extends JFrame implements RunnerListener {
     this.platform = platform;
 
     Base.setIcon(this);
+    
+    sidePanelTabs = new ArrayList<> ();
     
     String firstName = file.getName();
     String extension = null;
@@ -380,11 +392,8 @@ public class Editor extends JFrame implements RunnerListener {
     // http://code.google.com/p/arduino/issues/detail?id=52
     splitPane.setMinimumSize(scale(new Dimension(600, 100)));
     
-    sidePanel = new JPanel();
-    sidePanel.setMinimumSize(new Dimension(200, 0));
-    sidePanel.setVisible(false);
-    sidePanel.setEnabled(false);
-    sidePanel.setBackground(Theme.getColor("header.bgcolor"));
+    sidePanel = new JPanel(new BorderLayout());
+    sidePanel.setBackground(Theme.getColor("editor.bgcolor"));
     
     middleSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sidePanel, splitPane);
     middleSplit.setContinuousLayout(true);
@@ -395,6 +404,8 @@ public class Editor extends JFrame implements RunnerListener {
     
     JPanel pnl = new JPanel(new BorderLayout());
     pnl.add(toolbarPanel, BorderLayout.NORTH);
+    sideHeaderPanel = new JPanel(new BorderLayout());
+    pnl.add(sideHeaderPanel, BorderLayout.WEST);
     pnl.add(middleSplit, BorderLayout.CENTER);
     box.add(pnl);
 
@@ -418,6 +429,11 @@ public class Editor extends JFrame implements RunnerListener {
 
     // Set the window bounds and the divider location before setting it visible
     setPlacement(storedLocation, defaultLocation);
+    
+    // TODO: handle cases of error or timeout to prevent plugin
+    //  from hanging the IDE
+    pluginManager.fire(PluginManager.Hooks.SIDE);
+    populateSidePanel();
 
     // Open the document that was passed in
     boolean loaded = handleOpenInternal(file);
@@ -548,7 +564,20 @@ public class Editor extends JFrame implements RunnerListener {
 
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
+  
+  private void populateSidePanel() {
+    ArrayList<String> tabNames = sidePanelTabs.stream().map(tab -> tab.tabName).collect(Collectors.toCollection(ArrayList::new));
+    
+    currentSideTabIndex = -1;
+    
+    sideHeader = new SideBarHeader(this, tabNames);
+    sideHeader.rebuild();
+    sideHeaderPanel.add(sideHeader, BorderLayout.CENTER);
+    
+    sidePanel.setMinimumSize(new Dimension(200, 0));
+    sidePanel.setVisible(false);
+    sidePanel.setEnabled(false);
+  }
 
   private void buildMenuBar() {
     JMenuBar menubar = new JMenuBar();
@@ -1538,6 +1567,10 @@ public class Editor extends JFrame implements RunnerListener {
   public int getCurrentTabIndex() {
     return currentTabIndex;
   }
+  
+  public int getCurrentSideTabIndex() {
+    return currentSideTabIndex;
+  }
 
   /**
    * Returns an (unmodifiable) list of currently opened tabs.
@@ -1580,6 +1613,27 @@ public class Editor extends JFrame implements RunnerListener {
 
   public void selectPrevTab() {
     selectTab((currentTabIndex - 1 + tabs.size()) % tabs.size());
+  }
+  
+  public void selectSideTab(final int index) {
+    currentSideTabIndex = index;
+    sideHeader.rebuild();
+    
+    SwingUtilities.invokeLater(() -> {
+      sidePanel.removeAll();
+      sidePanel.add(sidePanelTabs.get(index).tabPanel , BorderLayout.CENTER);
+      tabs.get(index).requestFocusInWindow();
+      sidePanel.revalidate();
+      sidePanel.repaint();
+    });
+  }
+  
+  public void selectNextSideTab() {
+    selectSideTab((currentSideTabIndex + 1) % sidePanelTabs.size());
+  }
+
+  public void selectPrevSideTab() {
+    selectSideTab((currentSideTabIndex - 1 + sidePanelTabs.size()) % sidePanelTabs.size());
   }
 
   public EditorTab findTab(final SketchFile file) {
