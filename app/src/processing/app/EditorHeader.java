@@ -190,7 +190,7 @@ public class EditorHeader extends JComponent {
 
           } else if ((x > toolLeft) && (x < toolRight)) {
             toolSelected = !toolSelected;
-            editor.setToolState(toolSelected);
+            editor.setToolState(toolSelected, toolSelected);
             repaint();
           } else {
             int numTabs = editor.getTabs().size();

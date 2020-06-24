@@ -31,6 +31,7 @@ import static processing.app.I18n.tr;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ public class SideBarHeader extends JComponent {
   int tabBottom[];
 
   Font font;
+  Font normalFont;
   FontMetrics metrics;
   int fontAscent;
 
@@ -68,10 +70,10 @@ public class SideBarHeader extends JComponent {
   static final int UNSELECTED = 0;
   static final int SELECTED = 1;
 
-  static final String WHERE[] = { "left", "mid", "right" };
-  static final int LEFT = 0;
+  static final String WHERE[] = { "top", "mid", "bottom" };
+  static final int TOP = 0;
   static final int MIDDLE = 1;
-  static final int RIGHT = 2;
+  static final int BOTTOM = 2;
 
   static final int PIECE_WIDTH = scale(33);
   static final int PIECE_HEIGHT = scale(4);
@@ -138,13 +140,13 @@ public class SideBarHeader extends JComponent {
       menuButtons = new Image[STATUS.length];
       for (int i = 0; i < STATUS.length; i++) {
         for (int j = 0; j < WHERE.length; j++) {
-          String path = "tab-" + STATUS[i] + "-" + WHERE[j];
+          String path = "sidetab-" + STATUS[i] + "-" + WHERE[j];
           pieces[i][j] = Theme.getThemeImage(path, this, PIECE_WIDTH,
                                              PIECE_HEIGHT);
         }
         String path = "tab-" + STATUS[i] + "-menu";
-        menuButtons[i] = Theme.getThemeImage(path, this, PIECE_HEIGHT,
-                                             PIECE_HEIGHT);
+        menuButtons[i] = Theme.getThemeImage(path, this, PIECE_WIDTH,
+                                             PIECE_WIDTH);
       }
     }
 
@@ -210,11 +212,15 @@ public class SideBarHeader extends JComponent {
 
     Graphics2D g = Theme.setupGraphics2D(offscreen.getGraphics());
     if (font == null) {
-      font = Theme.getFont("header.text.font");
+      normalFont = Theme.getFont("header.text.font");
+      AffineTransform affineTransform = new AffineTransform();
+      affineTransform.rotate(Math.toRadians(-90), 0, 0);
+      font = normalFont.deriveFont(affineTransform);
     }
-    g.setFont(font);  // need to set this each time through
+    g.setFont(normalFont);  // need to set this each time through
     metrics = g.getFontMetrics();
     fontAscent = metrics.getAscent();
+    g.setFont(font);
 
     // set the background for the offscreen
     g.setColor(backgroundColor);
@@ -230,7 +236,7 @@ public class SideBarHeader extends JComponent {
     int i = 0;
     for (String tabName : tabNames) {
       
-      String text = "  " + tabName;
+      String text = tabName.replace(" ", "  ");
 
       int textWidth = (int)
         font.getStringBounds(text, g.getFontRenderContext()).getWidth();
@@ -239,7 +245,7 @@ public class SideBarHeader extends JComponent {
       int pieceHeight = pieceCount * PIECE_HEIGHT;
 
       int state = (i == editor.getCurrentSideTabIndex()) ? SELECTED : UNSELECTED;
-      g.drawImage(pieces[state][LEFT], 0, y, null);
+      g.drawImage(pieces[state][TOP], 0, y, null);
       y += PIECE_HEIGHT;
 
       int contentTop = y;
@@ -249,14 +255,14 @@ public class SideBarHeader extends JComponent {
         y += PIECE_HEIGHT;
       }
       tabBottom[i] = y;
-      int textTop = contentTop + (pieceHeight - textWidth) / 2;
+      int textBottom = contentTop + (pieceHeight - textWidth) / 2 + textWidth;
 
       g.setColor(textColor[state]);
       int baseline = (sizeW + fontAscent) / 2;
-      //g.drawString(sketch.code[i].name, textLeft, baseline);
-      g.drawString(text, baseline, textTop);
+      g.drawString(text, baseline, textBottom);
 
-      g.drawImage(pieces[state][RIGHT], 0, y, null);
+      g.drawImage(pieces[state][BOTTOM], 0, y, null);
+      
       y += PIECE_HEIGHT - 1;  // overlap by 1 pixel
       i++;
     }

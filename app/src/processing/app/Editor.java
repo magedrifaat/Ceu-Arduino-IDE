@@ -34,11 +34,19 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.awt.AWTEvent;
+import java.awt.event.AWTEventListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusListener;
+import java.awt.event.FocusEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.Point;
 import java.awt.print.PageFormat;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
@@ -230,6 +238,7 @@ public class Editor extends JFrame implements RunnerListener {
   private JPanel sidePanel;
   private SideBarHeader sideHeader;
   private JPanel sideHeaderPanel;
+  private boolean sideIsPinned;
   
   private class SideTab {
     public String tabName;
@@ -569,6 +578,7 @@ public class Editor extends JFrame implements RunnerListener {
     ArrayList<String> tabNames = sidePanelTabs.stream().map(tab -> tab.tabName).collect(Collectors.toCollection(ArrayList::new));
     
     currentSideTabIndex = -1;
+    sideIsPinned = false;
     
     sideHeader = new SideBarHeader(this, tabNames);
     sideHeader.rebuild();
@@ -577,6 +587,28 @@ public class Editor extends JFrame implements RunnerListener {
     sidePanel.setMinimumSize(new Dimension(200, 0));
     sidePanel.setVisible(false);
     sidePanel.setEnabled(false);
+    
+    // This basically catches any mouse click event that happened anywhere
+    // and closes the side bar if it is not pinned and the mouse click
+    // occurred outside its bounds.
+    // This shouldn't be the best way to do this but after a lot of reasearch
+    // and a lot of bugs in other methods, this works really well
+    Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
+      public void eventDispatched(AWTEvent event) {
+        if(event instanceof MouseEvent){
+          MouseEvent e = (MouseEvent)event;
+          if(e.getID() == MouseEvent.MOUSE_CLICKED){
+            if (!isSidePinned()) {
+              Rectangle b = sidePanel.getBounds();
+              Point mousepos = sidePanel.getParent().getMousePosition();
+              if (mousepos != null && !(mousepos.x < b.getX() + b.getWidth() && mousepos.y > b.getY())) {
+                setToolState(false);
+              }
+            }
+          }
+        }
+      }
+    }, AWTEvent.MOUSE_EVENT_MASK);
   }
 
   private void buildMenuBar() {
@@ -1616,13 +1648,13 @@ public class Editor extends JFrame implements RunnerListener {
   }
   
   public void selectSideTab(final int index) {
+    
     currentSideTabIndex = index;
     sideHeader.rebuild();
-    
+    setToolState(true);
     SwingUtilities.invokeLater(() -> {
       sidePanel.removeAll();
       sidePanel.add(sidePanelTabs.get(index).tabPanel , BorderLayout.CENTER);
-      tabs.get(index).requestFocusInWindow();
       sidePanel.revalidate();
       sidePanel.repaint();
     });
@@ -1634,6 +1666,10 @@ public class Editor extends JFrame implements RunnerListener {
 
   public void selectPrevSideTab() {
     selectSideTab((currentSideTabIndex - 1 + sidePanelTabs.size()) % sidePanelTabs.size());
+  }
+  
+  boolean isSidePinned() {
+    return sideIsPinned;
   }
 
   public EditorTab findTab(final SketchFile file) {
@@ -1720,12 +1756,25 @@ public class Editor extends JFrame implements RunnerListener {
     tabs.remove(index);
   }
   
+  public void setToolState(boolean show, boolean pin) {
+    sideIsPinned = pin;
+    if (show && currentSideTabIndex == -1) {
+      selectSideTab(0);
+    }
+    setToolState(show);
+  }
+  
   public void setToolState(boolean show) {
     sidePanel.setVisible(show);
     sidePanel.setEnabled(show);
     if (show) {
       middleSplit.setDividerLocation(0.2);
     }
+    else
+    {
+      currentSideTabIndex = -1;
+    }
+    sideHeader.repaint();
   }
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -2801,11 +2850,11 @@ public class Editor extends JFrame implements RunnerListener {
   
   
   /* -------------- Helpers for Plugins API -------------*/
-  public void addMenu(JMenu newMenu) {
+  void addMenu(JMenu newMenu) {
     this.getJMenuBar().add(newMenu);
   }
   
-  public AbstractAction getIncludeAction(File folder) {
+  AbstractAction getIncludeAction(File folder) {
     // create a UserLibrary from the given folder with a dummy location
     UserLibrary lib;
     try {
@@ -2825,5 +2874,12 @@ public class Editor extends JFrame implements RunnerListener {
         }
       }
     };
+  }
+  
+  void addSideTab(String tabName, JPanel tabPanel) {
+    SideTab newTab = new SideTab();
+    newTab.tabName = tabName;
+    newTab.tabPanel = tabPanel;
+    sidePanelTabs.add(newTab);
   }
 }
