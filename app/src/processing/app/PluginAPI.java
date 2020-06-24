@@ -1,6 +1,7 @@
 package processing.app;
 
 import javax.swing.JMenu;
+import javax.swing.JPanel;
 import javax.swing.AbstractAction;
 import java.io.File;
 
@@ -40,5 +41,9 @@ public class PluginAPI {
       editor.statusError("Couldn't find the file specified: " + folderName);
       return null;
     }
+  }
+  
+  public void addSideTab(String tabName, JPanel tabPanel) {
+    editor.addSideTab(tabName, tabPanel);
   }
 }

@@ -49,9 +49,13 @@ public class PluginManager {
         
       case MENU:
         for (Plugin p : plugins) {
-          p.addmenu(pluginAPI);
+          p.addMenu(pluginAPI);
         }
         break;
+      case SIDE:
+        for (Plugin p : plugins) {
+          p.sideTab(pluginAPI);
+        }
     }
   }
 }
