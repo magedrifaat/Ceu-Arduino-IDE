@@ -62,6 +62,7 @@ public class PluginManager {
           for (Plugin p : plugins) {
             p.onSide(pluginAPI);
           }
+          break;
         case COMPILE:
           for (Plugin p : plugins) {
             p.onCompile(pluginAPI);

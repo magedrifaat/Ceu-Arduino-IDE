@@ -1426,11 +1426,6 @@ public class Editor extends JFrame implements RunnerListener {
     decreseIndentItem.setName("menuDecreaseIndent");
     decreseIndentItem.addActionListener(event -> getCurrentTab().handleIndentOutdent(false));
     menu.add(decreseIndentItem);
-    
-    JMenuItem newLineItem = new JMenuItem(tr("Add New Line"));
-    newLineItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0));
-    newLineItem.setName("menuAddNewLine");
-    newLineItem.addActionListener(event -> pluginManager.fire(PluginManager.Hooks.ENTER));
 
     menu.addSeparator();
 
@@ -1661,6 +1656,8 @@ public class Editor extends JFrame implements RunnerListener {
   }
   
   public void selectSideTab(final int index) {
+    if (sidePanelTabs.size() == 0)
+      return;
     
     currentSideTabIndex = index;
     sideHeader.rebuild();

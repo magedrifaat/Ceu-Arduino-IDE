@@ -32,6 +32,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.MouseWheelEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyAdapter;
 
 import java.io.IOException;
 
@@ -188,6 +190,15 @@ public class EditorTab extends JPanel implements SketchFile.TextStorage {
 
       editor.lineStatus.set(lineStart, lineEnd);
     });
+    
+    textArea.addKeyListener(new KeyAdapter() {
+      public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+          editor.pluginManager.fire(PluginManager.Hooks.ENTER);
+        }
+      }
+    });
+    
     ToolTipManager.sharedInstance().registerComponent(textArea);
 
     configurePopupMenu(textArea);
