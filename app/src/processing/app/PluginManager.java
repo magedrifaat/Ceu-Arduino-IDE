@@ -9,7 +9,7 @@ import java.net.URLClassLoader;
 import javax.swing.JMenu;
 
 public class PluginManager {
-  public enum Hooks {MENU, TOOL, SIDE, FORMAT, COMPILE, UPLOAD, 
+  public enum Hooks {MENU, SIDE, FORMAT, COMPILE, UPLOAD, 
                     RUN, ENTER, START, QUIT}
   
   ArrayList<Plugin> plugins;
@@ -40,22 +40,57 @@ public class PluginManager {
   }
   
   public void fire(Hooks hook) {
-    switch (hook) {
-      case START:
-        for (Plugin p : plugins) {
-          p.start(pluginAPI);
-        }
-        break;
-        
-      case MENU:
-        for (Plugin p : plugins) {
-          p.addMenu(pluginAPI);
-        }
-        break;
-      case SIDE:
-        for (Plugin p : plugins) {
-          p.sideTab(pluginAPI);
-        }
+    try {
+      switch (hook) {
+        case START:
+          for (Plugin p : plugins) {
+            p.onStart(pluginAPI);
+          }
+          break;
+        case QUIT:
+          for (Plugin p : plugins) {
+            p.onQuit(pluginAPI);
+          }
+          break;
+          
+        case MENU:
+          for (Plugin p : plugins) {
+            p.onMenu(pluginAPI);
+          }
+          break;
+        case SIDE:
+          for (Plugin p : plugins) {
+            p.onSide(pluginAPI);
+          }
+        case COMPILE:
+          for (Plugin p : plugins) {
+            p.onCompile(pluginAPI);
+          }
+          break;
+        case UPLOAD:
+          for (Plugin p : plugins) {
+            p.onUpload(pluginAPI);
+          }
+          break;
+        case RUN:
+          for (Plugin p : plugins) {
+            p.onRun(pluginAPI);
+          }
+          break;
+        case FORMAT:
+          for (Plugin p : plugins) {
+            p.onFormat(pluginAPI);
+          }
+          break;
+        case ENTER:
+          for (Plugin p : plugins) {
+            p.onNewLine(pluginAPI);
+          }
+          break;
+      }
+    }
+    catch (Exception e) {
+      e.printStackTrace();
     }
   }
 }

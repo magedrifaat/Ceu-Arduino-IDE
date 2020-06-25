@@ -297,6 +297,7 @@ public class Editor extends JFrame implements RunnerListener {
     // add listener to handle window close box hit event
     addWindowListener(new WindowAdapter() {
         public void windowClosing(WindowEvent e) {
+          pluginManager.fire(PluginManager.Hooks.QUIT);
           base.handleClose(Editor.this);
         }
       });
@@ -753,7 +754,10 @@ public class Editor extends JFrame implements RunnerListener {
     fileMenu.add(examplesMenu);
 
     item = Editor.newJMenuItem(tr("Close"), 'W');
-    item.addActionListener(event -> base.handleClose(Editor.this));
+    item.addActionListener(event -> {
+      pluginManager.fire(PluginManager.Hooks.QUIT);
+      base.handleClose(Editor.this);
+    });
     fileMenu.add(item);
 
     saveMenuItem = newJMenuItem(tr("Save"), 'S');
@@ -785,7 +789,10 @@ public class Editor extends JFrame implements RunnerListener {
       fileMenu.addSeparator();
 
       item = newJMenuItem(tr("Quit"), 'Q');
-      item.addActionListener(event -> base.handleQuit());
+      item.addActionListener(event -> {
+        pluginManager.fire(PluginManager.Hooks.QUIT);
+        base.handleQuit();
+      });
       fileMenu.add(item);
     }
     return fileMenu;
@@ -1134,6 +1141,7 @@ public class Editor extends JFrame implements RunnerListener {
     item.setName("menuToolsAutoFormat");
     int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
     item.setAccelerator(KeyStroke.getKeyStroke('T', modifiers));
+    item.addActionListener(e -> pluginManager.fire(PluginManager.Hooks.FORMAT));
     menu.add(item);
 
     //menu.add(createToolMenuItem("processing.app.tools.CreateFont"));
@@ -1418,6 +1426,11 @@ public class Editor extends JFrame implements RunnerListener {
     decreseIndentItem.setName("menuDecreaseIndent");
     decreseIndentItem.addActionListener(event -> getCurrentTab().handleIndentOutdent(false));
     menu.add(decreseIndentItem);
+    
+    JMenuItem newLineItem = new JMenuItem(tr("Add New Line"));
+    newLineItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0));
+    newLineItem.setName("menuAddNewLine");
+    newLineItem.addActionListener(event -> pluginManager.fire(PluginManager.Hooks.ENTER));
 
     menu.addSeparator();
 
@@ -1848,6 +1861,7 @@ public class Editor extends JFrame implements RunnerListener {
 
     @Override
     public void run() {
+      pluginManager.fire(PluginManager.Hooks.COMPILE);
       try {
         removeAllLineHighlights();
         if (sketch.isLegacy()) {
@@ -1877,6 +1891,10 @@ public class Editor extends JFrame implements RunnerListener {
   }
 
   public void addLineHighlight(int line) throws BadLocationException {
+    addLineHighlight(line, new Color(1, 0, 0, 0.2f));
+  }
+
+  public void addLineHighlight(int line, Color color) throws BadLocationException {
     SketchTextArea textArea = getCurrentTab().getTextArea();
     FoldManager foldManager = textArea.getFoldManager();
     if (foldManager.isLineHidden(line)) {
@@ -1886,7 +1904,11 @@ public class Editor extends JFrame implements RunnerListener {
         }
       }
     }
-    textArea.addLineHighlight(line, new Color(1, 0, 0, 0.2f));
+    
+    if (color == null) {
+      color = new Color(1, 0, 0, 0.2f);
+    }
+    textArea.addLineHighlight(line, color);
     textArea.setCaretPosition(textArea.getLineStartOffset(line));
   }
 
@@ -2274,6 +2296,7 @@ public class Editor extends JFrame implements RunnerListener {
     }
 
     public void run() {
+      pluginManager.fire(PluginManager.Hooks.UPLOAD);
       try {
         removeAllLineHighlights();
         if (serialMonitor != null) {
@@ -2881,5 +2904,9 @@ public class Editor extends JFrame implements RunnerListener {
     newTab.tabName = tabName;
     newTab.tabPanel = tabPanel;
     sidePanelTabs.add(newTab);
+  }
+  
+  String getMainFilePath() {
+    return sketch.getMainFilePath();
   }
 }
