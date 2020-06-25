@@ -1,8 +1,11 @@
 package processing.app;
 
+import java.awt.Color;
 import javax.swing.JMenu;
 import javax.swing.JPanel;
 import javax.swing.AbstractAction;
+import javax.swing.JOptionPane;
+import javax.swing.JDialog;
 import java.io.File;
 
 public class PluginAPI {
@@ -12,10 +15,24 @@ public class PluginAPI {
     this.editor = editor;
   }
   
+  // --------------- GUI relevant functions --------------- //
   public void addMenu(JMenu newMenu) {
     editor.addMenu(newMenu);
   }
   
+  public void addSideTab(String tabName, JPanel tabPanel) {
+    editor.addSideTab(tabName, tabPanel);
+  }
+  
+  public Object showDialog(JOptionPane optionPane, String title) {
+    JDialog dialog = optionPane.createDialog(editor, title);
+    dialog.setVisible(true);
+    
+    return optionPane.getValue();
+  }
+  
+  
+  // --------------- IDE Actions functions ---------------- //
   public void openFile(String fileName) {
     File file = new File(fileName);
     if (file.exists()) {
@@ -43,7 +60,46 @@ public class PluginAPI {
     }
   }
   
-  public void addSideTab(String tabName, JPanel tabPanel) {
-    editor.addSideTab(tabName, tabPanel);
+  public void addLineHighlight(int line) {
+    try {
+      editor.addLineHighlight(line);
+    }
+    catch (Exception e) {
+      System.out.println("Faield to add line highlight at line " +line);
+    }
+  }
+  
+  public void addLineHighlight(int line, Color color) {
+    try {
+      editor.addLineHighlight(line, color);
+    }
+    catch (Exception e) {
+      System.out.println("Faield to add line highlight at line " +line);
+    }
+  }
+  
+  
+  public void removeAllLineHighlights() {
+    editor.removeAllLineHighlights();
+  }
+  
+  public boolean saveProject() {
+    return editor.handleSave(false);
+  }
+  
+  public boolean saveProjectAs() {
+    return editor.handleSaveAs();
+  }
+  
+  public String getMainFilePath() {
+    return editor.getMainFilePath();
+  }
+  
+  public String getCurrentTabText() {
+    return editor.getCurrentTab().getText();
+  }
+  
+  public void setCurrentTabText(String text) {
+    editor.getCurrentTab().setText(text);
   }
 }
