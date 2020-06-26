@@ -1,0 +1,143 @@
+// Based on source code from <https://www.arduino.cc/en/Reference/RTC>
+
+native/pre do
+  enum Alarm_Match: uint8_t // Should we have this enum or just use the identifiers from /component/rtc.h ?
+  {
+    RTC_MATCH_OFF          = RTC_MODE2_MASK_SEL_OFF_Val,          // Never
+    RTC_MATCH_SS           = RTC_MODE2_MASK_SEL_SS_Val,           // Every Minute
+    RTC_MATCH_MMSS         = RTC_MODE2_MASK_SEL_MMSS_Val,         // Every Hour
+    RTC_MATCH_HHMMSS       = RTC_MODE2_MASK_SEL_HHMMSS_Val,       // Every Day
+    RTC_MATCH_DHHMMSS      = RTC_MODE2_MASK_SEL_DDHHMMSS_Val,     // Every Month
+    RTC_MATCH_MMDDHHMMSS   = RTC_MODE2_MASK_SEL_MMDDHHMMSS_Val,   // Every Year
+    RTC_MATCH_YYMMDDHHMMSS = RTC_MODE2_MASK_SEL_YYMMDDHHMMSS_Val  // Once, on a specific date and a specific time
+  };
+end
+
+// rtc.begin();
+{{
+    PM->APBAMASK.reg |= PM_APBAMASK_RTC; // turn on digital interface clock
+
+    // config32kOSC();
+    /* Configure the 32768Hz Oscillator */
+    SYSCTRL->XOSC32K.reg = SYSCTRL_XOSC32K_ONDEMAND |
+                           SYSCTRL_XOSC32K_RUNSTDBY |
+                           SYSCTRL_XOSC32K_EN32K |
+                           SYSCTRL_XOSC32K_XTALEN |
+                           SYSCTRL_XOSC32K_STARTUP(6) |
+                           SYSCTRL_XOSC32K_ENABLE;
+
+    // If the RTC is in clock mode and the reset was
+    // not due to POR or BOD, preserve the clock time
+    // POR causes a reset anyway, BOD behaviour is?
+    bool validTime = false;
+    RTC_MODE2_CLOCK_Type oldTime;
+
+    if (PM->RCAUSE.reg & (PM_RCAUSE_SYST | PM_RCAUSE_WDT | PM_RCAUSE_EXT)) {
+        if (RTC->MODE2.CTRL.reg & RTC_MODE2_CTRL_MODE_CLOCK) {
+            validTime = true;
+            oldTime.reg = RTC->MODE2.CLOCK.reg;
+        }
+    }
+
+    // Setup clock GCLK2 with OSC32K divided by 32
+    // configureClock();
+    /* Attach peripheral clock to 32k oscillator */
+    GCLK->GENDIV.reg = GCLK_GENDIV_ID(2)|GCLK_GENDIV_DIV(4);
+    while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY)
+        ;
+    GCLK->GENCTRL.reg = (GCLK_GENCTRL_GENEN | GCLK_GENCTRL_SRC_XOSC32K | GCLK_GENCTRL_ID(2) | GCLK_GENCTRL_DIVSEL );
+    while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY)
+        ;
+    GCLK->CLKCTRL.reg = (uint32_t)((GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK2 | (RTC_GCLK_ID << GCLK_CLKCTRL_ID_Pos)));
+    CEU_SAMD_WAIT(*GCLK)
+
+    // RTCdisable();
+    RTC->MODE2.CTRL.reg &= ~RTC_MODE2_CTRL_ENABLE; // disable RTC
+    CEU_SAMD_WAIT(RTC->MODE2);
+
+    // RTCreset();
+    RTC->MODE2.CTRL.reg |= RTC_MODE2_CTRL_SWRST; // software reset
+    CEU_SAMD_WAIT(RTC->MODE2);
+
+    uint16_t tmp_reg = 0;
+    tmp_reg |= RTC_MODE2_CTRL_MODE_CLOCK; // set clock operating mode
+    tmp_reg |= RTC_MODE2_CTRL_PRESCALER_DIV1024; // set prescaler to 1024 for MODE2
+    tmp_reg &= ~RTC_MODE2_CTRL_MATCHCLR; // disable clear on match
+  
+    //According to the datasheet RTC_MODE2_CTRL_CLKREP = 0 for 24h
+    tmp_reg &= ~RTC_MODE2_CTRL_CLKREP; // 24h time representation
+
+    RTC->MODE2.READREQ.reg &= ~RTC_READREQ_RCONT; // disable continuously mode
+
+    RTC->MODE2.CTRL.reg = tmp_reg;
+    CEU_SAMD_WAIT(RTC->MODE2);
+
+    NVIC_EnableIRQ(RTC_IRQn); // enable RTC interrupt 
+    NVIC_SetPriority(RTC_IRQn, 0x00);
+
+    RTC->MODE2.INTENSET.reg |= RTC_MODE2_INTENSET_ALARM0; // enable alarm interrupt
+    RTC->MODE2.Mode2Alarm[0].MASK.bit.SEL = RTC_MATCH_OFF; // default alarm match is off (disabled)
+  
+    CEU_SAMD_WAIT(RTC->MODE2);
+
+    // RTCenable();
+    RTC->MODE2.CTRL.reg |= RTC_MODE2_CTRL_ENABLE; // enable RTC
+    CEU_SAMD_WAIT(RTC->MODE2);
+
+    // RTCresetRemove();
+    RTC->MODE2.CTRL.reg &= ~RTC_MODE2_CTRL_SWRST; // software reset remove
+    CEU_SAMD_WAIT(RTC->MODE2);
+
+    // If desired and valid, restore the time value
+    if (validTime) {
+        RTC->MODE2.CLOCK.reg = oldTime.reg;
+        CEU_SAMD_WAIT(RTC->MODE2);
+    }
+}}
+
+// main program
+{
+    // rtc.setTime(hours, minutes, seconds);
+        // setSeconds(seconds);
+            RTC->MODE2.CLOCK.bit.SECOND = 0;
+            CEU_SAMD_WAIT(RTC->MODE2);
+        // setMinutes(minutes);
+            RTC->MODE2.CLOCK.bit.MINUTE = 0;
+            CEU_SAMD_WAIT(RTC->MODE2);
+        // setHours(hours);
+            RTC->MODE2.CLOCK.bit.HOUR = 0;
+            CEU_SAMD_WAIT(RTC->MODE2);
+
+    // rtc.setDate(day, month, year);
+        // setDay(day);
+            RTC->MODE2.CLOCK.bit.DAY = 1;
+            CEU_SAMD_WAIT(RTC->MODE2);
+        // setMonth(month);
+            RTC->MODE2.CLOCK.bit.MONTH = 6;
+            CEU_SAMD_WAIT(RTC->MODE2);
+        // setYear(year);
+            RTC->MODE2.CLOCK.bit.YEAR = 18;
+            CEU_SAMD_WAIT(RTC->MODE2);
+
+    // RTC alarm setting on every 15 s resulting in 1 minute sleep period
+    // rtc.setAlarmSeconds(seconds);
+        RTC->MODE2.Mode2Alarm[0].ALARM.bit.SECOND = 10;
+        CEU_SAMD_WAIT(RTC->MODE2);
+
+    // rtc.enableAlarm(rtc.MATCH_SS);
+    RTC->MODE2.Mode2Alarm[0].MASK.bit.SEL = RTC_MATCH_SS;
+    CEU_SAMD_WAIT(RTC->MODE2);
+}
+
+input none RTC_DONE;
+
+native _RTC_Handler;
+spawn async/isr [_RTC_Handler] do
+    { RTC->MODE2.INTFLAG.reg = RTC_MODE2_INTFLAG_ALARM0; } // must clear flag at end
+    emit RTC_DONE;
+end
+
+_pinMode(13, _OUTPUT);
+every RTC_DONE do
+    _digitalWrite(13, not _digitalRead(13));
+end

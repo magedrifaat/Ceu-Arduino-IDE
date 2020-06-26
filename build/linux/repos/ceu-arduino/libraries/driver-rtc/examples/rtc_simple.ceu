@@ -1,0 +1,19 @@
+#include "wclock.ceu"
+#include "rtc.ceu"
+
+_Serial.begin(9600);
+await Rtc(on);
+await Rtc_set_time(2018,2,6,23,58,0);//u16 year, u8 month, u8 day, u8 hour, u8 minute, u8 second)
+
+loop do
+    var[7] u16 time_data;
+    await Rtc_get_time(&time_data);
+    _Serial.print("Date and Time: ");
+    _Serial.print(time_data[6]);    _Serial.print("-");
+    _Serial.print(time_data[5]);    _Serial.print("-");
+    _Serial.print(time_data[4]);    _Serial.print(" ");
+    _Serial.print(time_data[2]);    _Serial.print(":");
+    _Serial.print(time_data[1]);    _Serial.print(":");
+    _Serial.print(time_data[0]);    _Serial.println("");
+    await 1s;
+end

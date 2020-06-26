@@ -1,0 +1,7 @@
+// compile with CEU_DEFS=-DCEU_PM_MIN
+
+#include "pwm.ceu"
+
+emit PWM(6, 128);
+
+await FOREVER;

@@ -1,0 +1,123 @@
+/*
+The following program illustrates the process of slave read using TWI via a ceu API.
+This example shows multiple bytes data transfer
+The program starts by setting the value of the Bit Rate (TWBR) and the Address register (TWAR).
+It triggers the interrupt by sending ACK continously after the previous request is completed.
+An ACK is received when the Master addresses our device ( here, address=4 ).
+
+
+
+Testing:
+    - 
+
+Circuit :
+    - SDA,SCL lines of both master and slave pulled up by a resistor to 5V.
+    - 5V and GND of both master and slave connected respectively to operate both at same voltage.
+    - A Serial monitor to display the data received in the slave.
+*/
+#include "wclock.ceu"
+native
+    _TWI_vect,
+;
+native/pre do
+    ##include <compat/twi.h>
+    #include "../print_status.h"
+    int SLA;
+    volatile int TXBuffIndex=0;
+    int TXBuffLen=0;
+end
+var u8 errorcode=1;
+/*
+errorcode :
+  No error                 0
+  Interrupt not triggered  1
+  NACK received            2
+  Other Errors             3
+*/
+
+#define TXMAXBUFLEN 32 // receive buffer length
+var[TXMAXBUFLEN] byte twi_transmit_buffer;// max buffer length = 32
+var int requestmode = -1;// 0 for Write and 1 for Read
+
+input int I2C_REQUEST_ADDRESSED;
+input (u8,u8) I2C_REQUEST_DONE;
+
+output (none) I2C_REQUEST_SEND do
+    outer.requestmode = 0;
+    {
+        TXBuffIndex = 0;
+        TXBuffLen = @($outer.twi_transmit_buffer);
+        if(TXBuffLen){
+            s(@(outer.twi_transmit_buffer[{TXBuffIndex}]));
+            TWDR = @(outer.twi_transmit_buffer[{TXBuffIndex++}]);
+            s(TWDR);
+            TWCR = (1<<TWINT)|(1<<TWEA)|(1<<TWEN)|(1<<TWIE); // send ack
+        }
+        else
+            TWCR = (1<<TWINT)|(1<<TWEN)|(1<<TWIE); // send nack
+    }
+end
+spawn async/isr [_TWI_vect] do
+
+    var bool done = false;
+    var bool ack = false;
+    var int value = -1;
+    {
+        print_stat(TW_STATUS);
+        switch(TW_STATUS){
+
+            case TW_ST_SLA_ACK:
+            case TW_ST_ARB_LOST_SLA_ACK:
+                @ack=1;
+                @outer.requestmode = 0;
+                break;
+            case TW_ST_DATA_ACK:
+                if(TXBuffIndex < TXBuffLen){
+                    TWDR = @(outer.twi_transmit_buffer[{TXBuffIndex++}]);
+                    if(TXBuffIndex!=TXBuffLen){
+                        TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWIE)| (1 << TWEA);
+                    }
+                    else{
+                        TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWIE);
+                    }
+                }else{
+                    TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWIE);
+                }
+                break;
+            case TW_ST_DATA_NACK:
+            case TW_ST_LAST_DATA:
+                TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWIE) | (1 << TWEA);
+                @done=1;
+                break;
+            default:
+                TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWIE)| (1 << TWEA);
+        }
+    }
+    
+    if ack then
+        emit I2C_REQUEST_ADDRESSED(outer.requestmode);
+        {TWCR =  (1<<TWEN) | (1 << TWEA);} // disable interrupt from getting triggered
+    end
+    if done then
+        emit I2C_REQUEST_DONE({TXBuffIndex},outer.errorcode);
+        outer.requestmode = -1;
+    end
+end
+
+
+{
+    TWBR = ((F_CPU / 100000L) - 16) / 2;// Bit rate formula
+    TWAR = 8 << 1;
+  	Serial.begin(9600);
+    digitalWrite(SDA,1);
+    digitalWrite(SCL,1);
+    TWCR = (1 << TWEA) | (1 << TWEN) | (1<<TWIE) | (1<<TWINT);
+}
+
+loop do
+    await I2C_REQUEST_ADDRESSED;
+    twi_transmit_buffer = [1,2];
+    emit I2C_REQUEST_SEND;
+    await I2C_REQUEST_DONE;
+    {Serial.println("bye");}
+end

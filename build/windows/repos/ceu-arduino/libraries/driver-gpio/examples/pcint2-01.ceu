@@ -1,0 +1,12 @@
+#include "out.ceu"
+#include "pcint2.ceu"
+
+output high/low OUT_13;
+
+call PCINT2_Enable(_PCINT16, on);   // UNO=D0, MEGA=A8
+
+emit OUT(13, call PCINT2_Get(_PCINT16));
+
+every PCINT2 do
+    emit OUT(13, call PCINT2_Get(_PCINT16));
+end

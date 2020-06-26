@@ -1,0 +1,4 @@
+native/pre do
+    ##define CEU_ISR(id) ISR(id)
+end
+

@@ -1,0 +1,145 @@
+// compile with CEU_DEFS=-DCEU_PM_MIN
+
+/*
+ * The following program illustrates the process of master write using TWI via
+ * a ceu API.
+ * This example shows multiple bytes data transfer.
+ * The program starts by setting the value of the Bit Rate (TWBR).
+ * It triggers the interrupt by sending the start condition continously after
+ * the previous request is completed.
+ * The Start condition further changes the TWDR to SLA Write and the TWCR is
+ * set to resume the transfer.
+ * Once an ACK is received, The interrupts sends the data one by one until all
+ * data is sent or a NACK is received.
+ * This data is sent by setting TWDR to the data we want to send.
+ *
+ * Testing:
+ *  - The data is sent successfully continously with a proper master slave
+ *    system connected where the slave sends ACK on data received.
+ *  - Removing the loop and adding await forever at the end sends the data only
+ *    once as expected
+ *  - When a wrong address is mentioned or slave doesn't acknowledge the data a
+ *    NACK is assumed/received and no data is sent.
+ *
+ * Circuit :
+ *  - SDA,SCL lines of both master and slave pulled up by a resistor to 5V.
+ *  - 5V and GND of both master and slave connected respectively to operate
+ *    both at same voltage.
+ *  - A Serial monitor to display the data received in the slave.
+ */
+
+#include "wclock.ceu"
+
+native
+    _TWI_vect,
+;
+
+native/pre do
+    ##include <compat/twi.h>
+
+    enum {
+        TWI_ERR_NONE = 0,
+        TWI_ERR_NACK = 1,
+        TWI_ERR_ARB  = 2,
+        TWI_ERR_BUS  = 3,
+    };
+
+    enum {
+        TWI_MODE_NONE  = -1,
+        TWI_MODE_WRITE =  0,
+        TWI_MODE_READ  =  1
+    };
+end
+
+var u8  addr = _;
+var int mode = {TWI_MODE_NONE};
+
+#define BUF_MAX 32
+var[BUF_MAX*] byte buf;
+var int buf_togo = _;
+
+input (u8,u8) I2C_REQUEST_DONE;
+
+output (u8 address) I2C_REQUEST_SEND do
+    outer.mode = {TWI_MODE_WRITE};
+    outer.addr = address;
+    outer.buf_togo = $outer.buf as int;
+    {TWCR = (1<<TWINT)|(1<<TWSTA)|(1<<TWEN)|(1<<TWIE);}// start condition
+end
+
+spawn async/isr [_TWI_vect] do
+  var bool done = true;
+  var int  err  = {TWI_ERR_NONE};
+  var bool txed = false;
+  {
+    u8 status = TW_STATUS;
+    switch (status)
+    {
+        // NOT DONE
+
+        case TW_START:
+        case TW_REP_START:
+            ceu_assert(@outer.mode != TWI_MODE_NONE, "bug found");
+            TWDR = (@outer.addr << 1) | @outer.mode; // SLA + Read/Write
+            TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWIE); // Continue Transfer
+            @outer.mode = TWI_MODE_NONE;
+            @done = 0;
+            break;
+
+        // MAYBE DONE
+
+        case TW_MT_SLA_ACK:
+        case TW_MT_DATA_ACK:
+            if (@($outer.buf) > 0) {
+                TWDR = @(outer.buf[0]);
+                TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWIE);
+                @txed = 1;
+                @done = 0;
+            }
+            break;
+
+        // DONE: with errors
+
+        case TW_MT_SLA_NACK:
+        case TW_MT_DATA_NACK:   // occurs disconnecting A4=SDA, A5=SCL
+            @err = TWI_ERR_NACK;
+            break;
+        case TW_MT_ARB_LOST:    // occurs disconnecting A4=SDA
+            @err = TWI_ERR_ARB; // lost bus arbitration
+            break;
+        case TW_BUS_ERROR:      // occurs disconnecting A4=SDA
+            @err = TWI_ERR_BUS;
+            break;
+
+        default:
+            Serial.println(status);
+            ceu_arduino_assert(0, 9); // must never reach this case
+    }
+  }
+  if txed then
+    $outer.buf = $outer.buf - 1;
+  end
+  if done then
+    { TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWIE) | (1<<TWSTO); } // stop
+    emit I2C_REQUEST_DONE((outer.buf_togo - $outer.buf) as u8, err);
+  end
+end
+
+{
+    Serial.begin(9600);
+    pinMode(6, INPUT_PULLUP);
+    TWBR = ((F_CPU / 100000L) - 16) / 2;    // bit rate formula
+}
+
+var int i;
+loop i do
+    buf = [0,1,2,i];
+    emit I2C_REQUEST_SEND(8);
+    var u8 n;
+    var u8 err;
+    (n, err) = await I2C_REQUEST_DONE;
+    _ceu_arduino_assert(err == {TWI_ERR_NONE}, err);
+    _ceu_assert(n == 4, "bug found");
+    await 1s;
+    {Serial.println("ho");}
+end

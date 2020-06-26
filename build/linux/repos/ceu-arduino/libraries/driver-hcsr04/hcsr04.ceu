@@ -1,0 +1,36 @@
+#ifndef HCSR04_ECHO
+#error Missing interrupt pin `HCSR04_ECHO`.
+#endif
+#ifndef HCSR04_TRIGGER
+#error Missing output pin `HCSR04_TRIGGER`.
+#endif
+
+///////////////////////////////////////////////////////////////////////////////
+// INTERFACE
+///////////////////////////////////////////////////////////////////////////////
+
+code/await HCSR04_Init (none) -> int?;
+
+///////////////////////////////////////////////////////////////////////////////
+// IMPLEMENTATION
+///////////////////////////////////////////////////////////////////////////////
+
+#include "wclock.ceu"
+
+code/await HCSR04_Init (none) -> int? do
+    emit HCSR04_TRIGGER(high);
+    call WCLOCK_Freeze(10);
+    emit HCSR04_TRIGGER(low);
+
+    var int? ret;
+
+    watching 25ms do
+        await HCSR04_ECHO;
+        var u32 old = call WCLOCK_Now();
+        await HCSR04_ECHO;
+        var u32 now = call WCLOCK_Now();
+        ret = (((now - old) as int)/58) as int;
+    end
+
+    escape ret;
+end

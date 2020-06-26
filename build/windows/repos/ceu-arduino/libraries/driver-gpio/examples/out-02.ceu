@@ -1,0 +1,13 @@
+#include "out.ceu"
+
+output high/low OUT_10;
+output high/low OUT_11;
+output high/low OUT_12;
+output high/low OUT_13;
+
+var int i;
+loop i in [10 -> 13] do
+    emit OUT(i, high);
+end
+
+await FOREVER;

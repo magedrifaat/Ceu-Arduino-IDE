@@ -1,0 +1,18 @@
+#include "out.ceu"
+#include "pcint1.ceu"
+
+output high/low OUT_13;
+
+call PCINT1_Enable(_PCINT8, on);   // UNO=A0, MEGA=D0
+
+var& PCINT1_Demux pcint1 = spawn PCINT1_Demux();
+
+emit OUT(13, call PCINT1_Get(_PCINT8));
+
+loop do
+    var int pin;
+    var high/low v;
+    (pin,v) = await pcint1.e until (pin == _PCINT8);
+    emit OUT(13, v);
+end
+

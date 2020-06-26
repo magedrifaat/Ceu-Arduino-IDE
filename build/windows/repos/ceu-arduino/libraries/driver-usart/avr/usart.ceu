@@ -1,0 +1,131 @@
+#include "../usart.ceu"
+
+/* TODO: only working with original Arduino? I guess it is ok now. */
+
+///////////////////////////////////////////////////////////////////////////////
+// INITIALIZATION
+///////////////////////////////////////////////////////////////////////////////
+
+native/pre do
+#ifdef __AVR_ATmega644P__
+    ##define USART_BAUD(bps) (((F_CPU / (bps*16UL))) - 1)
+#else
+    ##define USART_BAUD(bps) ((F_CPU/4/bps - 1) / 2)
+#endif
+end
+
+var Lock usart_lock;
+var u8   usart_pm_refs = 0;
+
+var[USART_RX_BUF_N*] byte usart_rx_buf;
+native/pos do
+    tceu_vector* usart_tx_buf;
+    usize        usart_tx_buf_i;
+end
+
+///////////////////////////////////////////////////////////////////////////////
+// INPUT / OUTPUT
+///////////////////////////////////////////////////////////////////////////////
+
+native _UDR0;
+
+input none USART_RX;
+input none USART_TX_DONE;
+
+native/const _USART0_RX_vect, _USART_RX_vect;
+native/const _USART0_TX_vect, _USART_TX_vect;
+
+#ifdef ARDUINO_BOARD_MEGA
+spawn async/isr [_USART0_RX_vect]
+#else
+spawn async/isr [_USART_RX_vect]
+#endif
+do
+    outer.usart_rx_buf = outer.usart_rx_buf .. [_UDR0];
+    emit USART_RX;
+end
+
+#ifdef ARDUINO_BOARD_MEGA
+spawn async/isr [_USART0_TX_vect]
+#else
+spawn async/isr [_USART_TX_vect]
+#endif
+do
+    if {usart_tx_buf_i} < {usart_tx_buf->len} then
+        { UDR0 = *(byte*)(ceu_vector_geti(usart_tx_buf,usart_tx_buf_i)); }
+        { usart_tx_buf_i++; }
+    else
+        emit USART_TX_DONE;
+    end
+end
+
+///////////////////////////////////////////////////////////////////////////////
+// ABSTRACTIONS
+///////////////////////////////////////////////////////////////////////////////
+
+code/await USART_Init (var int bps) -> NEVER do
+    {
+        UCSR0A = 1 << U2X0;
+        UBRR0H = (USART_BAUD(@bps)>>8);    // set baud rate
+        UBRR0L = (USART_BAUD(@bps));
+        UCSR0C = (1<<USBS0) | (3<<UCSZ00);  // 8data, 2stop-bit
+        UCSR0B = (1<<RXEN0) | (1<<RXCIE0);  // enables RX & ISRS
+    }
+    do finalize with
+        {
+            UCSR0B = 0;                     // disables TX/RX & ISRS
+        }
+    end
+    await FOREVER;
+end
+
+code/await USART_Tx (var&[] byte buf) -> none
+do
+    lock outer.usart_lock do
+        outer.usart_pm_refs = outer.usart_pm_refs + 1;
+        {
+            ceu_pm_set(CEU_PM_USART, 1);
+            ceu_assert(bitRead(UCSR0A,UDRE0)==1, "pending TX?");
+            ceu_assert(bitRead(UCSR0A,TXC0)==0,  "pending ISR?");
+            usart_tx_buf = @(&&buf); // safe because finalize disables TX
+            usart_tx_buf_i = 1;
+            UCSR0B |= (1<<TXEN0) | (1<<TXCIE0);         // enables  TX & ISR
+        }
+        do finalize with
+            {
+                UCSR0B &= ~((1<<TXEN0) | (1<<TXCIE0));  // disables TX & ISR
+            }
+            outer.usart_pm_refs = outer.usart_pm_refs - 1;
+            if outer.usart_pm_refs == 0 then
+                {ceu_pm_set(CEU_PM_USART, 0);}
+            end
+        end
+
+        _UDR0 = buf[0];
+        await USART_TX_DONE;
+    end
+end
+
+code/await USART_Rx (var&[] byte buf, var usize? n) -> none
+do
+    outer.usart_pm_refs = outer.usart_pm_refs + 1;
+    {ceu_pm_set(CEU_PM_USART, 1);}
+    do finalize with
+        outer.usart_pm_refs = outer.usart_pm_refs - 1;
+        if outer.usart_pm_refs == 0 then
+            {ceu_pm_set(CEU_PM_USART, 0);}
+        end
+    end
+
+    loop do
+        atomic do
+            buf = buf..outer.usart_rx_buf;
+            outer.usart_rx_buf = [];
+        end
+        if (n? and $buf>=n!) or ((not n?) and $buf>0) then
+            break;
+        end
+
+        await USART_RX;
+    end
+end

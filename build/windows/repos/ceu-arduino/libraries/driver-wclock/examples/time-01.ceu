@@ -1,0 +1,13 @@
+#include "wclock.ceu"
+
+{ Serial.begin(9600); }
+
+loop do
+    await 1s;
+    var u32 us = call WCLOCK_Now();
+    {
+        Serial.print("MS ");
+        Serial.println(@us/1000);
+    }
+    call WCLOCK_Freeze(10000);
+end

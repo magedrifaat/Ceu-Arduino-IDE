@@ -1,0 +1,16 @@
+#include "out.ceu"
+#include "int0.ceu"
+#include "wclock.ceu"
+
+output high/low OUT_07;
+output high/low OUT_13;
+
+#define HCSR04_ECHO    INT0
+#define HCSR04_TRIGGER OUT_07
+#include "hcsr04.ceu"
+
+loop do
+    var int? d = await HCSR04_Init();
+    emit OUT_13(d? and ((d! <= 30) as high/low));
+    await 60ms;     // minimum recommended time between measures
+end

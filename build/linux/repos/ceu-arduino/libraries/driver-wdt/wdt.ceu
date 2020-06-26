@@ -1,0 +1,4 @@
+output int  WDT_REQUEST;
+input  none WDT_DONE;
+
+code/await Wdt (var int ms) -> none;

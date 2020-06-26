@@ -1,0 +1,110 @@
+#include "out.ceu"
+#include "pcint1.ceu"
+
+// LEDS
+
+output bool OUT_13; // D1
+output bool OUT_12; // D2
+output bool OUT_11; // D3
+output bool OUT_10; // D4
+
+// BUZZER
+
+output high/low OUT_03;
+emit OUT_03(high);
+
+// BUTTONS
+
+code/await MFS_Buttons (none) -> (event (int,high/low) e) -> NEVER do
+    call PCINT1_Enable(_PCINT9,  on);
+    call PCINT1_Enable(_PCINT10, on);
+    call PCINT1_Enable(_PCINT11, on);
+    do finalize with
+        call PCINT1_Enable(_PCINT9,  off);
+        call PCINT1_Enable(_PCINT10, off);
+        call PCINT1_Enable(_PCINT11, off);
+    end
+
+    var& PCINT1_Demux pcint1 = spawn PCINT1_Demux();
+    var int pin;
+    var high/low v;
+    every (pin,v) in pcint1.e do
+        var int pin_ = do
+            if pin == _PCINT9 then
+                escape _A1;
+            else/if pin == _PCINT10 then
+                escape _A2;
+            else/if pin == _PCINT11 then
+                escape _A3;
+            else
+                _ceu_arduino_assert(0, 2);
+            end
+        end;
+        emit e(pin_,v);
+    end
+end
+
+// DISPLAY
+
+output high/low OUT_04;
+output high/low OUT_07;
+output high/low OUT_08;
+
+var[4]  byte mfs_display_seg = [ 0xF1, 0xF2, 0xF4, 0xF8 ];
+var[10] byte mfs_display_map = [ 0xC0, 0xF9, 0xA4, 0xB0, 0x99, 0x92, 0x82, 0xF8, 0X80, 0X90 ];
+var[4]  int  mfs_display_vec = [ 0, 0, 0, 0 ];
+
+do
+    var int i;
+    loop i in [0 -> 4[ do
+        _digitalWrite(4, 0);
+        _shiftOut(8, 7, _MSBFIRST, 0xFF);
+        _shiftOut(8, 7, _MSBFIRST, mfs_display_seg[i]);
+        _digitalWrite(4, 1);
+    end
+end
+
+#define MFS_DISPLAY_PERIOD  80 // us
+#define MFS_DISPLAY_COUNTER (MFS_DISPLAY_PERIOD * F_CPU) / 1000000 / 64
+
+code/await MFS_Display (none) -> NEVER do
+
+    code/call Num (var int num) -> none do
+        atomic do
+            outer.mfs_display_vec[0] = num % 10000 / 1000;
+            outer.mfs_display_vec[1] = num %  1000 /  100;
+            outer.mfs_display_vec[2] = num %   100 /   10;
+            outer.mfs_display_vec[3] = num %    10 /    1;
+        end
+    end
+
+    {
+        TCCR2A = 0;
+        TCCR2B = 0;
+        TCCR2B = TCCR2B | (1 << WGM22);         // CTC mode
+        TCCR2B = TCCR2B | (1 << CS22);          // 64 prescaler
+        //TCCR2B = TCCR2B | (1 << CS22) | (1 << CS21) | (1 << CS20);          // 1024 prescaler
+        TCNT2  = 0;                             // initializes counter
+        OCR2A  = MFS_DISPLAY_PERIOD;            // CTC value
+        TIMSK2 = TIMSK2 | (1 << OCIE2A);        // enables interrupts
+        ceu_pm_set(CEU_PM_TIMER2, 1);
+    }
+    do finalize with
+        {
+            ceu_pm_set(CEU_PM_TIMER2, 0);
+            TIMSK2 = TIMSK2 & ~(1 << OCIE2A);   // disables interrupts
+        }
+    end
+    await FOREVER;
+end
+
+native/const _TIMER2_COMPA_vect;
+spawn async/isr [_TIMER2_COMPA_vect, 0] do
+    var int i;
+    loop i in [0 -> 4[ do
+        _digitalWrite(4, 0);
+        _shiftOut(8, 7, _MSBFIRST, outer.mfs_display_map[outer.mfs_display_vec[i]]);
+        _shiftOut(8, 7, _MSBFIRST, outer.mfs_display_seg[i]);
+        _digitalWrite(4, 1);
+    end
+end

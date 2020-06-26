@@ -1,0 +1,13 @@
+#include "wclock.ceu"
+#include "mfs.ceu"
+
+var& MFS_Display display = spawn MFS_Display();
+
+var int counter = 0;
+call display.Num(counter);
+every 1s do
+    counter = counter + 1;
+    call display.Num(counter);
+end
+
+await FOREVER;

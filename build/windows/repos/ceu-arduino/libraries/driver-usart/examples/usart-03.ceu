@@ -1,0 +1,21 @@
+#include "wclock.ceu"
+#include "usart.ceu"
+#include "string.ceu"
+
+spawn USART_Init(9600);
+
+var int i;
+loop i do
+    var[30] byte str;
+
+    call String_Append_STR(&str, "> ");
+    call String_Append_INT(&str, i, _);
+    call String_Append_STR(&str, " 0x");
+    call String_Append_INT(&str, i, 16);
+    call String_Append_STR(&str, " 0b");
+    call String_Append_INT(&str, i, 2);
+    call String_Append_STR(&str, "\n\r");
+
+    await USART_Tx(&str);
+    await 250ms;
+end

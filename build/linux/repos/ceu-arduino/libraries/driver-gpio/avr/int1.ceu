@@ -1,0 +1,25 @@
+input none INT1;
+
+#if   defined(ARDUINO_BOARD_UNO)
+#define INT1_PIN 3
+#elif defined(ARDUINO_BOARD_MEGA)
+#define INT1_PIN 20
+#else
+#error Board not supported.
+#endif
+
+code/call INT1_Get (none) -> high/low do
+    escape _digitalRead(INT1_PIN) as high/low;
+end
+
+native/const _INT1_vect;
+
+{
+    pinMode(INT1_PIN, INPUT_PULLUP);
+    EICRA = (EICRA & ~((1<<ISC10) | (1<<ISC11))) | (CHANGE << ISC10);
+    EIMSK |= (1 << INT1);
+}
+
+spawn async/isr [_INT1_vect] do
+    emit INT1;
+end

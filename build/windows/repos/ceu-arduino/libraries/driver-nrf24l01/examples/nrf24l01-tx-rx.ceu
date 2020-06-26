@@ -1,0 +1,51 @@
+#include "wdt.ceu"
+#include "out.ceu"
+#include "int0.ceu"
+#include "spi.ceu"
+
+#define NRF24L01_IRQ INT0
+#include "nrf24l01.ceu"
+
+#include "usart.ceu"
+#include "string.ceu"
+spawn USART_Init(9600);
+var[20] byte str = [] .. "Ceu - nrf-tx-rx\n\r";
+await USART_Tx(&str);
+//{Serial.begin(9600);}
+//{_DELAY(2000);}
+//{Serial.println("Ceu - nrf-tx-rx");}
+//{_DELAY(20);}
+
+var Lock spi = _;
+
+var NRF24L01_Data nrf = val NRF24L01_Data(&spi, 8,7, _,_,_,_,_,_,_);
+spawn NRF24L01_Init(&nrf);
+await nrf.ok;
+
+var int i;
+loop i do
+    watching Wdt(5000)
+    do
+        do
+            var[1] byte buf = [i];
+            await NRF24L01_Tx(&nrf, &buf);
+
+            str = [] .. "< ";
+            call String_Append_INT(&str, i, _);
+            call String_Append_STR(&str, "\n\r");
+            await USART_Tx(&str);
+            //{Serial.print("< "); Serial.println(@buf[0]); _DELAY(10);}
+        end
+        do
+            var[1] byte buf = [];
+            await NRF24L01_Rx(&nrf, &buf);
+
+            str = [] .. "> ";
+            call String_Append_INT(&str, buf[0], _);
+            call String_Append_STR(&str, "\n\r");
+            await USART_Tx(&str);
+            //{Serial.print("> "); Serial.println(@buf[0]); _DELAY(10);}
+        end
+        await FOREVER;
+    end
+end

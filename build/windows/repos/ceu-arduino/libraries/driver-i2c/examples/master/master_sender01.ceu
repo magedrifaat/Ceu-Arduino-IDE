@@ -1,0 +1,10 @@
+#include "i2c.ceu"
+#include "wclock.ceu"
+_Serial.begin(9600);
+emit I2C(on,_); // begin I2C
+loop do
+    tx_buf = [0,1,2,3,4]; // transmit buffer contains values to transfer. We are sending 5 bytes
+    emit I2C_MASTER_SEND(8); // send the data to slave with address 8
+    await I2C_DONE; // await for the request to be completed
+    await 1s; // send data every 1s
+end

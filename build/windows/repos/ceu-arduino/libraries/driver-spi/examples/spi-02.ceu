@@ -1,0 +1,36 @@
+// Testing:
+// - Same as `spi-01.ceu`.
+// - Connect master's pin 9 into another slave's pin SS.
+// - Upload `spi_slave/spi_slave.ino` to the new slave.
+// - Observe that the second slave is always 1 unit behind.
+
+#include "out.ceu"
+#include "wclock.ceu"
+#include "spi.ceu"
+
+output high/low OUT_08;
+output high/low OUT_09;
+
+emit OUT_08(high);      // disables slave
+emit OUT_09(high);      // disables slave
+
+_Serial.begin(9600);
+
+var int i;
+loop i do
+    { Serial.print("> "); Serial.println(@i); _DELAY(10); }
+    await 1s;
+
+    var byte v = _;
+    watching SPI_Transaction(1400000, SPI_MSBFIRST, SPI_MODE0, _, 8) do
+        v = await SPI_Transfer_8(i);
+    end
+
+    await 1s;
+
+    watching SPI_Transaction(1400000, SPI_MSBFIRST, SPI_MODE0, _, 9) do
+        await SPI_Transfer_8(v);
+    end
+
+    await 1s;
+end

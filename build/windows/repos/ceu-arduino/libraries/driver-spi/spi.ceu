@@ -1,0 +1,7 @@
+#ifndef USART_BUF_N
+#define USART_BUF_N 32
+#endif
+
+code/await SPI_Transaction (var u32 freq, var u8 bit_order, var u8 mode, var int? cs, var int? csn) -> NEVER;
+code/await SPI_Transfer    (var&[] byte  buf) -> none;
+code/await SPI_Transfer_8  (var    byte? v)   -> byte;
