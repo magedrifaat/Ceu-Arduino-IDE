@@ -1,0 +1,13 @@
+#include "out.ceu"
+#include "wclock.ceu"
+#include "adc.ceu"
+
+output high/low OUT_13;
+
+spawn Adc();
+
+loop do
+    await 1s;
+    var int value = await Adc_Conversion(_A0);
+    emit OUT_13(value > 1000);
+end

@@ -1,0 +1,88 @@
+/*
+The following program illustrates the process of master read using TWI via a ceu API.
+The program starts by setting the value of the Bit Rate (TWBR).
+It triggers the interrupt by sending the start condition every time we request.
+The Start condition further changes the TWDR to SLA Read and the TWCR is set to resume the transfer.
+Further, the api sets the twi_receive_buffer to the value of TWDR.
+We will print to Serial the value of the data received.
+
+
+Testing:
+    - The ACK from the slave was acheived by a fully connected master slave TWI system and the data received is printed to the serial.
+    - When a wrong address is mentioned or the slave is disconnected the NACK is assumed and goes to default condition and sends a stop.
+    - When I2C_REQUEST_DONE is replaced by FOREVER and the serial print is removed the data is sent only once as expected.
+
+
+Circuit :
+    - SDA,SCL lines of both master and slave pulled up by a resistor to 5V.
+    - 5V and GND of both master and slave connected respectively to operate both at same voltages.
+    - Slave sending some data to the master and this data can be viewed through serial monitor.
+*/
+#include "wclock.ceu"
+#include "gpio.ceu"
+native
+    _TWI_vect,
+;
+native/pre do
+    ##include <compat/twi.h>
+    int SLA;
+end
+var int requestmode=-1;// 0 for Write and 1 for Read
+var u8 errorcode=1;
+/*
+errorcode :
+  No error                 0
+  Interrupt not triggered  1
+  NACK received            2
+  Other Errors             3
+*/
+
+var byte twi_receive_buffer = 0; // max buffer length = 1 in this 1 byte example
+input  (u8,u8) I2C_REQUEST_DONE;
+
+output (u8 address,u8 n_byte) I2C_REQUEST_RECEIVE do
+    outer.requestmode=1;// Read mode
+    outer.twi_receive_buffer = 0;
+    {SLA=@address;}
+    {TWCR = (1<<TWINT)|(1<<TWSTA)|(1<<TWEN)|(1<<TWIE);} // start condition
+end
+spawn async/isr [_TWI_vect] do
+    var bool done=false;
+    {
+        switch(TW_STATUS){
+            case TW_START:
+                TWDR = (SLA << 1) | 1;//SLA+READ
+                TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWIE); // continue transfer
+                break;
+            
+            case TW_MR_SLA_ACK:
+                TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWIE); //get only one byte, send nack
+                break;
+            
+            case TW_MR_DATA_NACK:
+                @(outer.twi_receive_buffer) = TWDR;
+                TWCR = (1<<TWINT) | (1<<TWEN)| (1<<TWSTO) | (1<<TWIE);// send stop condition
+                @done=1;
+                break;
+            default:
+                @done=1;
+                TWCR = (1<<TWINT)|(1<<TWEN)| (1<<TWSTO) | (1<<TWIE);//default case sends stop condition. This case occurs in case of error or a NACK
+        }
+    }
+
+    if done then
+        emit I2C_REQUEST_DONE(1,outer.errorcode);
+    end
+end
+
+{
+    Serial.begin(9600);
+    TWBR = ((F_CPU / 100000L) - 16) / 2;// Bit rate formula
+    pinMode(12,OUTPUT);
+} 
+
+loop do
+    emit I2C_REQUEST_RECEIVE(4,1);
+    await I2C_REQUEST_DONE;
+    {Serial.println(@twi_receive_buffer);}
+end

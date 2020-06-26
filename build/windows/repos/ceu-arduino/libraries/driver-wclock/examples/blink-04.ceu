@@ -1,0 +1,21 @@
+#include "out.ceu"
+#include "wclock.ceu"
+
+output high/low OUT_11;
+output high/low OUT_12;
+output high/low OUT_13;
+
+code/await Blink (var int pin, var int ms) -> NEVER do
+    loop do
+        emit OUT(pin,high);
+        await (ms)ms;
+        emit OUT(pin,low);
+        await (ms)ms;
+    end
+end
+
+spawn Blink(11, 1000);
+spawn Blink(12,  500);
+spawn Blink(13,  250);
+
+await FOREVER;

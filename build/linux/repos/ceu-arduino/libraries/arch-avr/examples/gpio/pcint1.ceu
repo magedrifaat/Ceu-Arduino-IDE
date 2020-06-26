@@ -1,0 +1,36 @@
+/*
+ * Pin change associated with PCINT1 generates an interrupt, which emits PCINT1.
+ * On every PCINT1, main program toggles LED at PIN13.
+ */
+
+input none PCINT1;
+
+// PORT 1/C
+// Uno:  A0-A5
+// Mega: D0,D15,D14
+
+#define BIT PCINT8 // NOTE: PCINT8=0bit in the port (unrelated to the ISR vect!)
+
+native/const _PCINT1_vect;
+
+{
+    pinMode(13, OUTPUT);
+
+    bitClear(DDRC, BIT);  // input
+    bitSet(PORTC, BIT);   // pullup
+
+    bitSet(PCMSK1, BIT);
+    bitSet(PCIFR,  PCIF1);  // clears pending interrupts in port 1
+    bitSet(PCICR,  PCIE1);  // enables port 1
+}
+
+spawn async/isr [_PCINT1_vect, 0] do
+    emit PCINT1;
+end
+
+loop do
+    _digitalWrite(13, high);
+    await PCINT1;
+    _digitalWrite(13, low);
+    await PCINT1;
+end

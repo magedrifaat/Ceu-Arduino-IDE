@@ -143,12 +143,25 @@ public class ProjectConfig {
   }
   
   private ArrayList<String> getPrefExtensions() {
-    String csvExtensions = PreferencesData.get(projectType + "-extensions");
+    String csvExtensions = PreferencesData.getDefault(projectType + "-extensions");
+    if (csvExtensions == null) {
+      csvExtensions = PreferencesData.get(projectType + "-extensions");
+    }
+    
+    if (csvExtensions == null) {
+      return new ArrayList<String> ();
+    }
+    
     return new ArrayList<String> (Arrays.asList(csvExtensions.replaceAll(" ", "").split(",")));
   }
   
   private String getPrefCommand(String command) {
-    return PreferencesData.get(projectType + "-" + command);
+    String res = PreferencesData.getDefault(projectType + "-" + command);
+    if (res == null) {
+      res = PreferencesData.get(projectType + "-" + command);
+    }
+    
+    return res;
   }
   
   public File getKeywordsFile() {

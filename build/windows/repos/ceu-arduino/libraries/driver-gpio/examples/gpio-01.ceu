@@ -1,0 +1,18 @@
+#include "wclock.ceu"
+#include "out.ceu"
+#include "int0.ceu"     // UNO=D2, MEGA=D21
+
+output high/low OUT_13;
+
+loop do
+    watching INT0 do
+        var high/low x = low;
+        every 500ms do
+            x = not x;
+            emit OUT_13(x);
+        end
+    end
+    await 500ms;     // debouncing
+    await INT0;
+    await 500ms;     // debouncing
+end

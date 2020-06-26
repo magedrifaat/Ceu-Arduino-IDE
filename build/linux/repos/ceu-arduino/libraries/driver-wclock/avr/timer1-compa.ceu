@@ -1,0 +1,65 @@
+#ifndef WCLOCK_AVR_TIMER1
+#define WCLOCK_AVR_TIMER1
+
+#define CEU_WCLOCK_IRQ_N        _TIMER1_COMPA_vect
+#define CEU_PM_WCLOCK           CEU_PM_TIMER1
+#define CEU_WCLOCK_PRESCALER    1024
+
+#define ceu_timer1_init         ceu_wclock_init
+#define ceu_timer1_request      ceu_wclock_request
+#define ceu_timer1_done         ceu_wclock_done
+#define ceu_timer1_dt           ceu_wclock_dt
+#define ceu_timer1_now          ceu_wclock_now
+
+native/const _TIMER1_COMPA_vect;
+
+#include "../wclock.ceu"
+
+native/pos do
+    static u16 ceu_timer1_old;
+
+    void ceu_timer1_init (void) {
+        ceu_timer1_old = TCNT1;
+        TCCR1A = 0;
+
+#if   CEU_WCLOCK_PRESCALER ==    8
+        TCCR1B = 0b010;
+        #error "Not working (isr-16.ceu)!"
+#elif CEU_WCLOCK_PRESCALER ==   64
+        TCCR1B = 0b011;
+#elif CEU_WCLOCK_PRESCALER == 1024
+        TCCR1B = 0b101;
+#else
+        #error "Not implemented!"
+#endif
+    }
+
+    void ceu_timer1_request (s32 us, bool was_active) {
+        if (us == CEU_WCLOCK_INACTIVE) {
+            bitClear(TIMSK1, OCIE1A);
+        } else {
+            s32 v = CEU_WCLOCK_US_TO_INCS(us);
+            ceu_assert(v < U16_MAX, "bug found");
+            OCR1A = (ceu_timer1_old + v);
+            bitSet(TIMSK1, OCIE1A);
+        }
+    }
+
+    void ceu_timer1_done (void) {
+        // ok
+    }
+
+    s32 ceu_timer1_dt (void) {
+        u16 now = TCNT1;
+        //ceu_assert(now<128, "bug found");     (not really, only if called due to CEU_WCLOCK)
+        s32 dt  = (u16)(now - ceu_timer1_old);
+        ceu_timer1_old = now;
+        return CEU_WCLOCK_INCS_TO_US(dt);
+    }
+
+    u32 ceu_wclock_now (void) {
+        return CEU_WCLOCK_INCS_TO_US(TCNT1);
+    }
+end
+
+#endif

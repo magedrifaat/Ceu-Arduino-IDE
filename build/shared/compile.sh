@@ -1,0 +1,1 @@
+javac $1 -cp .;../lib/pde.jar

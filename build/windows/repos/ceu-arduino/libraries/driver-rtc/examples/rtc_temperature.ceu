@@ -1,0 +1,13 @@
+#include "wclock.ceu"
+#include "rtc.ceu"
+
+_Serial.begin(9600);
+await Rtc(on);
+
+loop do
+    await Rtc_force_conversion();
+    var r32 temp = await Rtc_read_temperature();
+    _Serial.print("Temperature is: ");
+    _Serial.println(temp);
+    await 1s;
+end

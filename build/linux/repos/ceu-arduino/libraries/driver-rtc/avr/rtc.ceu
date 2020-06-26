@@ -1,0 +1,416 @@
+/*
+ * General Description
+ * The  DS3231  is  a  low-cost,  extremely  accurate  I2C  real-time clock (RTC) with
+ * an integrated temperature-compensated  crystal  oscillator  (TCXO)  and  crystal.
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+#include "../rtc.ceu"
+#include "i2c.ceu"
+
+native/pre do
+    #include "rtc.h"
+end
+
+
+code/await Rtc_write_register8 (var u8 reg, var u8 value) -> none
+do
+    outer.tx_buf = [reg,value];
+    emit I2C_MASTER_SEND({DS3231_ADDRESS});
+    await I2C_DONE;
+end
+
+code/await Rtc_read_register8 (var u8 reg) -> u8
+do
+    outer.tx_buf = [reg];
+    emit I2C_MASTER_SEND({DS3231_ADDRESS});
+    await I2C_DONE;
+    emit I2C_MASTER_RECEIVE(DS3231_ADDRESS, 1);
+    await I2C_DONE;
+
+    escape outer.rx_buf[0] as u8;
+end
+
+code/await Rtc (var on/off v) -> none
+do
+    if v then
+        emit I2C(on,_);
+
+        var u8 value = await Rtc_read_register8({DS3231_REG_CONTROL});
+        value = value & 59;
+        await Rtc_write_register8({DS3231_REG_CONTROL},value);
+    else
+        emit I2C(off,_);
+    end
+end
+
+
+code/await Rtc_get_time (var&[] u16 values) -> none
+do
+    outer.tx_buf = [{DS3231_REG_TIME}];
+    emit I2C_MASTER_SEND({DS3231_ADDRESS});
+    await I2C_DONE;
+
+    emit I2C_MASTER_RECEIVE({DS3231_ADDRESS}, 7);
+    await I2C_DONE;
+
+    var u8 i;
+    loop i in [0->6] do
+        values = values .. [{bcd2dec(@outer.rx_buf[i])}];
+    end
+    values[6]=values[6]+2000;    
+end
+
+code/await Rtc_set_time (var u16 year,var u8 month, var u8 day, var u8 hour, var u8 minute, var u8 second) -> none do
+    outer.tx_buf = [{DS3231_REG_TIME},{dec2bcd(@second)},{dec2bcd(@minute)},{dec2bcd(@hour)},{dec2bcd(dow(@year, @month, @day))},{dec2bcd(@day)},{dec2bcd(@month)},{dec2bcd(@year-2000)},{DS3231_REG_TIME}];
+    //outer.tx_buf = outer.tx_buf = .. [{DS3231_REG_TIME}];
+    //outer.tx_buf = outer.tx_buf = .. [{dec2bcd(@second)}];
+    //outer.tx_buf = outer.tx_buf = .. [{dec2bcd(@minute)}];
+    //outer.tx_buf = outer.tx_buf = .. [{dec2bcd(@hour)}];
+    //outer.tx_buf = outer.tx_buf = .. [{dec2bcd(dow(@year, @month, @day))}];
+    //outer.tx_buf = outer.tx_buf = .. [{dec2bcd(@day)}];
+    //outer.tx_buf = outer.tx_buf = .. [{dec2bcd(@month)}];
+    //outer.tx_buf = outer.tx_buf = .. [{dec2bcd(@year-2000)}];
+    //outer.tx_buf = outer.tx_buf = .. [{DS3231_REG_TIME}];
+    
+    emit I2C_MASTER_SEND({DS3231_ADDRESS});
+    await I2C_DONE;
+end
+
+code/await Rtc_force_conversion (none) -> none
+do
+    var u8 value;
+    value = await Rtc_read_register8({DS3231_REG_CONTROL});
+    value = value | (1<<5);
+    await Rtc_write_register8({DS3231_REG_CONTROL}, value);
+end
+
+code/await Rtc_read_temperature (none) -> r32
+do
+    outer.tx_buf = [{DS3231_REG_TEMPERATURE}];
+    emit I2C_MASTER_SEND({DS3231_ADDRESS});
+    await I2C_DONE;
+
+    emit I2C_MASTER_RECEIVE({DS3231_ADDRESS}, 2);
+    await I2C_DONE;
+    escape ( (((outer.rx_buf[0] << 8) | outer.rx_buf[1]) >> 6) as r32) / 4.0;
+end
+// done till here
+
+code/await Rtc_get_alarm1 (var&[] u8 values) -> none
+do
+    
+    outer.tx_buf = [{DS3231_REG_ALARM_1}];
+    emit I2C_MASTER_SEND({DS3231_ADDRESS});
+    await I2C_DONE;
+    
+    emit I2C_MASTER_RECEIVE({DS3231_ADDRESS}, 4);
+    await I2C_DONE;
+
+    var u8 i;
+    loop i in [0->3] do
+        values = values .. [{bcd2dec((@outer.rx_buf[3-i]) & 0b01111111)}];
+    end
+
+    //day = values[0];
+    //hour = values[1];
+    //minute = values[2];
+    //second = values[3];
+end
+
+code/await Rtc_get_alarm_type1(none) -> u16
+do
+    var[4] u8 values;
+    var u16 mode = 0;
+
+    outer.tx_buf = [{DS3231_REG_ALARM_1}];
+    emit I2C_MASTER_SEND({DS3231_ADDRESS});
+    await I2C_DONE;
+
+    emit I2C_MASTER_RECEIVE({DS3231_ADDRESS}, 4);
+    await I2C_DONE;
+
+    var u8 i;
+    loop i in [0->3] do
+        values = values .. [{bcd2dec(@outer.rx_buf[3-i]}];
+    end
+
+    mode = mode | ((values[3] & (1<<6)) >> 6);
+    mode = mode | ((values[2] & (1<<6)) >> 5);
+    mode = mode | ((values[1] & (1<<6)) >> 4);
+    mode = mode | ((values[0] & (1<<6)) >> 3);
+    mode = mode | ((values[0] & (1<<5)) >> 1);
+
+    escape mode;
+end
+
+code/await Rtc_arm_alarm1(var bool armed) -> none
+do
+    var u8 value;
+    value = await Rtc_read_register8({DS3231_REG_CONTROL});
+
+    if armed then
+        value = value | 1;
+    else
+        value = value & 254;
+    end
+
+    await Rtc_write_register8({DS3231_REG_CONTROL}, value);
+end
+
+code/await Rtc_clear_alarm1(none) -> none
+do
+    var u8 value;
+
+    value = await Rtc_read_register8({DS3231_REG_STATUS});
+    value = value & 254; // 1111110
+
+    await Rtc_write_register8(DS3231_REG_STATUS, value);
+end
+
+code/await Rtc_set_alarm1(var u8 dydw, var u8 hour, var u8 minute, var u8 second, var u8 mode, var bool armed) -> none
+do
+    second = {dec2bcd(@second)};
+    minute = {dec2bcd(@minute)};
+    hour = {dec2bcd(@hour)};
+    dydw = {dec2bcd(@dydw)};
+{
+    switch(@mode)
+    {
+        case DS3231_EVERY_SECOND:
+            @second |= 0b10000000;
+            @minute |= 0b10000000;
+            @hour |= 0b10000000;
+            @dydw |= 0b10000000;
+            break;
+
+        case DS3231_MATCH_S:
+            @second &= 0b01111111;
+            @minute |= 0b10000000;
+            @hour |= 0b10000000;
+            @dydw |= 0b10000000;
+            break;
+
+        case DS3231_MATCH_M_S:
+            @second &= 0b01111111;
+            @minute &= 0b01111111;
+            @hour |= 0b10000000;
+            @dydw |= 0b10000000;
+            break;
+
+        case DS3231_MATCH_H_M_S:
+            @second &= 0b01111111;
+            @minute &= 0b01111111;
+            @hour &= 0b01111111;
+            @dydw |= 0b10000000;
+            break;
+
+        case DS3231_MATCH_DT_H_M_S:
+            @second &= 0b01111111;
+            @minute &= 0b01111111;
+            @hour &= 0b01111111;
+            @dydw &= 0b01111111;
+            break;
+
+        case DS3231_MATCH_DY_H_M_S:
+            @second &= 0b01111111;
+            @minute &= 0b01111111;
+            @hour &= 0b01111111;
+            @dydw &= 0b01111111;
+            @dydw |= (1<<6);
+            break;
+    }
+}
+
+    outer.tx_buf = [];
+    outer.tx_buf = outer.tx_buf ..[{DS3231_REG_ALARM_1}];
+    outer.tx_buf = outer.tx_buf ..[second];
+    outer.tx_buf = outer.tx_buf ..[minute];
+    outer.tx_buf = outer.tx_buf ..[hour];
+    outer.tx_buf = outer.tx_buf ..[dydw];
+    emit I2C_MASTER_SEND({DS3231_ADDRESS});
+    await I2C_DONE;
+    
+    await Rtc_arm_alarm1(armed);
+
+    await Rtc_clear_alarm1();
+end
+
+code/await Rtc_is_alarm1(var bool clear) -> bool
+do
+    var u8 alarm;
+
+    alarm = await Rtc_read_register8(DS3231_REG_STATUS);
+    alarm = alarm & 1;
+
+    if (alarm!=0) and clear then
+        await Rtc_clear_alarm1();
+    end
+
+    escape alarm!=0;
+end
+
+code/await Rtc_is_armed1 (none) -> bool
+do
+    var u8 value;
+    value = await Rtc_read_register8({DS3231_REG_CONTROL});
+    value = value & 1;
+    escape value!=0;
+end
+
+
+
+code/await Rtc_get_alarm2(var&[] u8 values) -> none
+do
+    
+    outer.tx_buf = [{DS3231_REG_ALARM_2}];
+    emit I2C_MASTER_SEND({DS3231_ADDRESS});
+    await I2C_DONE;
+    
+    emit I2C_MASTER_RECEIVE({DS3231_ADDRESS}, 3);
+    await I2C_DONE;
+
+    var u8 i;
+    loop i in [0->2] do
+        values = values .. [{bcd2dec((@outer.rx_buf[2-i]) & 0b01111111)}];
+    end
+
+    //a.day = values[0];
+    //a.hour = values[1];
+    //a.minute = values[2];
+    //a.second = 0;
+
+    //return a;
+end
+
+code/await Rtc_get_alarm_type2(none) -> u8
+do
+    var[3] u8 values;
+    var u8 mode = 0;
+
+    outer.tx_buf = [{DS3231_REG_ALARM_2}];
+    emit I2C_MASTER_SEND({DS3231_ADDRESS});
+    await I2C_DONE;
+    
+    emit I2C_MASTER_RECEIVE({DS3231_ADDRESS}, 3);
+    await I2C_DONE;
+
+    var u8 i;
+    loop i in [0->2] do
+        values = values .. [{bcd2dec(@outer.rx_buf[2-i])}];
+    end
+
+    mode = mode | ((values[2] & (1<<6)) >> 5);
+    mode = mode | ((values[1] & (1<<6)) >> 4);
+    mode = mode | ((values[0] & (1<<6)) >> 3);
+    mode = mode | ((values[0] & (1<<5)) >> 1);
+
+    escape mode;
+end
+
+code/await Rtc_arm_alarm2(var bool armed) -> none
+do
+    var u8 value;
+    value = await Rtc_read_register8({DS3231_REG_CONTROL});
+
+    if armed then
+        value = value | {0b00000010};
+    else
+        value = value & {0b11111101};
+    end
+
+    await Rtc_write_register8(DS3231_REG_CONTROL, value);
+end
+
+code/await Rtc_is_armed2(none) -> on/off
+do
+    var u8 value;
+    value = await Rtc_read_register8({DS3231_REG_CONTROL});
+    value = value & 2;
+    value = value >> 1;
+
+    escape value!=0;
+end
+
+
+code/await Rtc_clear_alarm2(none) -> none
+do
+    var u8 value;
+
+    value = await Rtc_read_register8({DS3231_REG_STATUS});
+    value = value & {0b11111101};
+
+    await Rtc_write_register8({DS3231_REG_STATUS}, value);
+end
+
+code/await Rtc_set_alarm2(var u8 dydw,var u8 hour,var u8 minute, var u8 mode, var bool armed) -> none
+do
+    minute = {dec2bcd(@minute)};
+    hour = {dec2bcd(@hour)};
+    dydw = {dec2bcd(@dydw)};
+{
+    switch(@mode)
+    {
+        case DS3231_EVERY_MINUTE:
+            @minute |= 0b10000000;
+            @hour |= 0b10000000;
+            @dydw |= 0b10000000;
+            break;
+
+        case DS3231_MATCH_M:
+            @minute &= 0b01111111;
+            @hour |= 0b10000000;
+            @dydw |= 0b10000000;
+            break;
+
+        case DS3231_MATCH_H_M:
+            @minute &= 0b01111111;
+            @hour &= 0b01111111;
+            @dydw |= 0b10000000;
+            break;
+
+        case DS3231_MATCH_DT_H_M:
+            @minute &= 0b01111111;
+            @hour &= 0b01111111;
+            @dydw &= 0b01111111;
+            break;
+
+        case DS3231_MATCH_DY_H_M:
+            @minute &= 0b01111111;
+            @hour &= 0b01111111;
+            @dydw &= 0b01111111;
+            @dydw |= (1<<6);
+            break;
+    }
+}
+
+    outer.tx_buf = [];
+    outer.tx_buf = outer.tx_buf ..[{DS3231_REG_ALARM_2}];
+    outer.tx_buf = outer.tx_buf ..[minute];
+    outer.tx_buf = outer.tx_buf ..[hour];
+    outer.tx_buf = outer.tx_buf ..[dydw];
+    emit I2C_MASTER_SEND({DS3231_ADDRESS});
+    await I2C_DONE;
+
+    await Rtc_arm_alarm2(armed);
+
+    await Rtc_clear_alarm2();
+end
+
+code/await Rtc_is_alarm2(var bool clear) ->  bool
+do
+    var u8 alarm;
+
+    alarm = await Rtc_read_register8(DS3231_REG_STATUS);
+    alarm = alarm & 2;
+
+    if (alarm!=0) and clear then
+        await Rtc_clear_alarm2();
+    end
+
+    escape (alarm!=0);
+end

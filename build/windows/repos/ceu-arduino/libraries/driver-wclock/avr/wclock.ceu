@@ -1,0 +1,3 @@
+// default wclock for AVR
+
+#include "timer1-compa.ceu"

@@ -1,0 +1,18 @@
+#include "wclock.ceu"
+
+{ Serial.begin(9600); }
+
+loop do
+    await 1s;
+    var u32 us = call WCLOCK_Now();
+    {
+        Serial.print("US ");
+        Serial.println(@us);
+    }
+
+    // freezes 500ms
+    var int i;
+    loop i in [1 -> 500] do
+        call WCLOCK_Freeze(1000);
+    end
+end

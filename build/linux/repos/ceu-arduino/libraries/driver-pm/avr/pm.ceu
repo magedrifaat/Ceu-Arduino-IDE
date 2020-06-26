@@ -1,0 +1,81 @@
+native/pre do
+
+    ##define CEU_PM_IMPL
+
+    enum {
+        CEU_PM_ADC = 0,
+        CEU_PM_SPI,
+        CEU_PM_TIMER0,
+        CEU_PM_TIMER1,
+        CEU_PM_TIMER2,      // TODO: works in ADC, power-save, ext-standby
+#ifdef ARDUINO_BOARD_MEGA
+        CEU_PM_TIMER3,
+        CEU_PM_TIMER4,
+        CEU_PM_TIMER5,
+#endif
+        CEU_PM_USART,
+        CEU_PM_TWI = 0,
+        CEU_PM_N,
+    };
+
+    #include "../pm.c"
+    ##include "LowPower.h"
+    ##include "LowPower.cpp"
+
+    void ceu_pm_init (void) {
+    }
+
+    void ceu_pm_sleep (void)
+    {
+#ifdef CEU_PM_MIN
+
+            LowPower.idle(SLEEP_FOREVER, ADC_ON,
+#ifdef ARDUINO_BOARD_MEGA
+                          TIMER5_ON, TIMER4_ON, TIMER3_ON,
+#endif
+                          TIMER2_ON, TIMER1_ON,
+                          TIMER0_ON, SPI_ON,
+#ifdef ARDUINO_BOARD_MEGA
+                          USART3_ON, USART2_ON, USART1_ON,
+#endif
+                          USART0_ON, TWI_ON);
+
+#else
+
+        if (ceu_pm_get(CEU_PM_TIMER0) || ceu_pm_get(CEU_PM_TIMER1) ||
+            ceu_pm_get(CEU_PM_TIMER2) || ceu_pm_get(CEU_PM_USART)  ||
+            ceu_pm_get(CEU_PM_TWI)    || ceu_pm_get(CEU_PM_SPI))
+        {
+
+            LowPower.idle(SLEEP_FOREVER,
+                          (adc_t) ceu_pm_get(CEU_PM_ADC),
+#ifdef ARDUINO_BOARD_MEGA
+                          (timer5_t) ceu_pm_get(CEU_PM_TIMER5),
+                          (timer4_t) ceu_pm_get(CEU_PM_TIMER4),
+                          (timer3_t) ceu_pm_get(CEU_PM_TIMER3),
+#endif
+                          (timer2_t) ceu_pm_get(CEU_PM_TIMER2),
+                          (timer1_t) ceu_pm_get(CEU_PM_TIMER1),
+                          (timer0_t) ceu_pm_get(CEU_PM_TIMER0),
+                          (spi_t) ceu_pm_get(CEU_PM_SPI),
+#ifdef ARDUINO_BOARD_MEGA
+                          USART3_OFF, USART2_OFF, USART1_OFF,
+#endif
+                          (usart0_t) ceu_pm_get(CEU_PM_USART),
+                          (twi_t) ceu_pm_get(CEU_PM_TWI));
+        }
+        else if (ceu_pm_get(CEU_PM_ADC))
+        {
+            LowPower.adcNoiseReduction(SLEEP_FOREVER,
+                                       (adc_t) ceu_pm_get(CEU_PM_ADC),
+                                       TIMER2_OFF);
+        }
+        else
+        {
+            LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
+        }
+
+#endif
+    }
+
+end

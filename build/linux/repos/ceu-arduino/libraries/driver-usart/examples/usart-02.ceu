@@ -1,0 +1,65 @@
+#include "out.ceu"
+#include "int0.ceu"
+#include "wclock.ceu"
+#include "usart.ceu"
+
+output high/low OUT_13;
+
+spawn USART_Init(9600);
+
+// heavy loop to evaluate ISR responsiveness
+#if 0
+spawn do
+    await async     // comment to freeze synchronous code in tight loop
+    do
+        var int v = 0;
+        loop do
+            v = 1 - v;
+            _digitalWrite(13,v);
+            //emit OUT_13(v);
+            DELAY(1000);
+        end
+    end
+end
+#endif
+
+watching INT0 do
+    loop do
+        //emit OUT_13({!digitalRead(13)});
+        par/and do
+            await 1s;
+        with
+            var[20] byte str = [].."Hello World!\r\n";
+            await USART_Tx(&str);
+        end
+    end
+end
+
+await 1s;
+
+watching INT0 do
+    loop do
+        var[20] byte str = [];
+        await USART_Rx(&str, _);
+        await USART_Tx(&str);
+    end
+end
+
+// should tx up to 1-4\n
+watching 6ms do
+    var[20] byte str = [].."1234\n567890";
+    await USART_Tx(&str);
+end
+
+// print both in sequence
+var[20] byte str = [].."Hello World!\n";
+par/and do
+    await USART_Tx(&str);
+with
+    await USART_Tx(&str);
+end
+
+var[20] byte str = [].."ok!\n";
+await USART_Tx(&str);
+
+await FOREVER;

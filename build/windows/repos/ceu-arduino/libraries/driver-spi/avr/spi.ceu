@@ -1,0 +1,113 @@
+#include "../spi.ceu"
+
+///////////////////////////////////////////////////////////////////////////////
+// DECLARATIONS
+///////////////////////////////////////////////////////////////////////////////
+
+// Constants copied from "<arduino>/hardware/avr/libraries/SPI/src/SPI.h"
+
+#define SPI_LSBFIRST 0
+#define SPI_MSBFIRST 1
+
+#define SPI_MODE0 0x00
+#define SPI_MODE1 0x04
+#define SPI_MODE2 0x08
+#define SPI_MODE3 0x0C
+
+#define SPI_MODE_MASK    0x0C  // CPOL = bit 3, CPHA = bit 2 on SPCR
+#define SPI_CLOCK_MASK   0x03  // SPR1 = bit 1, SPR0 = bit 0 on SPCR
+#define SPI_2XCLOCK_MASK 0x01  // SPI2X = bit 0 on SPSR
+
+native _SPDR;
+
+native/pos do
+    tceu_vector* spi_buf;
+    volatile usize spi_buf_i;
+end
+
+///////////////////////////////////////////////////////////////////////////////
+// INPUT / OUTPUT
+///////////////////////////////////////////////////////////////////////////////
+
+input none SPI_TRANSFER_DONE;
+
+native/const _SPI_STC_vect;
+spawn async/isr [_SPI_STC_vect,0] do
+    { *((byte*) ceu_vector_buf_get(spi_buf,spi_buf_i-1)) = SPDR; }
+    if {spi_buf_i} < {spi_buf->len} then
+        { SPDR = *(byte*)(ceu_vector_geti(spi_buf,spi_buf_i)); }
+        { spi_buf_i++; }
+//{Serial.println(spi_buf_i);}
+    else
+        emit SPI_TRANSFER_DONE;
+    end
+end
+
+///////////////////////////////////////////////////////////////////////////////
+// ABSTRACTIONS
+///////////////////////////////////////////////////////////////////////////////
+
+code/await SPI_Transaction (var u32 freq, var u8 bit_order, var u8 mode, var int? cs, var int? csn) -> NEVER do
+    {{
+        u32 clockSetting = F_CPU / 2;
+        u8  clock_div    = 0;
+        while (clock_div<6 && @(freq)<clockSetting) {
+            clockSetting /= 2;
+            clock_div++;
+        }
+
+        if (clock_div == 6) {
+            clock_div = 7;      // compensates for the duplicate fosc/64
+        }
+
+        clock_div ^= 0x1;       // inverts the SPI2X bit
+
+        pinMode(SS,   OUTPUT);
+        pinMode(SCK,  OUTPUT);
+        pinMode(MOSI, OUTPUT);
+
+        SPCR = (1<<SPE) | (1<<MSTR) |
+               ((@bit_order == SPI_LSBFIRST) ? _BV(DORD) : 0) |
+               (@mode & SPI_MODE_MASK) |
+               ((clock_div >> 1) & SPI_CLOCK_MASK);
+        SPSR = clock_div & SPI_2XCLOCK_MASK;
+        bitSet(SPCR, SPIE);
+
+        ceu_pm_set(CEU_PM_SPI, 1);
+    }}
+
+    if cs? then
+        _digitalWrite(cs!, _HIGH);
+    else/if csn? then
+        _digitalWrite(csn!, _LOW);
+    end
+
+    do finalize with
+        if cs? then
+            _digitalWrite(cs!, _LOW);
+        else/if csn? then
+            _digitalWrite(csn!, _HIGH);
+        end
+        { bitClear(SPCR,SPIE); }
+        {ceu_pm_set(CEU_PM_SPI, 0);}
+    end
+    await FOREVER;
+end
+
+code/await SPI_Transfer (var&[] byte buf) -> none do
+    {
+        spi_buf   = @(&&buf); // safe because finalize disables SPI
+        spi_buf_i = 1;
+    }
+    _SPDR = buf[0];
+    await SPI_TRANSFER_DONE;
+end
+
+code/await SPI_Transfer_8 (var byte? v) -> byte do
+    if not v? then
+        v = _SPDR;
+    end
+    var[1] byte vs = [v!];
+    await SPI_Transfer(&vs);
+    escape vs[0];
+end

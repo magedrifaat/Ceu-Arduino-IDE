@@ -1,0 +1,33 @@
+// compile with CEU_DEFS=-DCEU_PM_MIN
+
+/*
+ * Runs a timer on CTC mode, e.g., every 500ms generates an interrupt.
+ * Interrupt generates "emit 500ms" to the application.
+ * Main program blinks LED connected to PIN13 every 500ms.
+ */
+
+native/const _TIMER2_COMPA_vect;
+
+// initialize timer1 
+{
+    TCCR2A = 0;
+    TCCR2B = 0;
+    TCNT2  = 0;
+    OCR2A  = 255;                  // aprox. 15ms
+    TCCR2B = TCCR2B | (1 << WGM22);  // CTC mode
+    TCCR2B = TCCR2B | (1<<CS22) | (1<<CS21) | (1<<CS20); // 1024 prescaler
+    TIMSK2 = TIMSK2 | (1 << OCIE2A); // enable timer compare interrupt
+}
+
+input none DT;
+
+spawn async/isr [_TIMER2_COMPA_vect, 0] do
+    emit DT;    // 500ms
+end
+
+_pinMode(13, _OUTPUT);
+var high/low x = low;
+every DT do
+    x = not x;
+    _digitalWrite(13, x);
+end

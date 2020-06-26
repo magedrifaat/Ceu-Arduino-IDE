@@ -1,0 +1,70 @@
+// compile with CEU_DEFS=-DCEU_PM_MIN
+
+/*
+ * BUTTON => LED
+ * Button press/release connected to PIN_05 generates an interrupt.
+ * Interrupt generates "emit PIN_05" passing the button state.
+ * Main program changes LED connected to PIN15 according to the button state.
+ */
+
+input high/low PIN_05;
+
+#define GPIO_PIN 15
+
+{
+    ceu_assert(GPIO_PIN == EXTERNAL_INT_15,      "bug found");
+    ceu_assert(EXTERNAL_INT_15 > EXTERNAL_INT_7, "bug found");
+    ceu_assert((GPIO_PIN & 1) == 1,              "bug found");
+
+    pinMode(5, INPUT_PULLDOWN);
+    // cores/arduino/WInterrupts.c
+    // variants/arduino_zero/variant.cpp
+    //  Port, Pin, PinType,     PinAttribute,       ADCChannelN,    PWMChannel, TCCChannel,   ExtInt
+    //{ PORTA, 15, PIO_TIMER, (PIN_ATTR_DIGITAL|PIN_ATTR_PWM|PIN_ATTR_TIMER), No_ADC_Channel, PWM3_CH1, TC3_CH1, EXTERNAL_INT_15 }, // TC3/WO[1]
+
+    {
+        NVIC_DisableIRQ(EIC_IRQn);
+        NVIC_ClearPendingIRQ(EIC_IRQn);
+        NVIC_SetPriority(EIC_IRQn, 0);
+        NVIC_EnableIRQ(EIC_IRQn);
+
+        // Enable GCLK for IEC (External Interrupt Controller)
+        GCLK->CLKCTRL.reg = (uint16_t) (GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID(GCM_EIC));
+
+        /* Shall we do that?
+        // Do a software reset on EIC
+        EIC->CTRL.SWRST.bit = 1 ;
+        while ((EIC->CTRL.SWRST.bit == 1) && (EIC->STATUS.SYNCBUSY.bit == 1)) { }
+        */
+
+        // Enable EIC
+        EIC->CTRL.bit.ENABLE = 1;
+        CEU_SAMD_WAIT(*EIC);
+    }
+    EIC->WAKEUP.reg |= (1<<GPIO_PIN);
+    {
+        u32 tmp = (PORT->Group[PORTA].PMUX[GPIO_PIN >> 1].reg) & PORT_PMUX_PMUXE(0xF) ;
+        PORT->Group[PORTA].PMUX[GPIO_PIN >> 1].reg = tmp|PORT_PMUX_PMUXO(PIO_EXTINT) ;
+        PORT->Group[PORTA].PINCFG[GPIO_PIN].reg |= PORT_PINCFG_PMUXEN ;
+    }
+    {
+        u32 config = 1;
+        u32 pos = (GPIO_PIN - 8) << 2;
+        EIC->CONFIG[config].reg &=~ (EIC_CONFIG_SENSE0_Msk << pos);
+        EIC->CONFIG[config].reg |= EIC_CONFIG_SENSE0_BOTH_Val << pos;
+    }
+    EIC->INTENSET.reg = EIC_INTENSET_EXTINT(1<<GPIO_PIN);
+}
+
+native/const _EIC_Handler;
+spawn async/isr [_EIC_Handler] do
+    emit PIN_05(_digitalRead(5));
+    { EIC->INTFLAG.reg = 1<<GPIO_PIN; }
+end
+
+_pinMode(13, _OUTPUT);
+_digitalWrite(13, low);
+loop do
+    var high/low v = await PIN_05;
+    _digitalWrite(13, v);
+end

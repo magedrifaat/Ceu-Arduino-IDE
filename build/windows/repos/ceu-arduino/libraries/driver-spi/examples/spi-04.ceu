@@ -1,0 +1,41 @@
+// Testing:
+// Same as `spi-01.ceu`.
+// Disable `Serial.print` in slave for maximum performance.
+
+#include "out.ceu"
+#include "wclock.ceu"
+#include "spi.ceu"
+
+output high/low OUT_08;
+
+emit OUT_08(high);      // disables slave
+
+_Serial.begin(9600);
+
+var[256] byte vs = [];
+var int i;
+loop i in [0 -> 256[ do
+    vs = vs..[i];
+end
+
+await 2s;
+{Serial.println("---");}
+{ _DELAY(10); }
+
+var u32 old = call WCLOCK_Now();
+
+watching SPI_Transaction(1400000, SPI_MSBFIRST, SPI_MODE0, _, 8) do
+    await SPI_Transfer(&vs);
+end
+
+var u32 dt = call WCLOCK_Now() - old;
+
+var int i;
+loop i in [0 -> 256[ do
+    { Serial.println(@vs[i]); }
+end
+
+{ Serial.println(@dt); }
+{ _DELAY(100); }
+
+await FOREVER;

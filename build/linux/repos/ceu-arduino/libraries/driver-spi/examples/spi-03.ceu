@@ -1,0 +1,36 @@
+// Testing:
+// - Same as `spi-02.ceu`.
+// - Observe that the slaves have the same behavior and appear to be concurrent.
+
+#include "out.ceu"
+#include "wclock.ceu"
+#include "spi.ceu"
+
+output high/low OUT_08;
+output high/low OUT_09;
+
+emit OUT_08(high);      // disables slave
+emit OUT_09(high);      // disables slave
+
+_Serial.begin(9600);
+
+var Lock spi = _;
+
+var int i;
+loop i do
+    { Serial.print("> "); Serial.println(@i); _DELAY(10); }
+    par/and do
+        lock spi do
+            watching SPI_Transaction(1400000, SPI_MSBFIRST, SPI_MODE0, _, 8) do
+                await SPI_Transfer_8(i);
+            end
+        end
+    with
+        lock spi do
+            watching SPI_Transaction(1400000, SPI_MSBFIRST, SPI_MODE0, _, 9) do
+                await SPI_Transfer_8(i);
+            end
+        end
+    end
+    await 1s;
+end

@@ -1,0 +1,34 @@
+// compile with CEU_DEFS=-DCEU_PM_MIN
+
+/*
+ * TIMER-OVF => LED, BUTTON => RESTART
+ * Runs a timer on OVERFLOW mode, restarting it on every interrupt.
+ * Interrupt generates "emit 500ms" to the application.
+ * Main program blinks LED connected to PIN13 every 500ms.
+ * (http://letsmakerobots.com/node/28278)
+ */
+
+native/const _TIMER1_OVF_vect;
+
+_pinMode(13, _OUTPUT);
+
+{
+    TCCR1A = 0;
+    TCCR1B = 0;
+    TCNT1  = 34286;                  // preload timer 65536-16MHz/256/2Hz
+    TCCR1B = TCCR1B | (1 << CS12);   // 256 prescaler
+    TIMSK1 = TIMSK1 | (1 << TOIE1);  // enable timer overflow interrupt
+}
+
+input none DT;
+
+spawn async/isr [_TIMER1_OVF_vect, 0] do
+    {TCNT1 = 34286;}                 // preload timer 65536-16MHz/256/2Hz
+    emit DT;    // 500ms
+end
+
+var high/low x = low;
+every DT do
+    x = not x;
+    _digitalWrite(13, x);
+end

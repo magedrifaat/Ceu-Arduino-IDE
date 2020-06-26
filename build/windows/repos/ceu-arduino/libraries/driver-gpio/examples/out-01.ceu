@@ -1,0 +1,7 @@
+#include "out.ceu"
+
+output high/low OUT_13;
+
+emit OUT_13(high);
+
+await FOREVER;

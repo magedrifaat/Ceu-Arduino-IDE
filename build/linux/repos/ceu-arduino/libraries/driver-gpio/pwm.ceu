@@ -1,0 +1,64 @@
+#ifndef PWM_CEU
+#define PWM_CEU
+
+// TODO: timers vs wclock and other drivers
+
+#if 0
+https://forum.arduino.cc/index.php?topic=410287.0
+On a UNO as we only have 3 timers but 6 PWM pins, they go in pairs and the relation between timers and PWM outputs is as follow:
+
+- timer0 = Pins 5, 6
+- timer1 = Pins 9, 10
+- timer2 = Pins 11, 3
+
+On a MEGA you have 6 timers but 15 PWM pins (PWM: 2 to 13 and 44 to 46) , they also go in pair or triples
+
+- timer0 = Pins 4, 13
+- timer1 = Pins 11,12
+- timer2 = Pins 9, 10
+- timer3 = Pin 2, 3, 5
+- timer4 = Pin 6, 7, 8
+- timer5 = Pin 44, 45, 46
+#endif
+
+native/pos do
+    static int pwm_refs = 0;
+    void pwm_inc (int v) {
+        pwm_refs += v;
+        if (pwm_refs == 0) {
+            ceu_pm_set(CEU_PM_TIMER0, 0);
+            ceu_pm_set(CEU_PM_TIMER1, 0);
+            ceu_pm_set(CEU_PM_TIMER2, 0);
+#ifdef ARDUINO_BOARD_MEGA
+            ceu_pm_set(CEU_PM_TIMER3, 0);
+            ceu_pm_set(CEU_PM_TIMER4, 0);
+            ceu_pm_set(CEU_PM_TIMER5, 0);
+#endif
+        } else if (pwm_refs == 1) {
+            ceu_pm_set(CEU_PM_TIMER0, 1);
+            ceu_pm_set(CEU_PM_TIMER1, 1);
+            ceu_pm_set(CEU_PM_TIMER2, 1);
+#ifdef ARDUINO_BOARD_MEGA
+            ceu_pm_set(CEU_PM_TIMER3, 1);
+            ceu_pm_set(CEU_PM_TIMER4, 1);
+            ceu_pm_set(CEU_PM_TIMER5, 1);
+#endif
+        }
+    }
+end
+
+output (int pin, u8 v) PWM do
+    _analogWrite(pin, v);
+end
+
+code/await Pwm (var int pin, var u8 v) -> NEVER do
+    { pwm_inc(1); }
+    do finalize with
+        { pwm_inc(-1); }
+    end
+
+    emit PWM(pin, v);
+    await FOREVER;
+end
+
+#endif

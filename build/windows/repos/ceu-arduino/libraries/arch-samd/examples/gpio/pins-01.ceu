@@ -1,0 +1,86 @@
+// compile with CEU_DEFS=-DCEU_PM_MIN
+
+#include "samd.ceu"
+
+input u32 SAMD_EIC;
+
+// Copied from "cores/arduino/WInterrupts.c"
+
+{
+    NVIC_DisableIRQ(EIC_IRQn);
+    NVIC_ClearPendingIRQ(EIC_IRQn);
+    NVIC_SetPriority(EIC_IRQn, 0);
+    NVIC_EnableIRQ(EIC_IRQn);
+    // Enable GCLK for IEC (External Interrupt Controller)
+    GCLK->CLKCTRL.reg = (uint16_t) (GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID(GCM_EIC));
+    /* Shall we do that?
+    // Do a software reset on EIC
+    EIC->CTRL.SWRST.bit = 1 ;
+    while ((EIC->CTRL.SWRST.bit == 1) && (EIC->STATUS.SYNCBUSY.bit == 1)) { }
+    */
+    // Enable EIC
+    EIC->CTRL.bit.ENABLE = 1;
+    CEU_SAMD_WAIT(*EIC);
+}
+
+code/await Pin (var int pin) -> high/low do
+    var int ext = {
+##if ARDUINO_SAMD_VARIANT_COMPLIANCE >= 10606
+        samd_g_APinDescription[@pin].ulExtInt
+##else
+        digitalPinToInterrupt(@pin)
+##endif
+    };
+    var u32 msk = 1 << ext;
+
+    {
+        gpio_samd_pinPeripheral(@pin, PIO_EXTINT);
+        {
+            u32 config;
+            u32 pos;
+            if (@ext > EXTERNAL_INT_7) {
+                config = 1;
+                pos = (@ext - 8) << 2;
+            } else {
+                config = 0;
+                pos = @ext << 2;
+            }
+            EIC->CONFIG[config].reg &=~ (EIC_CONFIG_SENSE0_Msk << pos);
+            // change
+            EIC->CONFIG[config].reg |= EIC_CONFIG_SENSE0_BOTH_Val << pos;
+        }
+        EIC->INTENSET.reg  = @msk;
+        EIC->WAKEUP.reg   |= @msk;
+    }
+    var u32 reg = await SAMD_EIC until ((reg & msk) as bool);
+    escape _digitalRead(pin) as high/low;
+end
+
+native/const _EIC_Handler;
+spawn async/isr [_EIC_Handler] do
+    var u32 reg = {EIC->INTFLAG.reg};
+//_ceu_arduino_warn(0,3);
+    emit SAMD_EIC(reg);
+    {
+        EIC->INTFLAG.reg   =  @reg;
+        EIC->WAKEUP.reg   &= ~@reg;
+        EIC->INTENCLR.reg  =  @reg;
+    }
+end
+
+_pinMode(2, _INPUT_PULLUP);
+_pinMode(3, _INPUT_PULLDOWN);
+_pinMode(13, _OUTPUT);
+_digitalWrite(13, _digitalRead(3));
+loop do
+    var high/low v = do
+        par do
+            var high/low v2 = await Pin(2);
+            escape v2;
+        with
+            var high/low v3 = await Pin(3);
+            escape v3;
+        end
+    end;
+    _digitalWrite(13, v);
+end

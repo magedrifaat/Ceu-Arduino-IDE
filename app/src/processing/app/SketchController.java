@@ -704,7 +704,14 @@ public class SketchController {
     
     List<String> cmd = new ArrayList<>();
     
-    cmd.add(BaseNoGui.getContentFile(editor.getProjectConfig().getCompileCommand()).getAbsolutePath());
+    String compileCommand = editor.getProjectConfig().getCompileCommand();
+    if (OSUtils.isWindows() && !compileCommand.endsWith(".bat")) {
+      compileCommand = compileCommand + ".bat";
+    }
+    else if (!OSUtils.isWindows() && !compileCommand.endsWith(".sh")) {
+      compileCommand = compileCommand + ".sh";
+    }
+    cmd.add(BaseNoGui.getContentFile(compileCommand).getAbsolutePath());
     
     // add the main file as first argument
     File file = sketch.getPrimaryFile().getFile();
@@ -823,8 +830,16 @@ public class SketchController {
     editor.status.progressNotice(tr("Compiling Sketch..."));
     buildCustom();
     
+    String uploadCommand = editor.getProjectConfig().getUploadCommand();
+    
+    if (OSUtils.isWindows() && !uploadCommand.endsWith(".bat")) {
+      uploadCommand = uploadCommand + ".bat";
+    }
+    else if (!OSUtils.isWindows() && !uploadCommand.endsWith(".sh")) {
+      uploadCommand = uploadCommand + ".sh";
+    }
     List<String> cmd = new ArrayList<>();
-    cmd.add(BaseNoGui.getContentFile(editor.getProjectConfig().getUploadCommand()).getAbsolutePath());
+    cmd.add(BaseNoGui.getContentFile(uploadCommand).getAbsolutePath());
     
     // add the main file as first argument
     cmd.add(sketch.getPrimaryFile().getFile().getAbsolutePath());
