@@ -679,6 +679,7 @@
 	<chmod perm="755" dir="linux/arduino-1.8.8/ceu-uploader.sh" />
 	<chmod perm="755" dir="linux/arduino-1.8.8/pico-compiler.sh" />
 	<chmod perm="755" dir="linux/arduino-1.8.8/pico-run.sh" />
+	<chmod perm="755" dir="linux/run/lua/src/lua" />
 
     <copy todir="linux/arduino-1.8.8">
       <fileset dir="linux/dist" includes="lib/**" />
