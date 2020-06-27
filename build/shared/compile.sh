@@ -1,1 +1,1 @@
-javac $1 -cp .;../lib/pde.jar
+javac -cp ".:../lib/pde.jar:../lib/arduino_core.jar;" $1
