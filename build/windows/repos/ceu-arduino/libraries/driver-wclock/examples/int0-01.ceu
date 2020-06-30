@@ -1,0 +1,18 @@
+#include "int0.ceu"
+#include "out.ceu"
+#include "wclock.ceu"
+
+output high/low OUT_13;
+
+loop do
+    emit OUT_13(low);
+    await 2s;
+    watching INT0 do
+        loop do
+            emit OUT_13(high);
+            await 1s;
+            emit OUT_13(low);
+            await 1s;
+        end
+    end
+end

@@ -1,0 +1,72 @@
+input none PCINT2;
+
+// PORT 2/D
+// Uno:  D0-D7
+// Mega: A8-A15
+
+#if   defined(ARDUINO_BOARD_UNO)
+#define PCINT2_DDR  DDRD
+#define PCINT2_PORT PORTD
+#define PCINT2_PIN  PIND
+#elif defined(ARDUINO_BOARD_MEGA)
+#define PCINT2_DDR  DDRK
+#define PCINT2_PORT PORTK
+#define PCINT2_PIN  PINK
+#else
+#error Board not supported.
+#endif
+
+code/call PCINT2_Enable (var int pcint, var on/off v) -> none do
+    if v then
+        {
+            bitClear(PCINT2_DDR, @pcint);  // input
+            bitSet(PCINT2_PORT, @pcint);   // pullup
+            bitSet(PCMSK2, @pcint);  // interrupt enable
+        }
+    else
+        {
+            bitClear(PCMSK2, @pcint);
+        }
+    end
+end
+
+code/call PCINT2_Get (var int pcint) -> high/low do
+    escape _bitRead({PCINT2_PIN}, pcint) as high/low;
+end
+
+native/const _PCINT2_vect;
+
+{
+    bitSet(PCICR,  PCIE2);  // enables port 2
+}
+
+spawn async/isr [_PCINT2_vect, 0] do
+    emit PCINT2;
+end
+
+code/await PCINT2_Demux (none) -> (event (int,high/low) e) -> NEVER do
+    code/call Read (none) -> u8 do
+        var u8 cur = 0;
+        var int bit;
+        loop bit in [_PCINT16 -> _PCINT23] do
+            if _bitRead({PCMSK2},bit) == 1 then
+                _bitWrite(cur, bit, call PCINT2_Get(bit));
+            end
+        end
+        escape cur;
+    end
+
+    var u8 old = call Read();
+    loop do
+        await PCINT2;
+        var u8 cur = call Read();
+        var u8 dif = cur ^ old;
+        old = cur;
+        var int bit;
+        loop bit in [_PCINT16 -> _PCINT23] do
+            if _bitRead(dif,bit) == 1 then
+                emit e(bit, (_bitRead(cur,bit) as high/low));
+            end
+        end
+    end
+end

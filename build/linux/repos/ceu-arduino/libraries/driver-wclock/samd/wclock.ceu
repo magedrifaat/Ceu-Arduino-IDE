@@ -1,0 +1,3 @@
+// default wclock for SMD
+
+#include "tc4.ceu"

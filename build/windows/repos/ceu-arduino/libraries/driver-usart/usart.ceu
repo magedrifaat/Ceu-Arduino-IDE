@@ -1,0 +1,7 @@
+#ifndef USART_RX_BUF_N
+#define USART_RX_BUF_N 32
+#endif
+
+code/await USART_Init (var int bps)                   -> NEVER;
+code/await USART_Tx   (var&[] byte buf)               -> none;
+code/await USART_Rx   (var&[] byte buf, var usize? n) -> none;

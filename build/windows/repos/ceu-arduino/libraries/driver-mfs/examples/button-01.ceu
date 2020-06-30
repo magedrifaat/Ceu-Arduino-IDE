@@ -1,0 +1,13 @@
+#include "mfs.ceu"
+
+var& MFS_Buttons buttons = spawn MFS_Buttons();
+var int pin;
+every (pin,_) in buttons.e do
+    if pin == _A1 then
+        _ceu_arduino_warn(0,1);
+    else/if pin == _A2 then
+        _ceu_arduino_warn(0,2);
+    else/if pin == _A3 then
+        _ceu_arduino_warn(0,3);
+    end
+end

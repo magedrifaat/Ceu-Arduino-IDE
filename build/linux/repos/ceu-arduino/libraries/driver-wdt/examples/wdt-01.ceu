@@ -1,0 +1,11 @@
+#include "out.ceu"
+#include "wdt.ceu"
+
+output high/low OUT_13;
+
+loop do
+    emit OUT_13(high);
+    await Wdt(5000);
+    emit OUT_13(low);
+    await Wdt(200);
+end

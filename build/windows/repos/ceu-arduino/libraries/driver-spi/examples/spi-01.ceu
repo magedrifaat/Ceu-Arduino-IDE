@@ -1,0 +1,33 @@
+// Testing:
+// - Connect SCK, MISO, and MOSI between two Arduinos (master and slave):
+//      - UNO:  11, 12, 13
+//      - MEGA: 52, 50, 51
+//      - BOTH: ICSP-3, ICSP-1, ICSP-4
+// - Connect master's pin 8 into slave's pin SS:
+//      - UNO:  10
+//      - MEGA: 53
+// - Upload this file to the master.
+// - Upload `spi_slave/spi_slave.ino` to the slave.
+// - Open the Serial Monitor.
+// - Reset the slave.
+// - Observe the counter increasing in the Serial Monitor.
+// If it doesn't work, try `spi_master/spi_master.ino` as master.
+
+#include "out.ceu"
+#include "wclock.ceu"
+#include "spi.ceu"
+
+output high/low OUT_08;
+
+emit OUT_08(high);      // disables slave
+
+_Serial.begin(9600);
+
+var int i;
+loop i do
+    watching SPI_Transaction(1400000, SPI_MSBFIRST, SPI_MODE0, _, 8) do
+        var byte v = await SPI_Transfer_8(i);
+        { Serial.print("> "); Serial.println(@v); _DELAY(10); }
+    end
+    await 1s;
+end

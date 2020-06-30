@@ -1,0 +1,67 @@
+// compile with CEU_DEFS=-DCEU_PM_MIN
+
+/*
+ * The following program illustrates the process of master read using TWI.
+ * The program starts by setting the value of the Bit Rate (TWBR).
+ * It triggers the interrupt by sending the start condition every 300ms.
+ * The Start condition further changes the TWDR to SLA Read and the TWCR is set
+ * to resume the transfer.
+ * We will emit PIN 12 to the value of the data received (TWDR).
+ *
+ * Testing:
+ *  - The ACK from the slave was acheived by a fully connected master slave TWI
+ *    system and the LED connected to the pin 12 blinks every 300ms
+ *    corresponding to the data received.
+ *    Note: The slave sends alternating 0 and 1 every time the request is sent.
+ *  - When a wrong address is mentioned or the slave is disconnected the NACK
+ *    is assumed and the switch statement goes to default.
+ *  - When 300ms is replaced by FOREVER the data is sent only once as expected.
+ *
+ * Circuit :
+ *  - SDA,SCL lines of both master and slave pulled up by a resistor to 5V.
+ *  - 5V and GND of both master and slave connected respectively to operate
+ *    both at same voltage.
+ *  - an LED connected to the PIN 12 that is set to the data received.
+ *  - The slave can be connected to a switch and send data received on the pin
+ *    connected to the switch. Any alternate methods to send data is also fine.
+ *  - I have used slave sending count%2 and increasing count every time request
+ *    is called to notice the blinking pattern.
+*/
+#include "wclock.ceu"
+#include "gpio.ceu"
+native
+    _TWI_vect,
+;
+native/pre do
+    ##include <compat/twi.h>
+    int SLA=4;
+end
+{pinMode(12,OUTPUT);}
+spawn async/isr [_TWI_vect] do
+{
+  switch(TW_STATUS){
+    case TW_START:
+        TWDR = (SLA << 1) | 1;//SLA+READ
+        TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWIE); // continue transfer
+        break;
+    
+    case TW_MR_SLA_ACK:
+  	    TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWIE); //get only one byte, send nack
+        break;
+    
+    case TW_MR_DATA_NACK:
+        digitalWrite(12, TWDR);
+        TWCR = (1<<TWINT)|(1<<TWEN)| (1<<TWSTO) | (1<<TWIE);// send stop condition
+        break;
+    default:
+        TWCR = (1<<TWINT)|(1<<TWEN)| (1<<TWSTO) | (1<<TWIE);//default case sends stop condition. This case occurs in case of error or a NACK
+  }
+}
+end
+
+{TWBR = ((F_CPU / 100000L) - 16) / 2;} // Bit rate formula
+
+loop do
+    {TWCR = (1<<TWINT)|(1<<TWSTA)|(1<<TWEN)|(1<<TWIE);} //Start Condition
+    await 300ms; //send start every 300ms
+end

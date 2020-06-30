@@ -1,0 +1,1 @@
+call "./JDK/bin/javac.exe" %1 -cp .;../lib/pde.jar

@@ -1,0 +1,34 @@
+/*
+ * Pin change associated with INT1 generates an interrupt, which emits INT1.
+ * On every INT1, main program sets LED at PIN13 to to follow INT1 pin state.
+ */
+
+input none INT1;
+
+#if   defined(ARDUINO_BOARD_UNO)
+#define PIN 3
+#elif defined(ARDUINO_BOARD_MEGA)
+#define PIN 20
+#else
+#error Board not supported.
+#endif
+
+native/const _INT1_vect;
+
+{
+    pinMode(13, OUTPUT);
+    pinMode(PIN, INPUT_PULLUP);
+    EICRA = (EICRA & ~((1<<ISC10) | (1<<ISC11))) | (CHANGE << ISC10);
+    EIMSK |= (1 << INT1);
+}
+
+spawn async/isr [_INT1_vect] do
+    emit INT1;
+end
+
+_digitalWrite(13, low);
+loop do
+    await INT1;
+    _digitalWrite(13, _digitalRead(PIN));
+end
+

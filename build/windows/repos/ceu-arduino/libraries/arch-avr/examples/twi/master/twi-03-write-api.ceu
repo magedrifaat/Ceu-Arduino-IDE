@@ -1,0 +1,140 @@
+// compile with CEU_DEFS=-DCEU_PM_MIN
+
+/*
+ * The following program illustrates the process of master write of 1 byte data
+ * using TWI via a ceu API.
+ * This example shows 1 byte data transfer.
+ * The program starts by setting the value of the Bit Rate (TWBR).
+ * It triggers the interrupt by sending the start condition continously after
+ * the previous request is completed.
+ * Since it is only 1 byte, a repeated start isn't sent.
+ * To view multiple bytes transfer see example 04.
+ * The Start condition further changes the TWDR to SLA Write and the TWCR is
+ * set to resume the transfer.
+ * Further, the TWDR is set to the value we are going to send. In this case it
+ * is !(input in pin 6) which is passed as an argument to the output.
+ *
+ * Testing:
+ *  - The ACK from the slave was acheived by a fully connected master slave TWI
+ *    system and the slave outputs the data received to Serial to see the data.
+ *  - When a wrong address is mentioned or the slave is disconnected the NACK
+ *    is assumed and the assert is called accordingly.
+ *  - Removing the loop and writing await FOREVER at end to stop program from
+ *    termination causes the program to send the request only once and write
+ *    only once. This can be observed in the Serial monitor of the slave.
+ *
+ * Circuit :
+ *  - SDA,SCL lines of both master and slave pulled up by a resistor to 5V.
+ *  - 5V and GND of both master and slave connected respectively to operate
+ *    both at same voltage.
+ *  - A pushbutton that is grounded on one end and the middle connected to pin
+ *    6 of master.
+ *  - an LED connected to the slave that is set to the data received to observe
+ *    the output or a Serial monitor to display the data received.
+*/
+
+#include "wclock.ceu"
+
+native
+    _TWI_vect,
+;
+
+native/pre do
+    ##include <compat/twi.h>
+
+    enum {
+        TWI_ERR_NONE = 0,
+        TWI_ERR_NACK = 1,
+        TWI_ERR_ARB  = 2,
+        TWI_ERR_BUS  = 3,
+    };
+
+    enum {
+        TWI_MODE_NONE  = -1,
+        TWI_MODE_WRITE =  0,
+        TWI_MODE_READ  =  1
+    };
+
+    ##define TWI_STOP() TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWIE) | (1<<TWSTO);
+end
+
+var u8   addr = _;
+var int  mode = {TWI_MODE_NONE};
+var byte buf  = _;   // max buffer length = 1 in this 1 byte example
+
+input (u8,u8) I2C_REQUEST_DONE;
+
+output (u8 address) I2C_REQUEST_SEND do
+    outer.mode = {TWI_MODE_WRITE}; // write mode
+    outer.addr = address;
+    {TWCR = (1<<TWINT)|(1<<TWSTA)|(1<<TWEN)|(1<<TWIE);}// start condition
+end
+
+spawn async/isr [_TWI_vect] do
+  var bool done = true;
+  var int  err  = _;
+  {
+    u8 status = TW_STATUS;
+    switch (status)
+    {
+        // NOT DONE
+
+        case TW_START:
+            ceu_assert(@(outer.mode) != TWI_MODE_NONE, "bug found");
+            TWDR = (@outer.addr << 1) | (@(outer.mode)); // SLA + Read/Write
+            @(outer.mode) = TWI_MODE_NONE;
+            TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWIE); // Continue Transfer
+            @done = 0;
+            break;
+        case TW_MT_SLA_ACK:
+            TWDR = @(outer.buf);
+            TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWIE);
+            @done = 0;
+            break;
+
+        // DONE: no errors
+
+        case TW_MT_DATA_ACK:
+            @err = TWI_ERR_NONE;
+            break;
+
+        // DONE: with errors
+
+        case TW_MT_SLA_NACK:
+        case TW_MT_DATA_NACK:   // occurs disconnecting A4=SDA, A5=SCL
+            @err = TWI_ERR_NACK;
+            break;
+        case TW_MT_ARB_LOST:    // occurs disconnecting A4=SDA
+            @err = TWI_ERR_ARB; // lost bus arbitration
+            break;
+        case TW_BUS_ERROR:      // occurs disconnecting A4=SDA
+            @err = TWI_ERR_BUS;
+            break;
+
+        default:
+            Serial.println(status);
+            ceu_arduino_assert(0, 9); // must never reach this case
+    }
+  }
+  if done then
+    {TWI_STOP();}
+    emit I2C_REQUEST_DONE(1, err);
+  end
+end
+
+{
+    Serial.begin(9600);
+    pinMode(6, INPUT_PULLUP);
+    TWBR = ((F_CPU / 100000L) - 16) / 2;    // bit rate formula
+}
+
+var int i;
+loop i do
+    buf = i;
+    emit I2C_REQUEST_SEND(8);
+    var u8 n;
+    var u8 err;
+    (n, err) = await I2C_REQUEST_DONE;
+    _ceu_assert(n == 1, "bug found");
+    _ceu_arduino_assert(err == {TWI_ERR_NONE}, err);
+end

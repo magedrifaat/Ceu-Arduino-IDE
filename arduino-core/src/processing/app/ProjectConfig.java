@@ -147,6 +147,11 @@ public class ProjectConfig {
     if (csvExtensions == null) {
       csvExtensions = PreferencesData.get(projectType + "-extensions");
     }
+    
+    if (csvExtensions == null) {
+      return new ArrayList<String> ();
+    }
+    
     return new ArrayList<String> (Arrays.asList(csvExtensions.replaceAll(" ", "").split(",")));
   }
   

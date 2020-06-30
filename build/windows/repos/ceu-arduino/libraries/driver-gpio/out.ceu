@@ -1,0 +1,95 @@
+#ifndef OUT_CEU
+#define OUT_CEU
+
+//output high/low PIN_13;   // each output pin must be declared in the program
+output (int,high/low) OUT;
+
+
+output (int pin, high/low v) OUT do
+    _digitalWrite(pin, v);
+end
+
+#if 1
+native/pos do
+    ##define ceu_callback_output_OUT_00(ps,trace) digitalWrite( 0, *((bool*)ps))
+    ##define ceu_callback_output_OUT_01(ps,trace) digitalWrite( 1, *((bool*)ps))
+    ##define ceu_callback_output_OUT_02(ps,trace) digitalWrite( 2, *((bool*)ps))
+    ##define ceu_callback_output_OUT_03(ps,trace) digitalWrite( 3, *((bool*)ps))
+    ##define ceu_callback_output_OUT_04(ps,trace) digitalWrite( 4, *((bool*)ps))
+    ##define ceu_callback_output_OUT_05(ps,trace) digitalWrite( 5, *((bool*)ps))
+    ##define ceu_callback_output_OUT_06(ps,trace) digitalWrite( 6, *((bool*)ps))
+    ##define ceu_callback_output_OUT_07(ps,trace) digitalWrite( 7, *((bool*)ps))
+    ##define ceu_callback_output_OUT_08(ps,trace) digitalWrite( 8, *((bool*)ps))
+    ##define ceu_callback_output_OUT_09(ps,trace) digitalWrite( 9, *((bool*)ps))
+    ##define ceu_callback_output_OUT_10(ps,trace) digitalWrite(10, *((bool*)ps))
+    ##define ceu_callback_output_OUT_11(ps,trace) digitalWrite(11, *((bool*)ps))
+    ##define ceu_callback_output_OUT_12(ps,trace) digitalWrite(12, *((bool*)ps))
+    ##define ceu_callback_output_OUT_13(ps,trace) digitalWrite(13, *((bool*)ps))
+end
+#else   // cannot use the code below (it forces the existence of all outputs)
+#define __OUT__(id,pin)             \
+    output (high/low v) OUT_##id do \
+        _digitalWrite(pin, v);      \
+    end
+__OUT__(00, 0)
+__OUT__(01, 1)
+__OUT__(02, 2)
+__OUT__(03, 3)
+__OUT__(04, 4)
+__OUT__(05, 5)
+__OUT__(06, 6)
+__OUT__(07, 7)
+__OUT__(08, 8)
+__OUT__(09, 9)
+__OUT__(10,10)
+__OUT__(11,11)
+__OUT__(12,12)
+__OUT__(13,13)
+#endif
+
+{
+##ifdef _CEU_OUTPUT_OUT_00_
+    pinMode( 0, OUTPUT);
+##endif
+##ifdef _CEU_OUTPUT_OUT_01_
+    pinMode( 1, OUTPUT);
+##endif
+##ifdef _CEU_OUTPUT_OUT_02_
+    pinMode( 2, OUTPUT);
+##endif
+##ifdef _CEU_OUTPUT_OUT_03_
+    pinMode( 3, OUTPUT);
+##endif
+##ifdef _CEU_OUTPUT_OUT_04_
+    pinMode( 4, OUTPUT);
+##endif
+##ifdef _CEU_OUTPUT_OUT_05_
+    pinMode( 5, OUTPUT);
+##endif
+##ifdef _CEU_OUTPUT_OUT_06_
+    pinMode( 6, OUTPUT);
+##endif
+##ifdef _CEU_OUTPUT_OUT_07_
+    pinMode( 7, OUTPUT);
+##endif
+##ifdef _CEU_OUTPUT_OUT_08_
+    pinMode( 8, OUTPUT);
+##endif
+##ifdef _CEU_OUTPUT_OUT_09_
+    pinMode( 9, OUTPUT);
+##endif
+##ifdef _CEU_OUTPUT_OUT_10_
+    pinMode(10, OUTPUT);
+##endif
+##ifdef _CEU_OUTPUT_OUT_11_
+    pinMode(11, OUTPUT);
+##endif
+##ifdef _CEU_OUTPUT_OUT_12_
+    pinMode(12, OUTPUT);
+##endif
+##ifdef _CEU_OUTPUT_OUT_13_
+    pinMode(13, OUTPUT);
+##endif
+}
+
+#endif

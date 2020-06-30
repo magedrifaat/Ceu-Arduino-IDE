@@ -403,7 +403,7 @@
   <!-- Mac OS X      -->
   <!-- - - - - - - - -->
   <target name="macosx-clean" depends="subprojects-clean" description="Clean Mac OS X build">
-    <delete dir="macosx/work" />
+    <delete dir="macosx/arduino-1.8.8" />
     <delete dir="macosx/working_dir" />
     <delete dir="macosx/working.dmg" />
     <delete file="macosx/arduino-*.dmg" />
@@ -425,7 +425,7 @@
 
   <target name="macosx-build" if="macosx" depends="revision-check, macosx-checkos, subprojects-build" description="Build Mac OS X version">
     <fail unless="MACOSX_BUNDLED_JVM" message="MacOSX requires MACOSX_BUNDLED_JVM property set"/>
-    <mkdir dir="${staging_folder}/work" />
+    <mkdir dir="${staging_folder}/arduino-1.8.8" />
 
     <antcall target="unzip">
       <param name="archive_file" value="${staging_folder}/appbundler-1.0ea-arduino4.jar.zip" />
@@ -439,7 +439,7 @@
     <bundleapp
             jvmRequired="1.8"
             jrepreferred="true"
-            outputdirectory="${staging_folder}/work"
+            outputdirectory="${staging_folder}/arduino-1.8.8"
             name="Arduino"
             displayname="Arduino"
             executablename="Arduino"
@@ -477,7 +477,7 @@
 
       <!--<option value="-Dcom.apple.macos.useScreenMenuBar=true"/>-->
 
-      <!-- Workaround since the icon parameter for bundleapp doesn't work -->
+      <!-- Workaround since the icon parameter for bundleapp doesn't arduino-1.8.8 -->
       <option value="-Xdock:name=Arduino"/>
       <option value="-Dcom.apple.mrj.application.apple.menu.about.name=Arduino"/>
       <option value="-Dfile.encoding=UTF-8"/>
@@ -494,22 +494,22 @@
 
     </bundleapp>
 
-    <mkdir dir="${staging_folder}/work/${staging_hardware_folder}" />
+    <mkdir dir="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}" />
 
-    <copy todir="${staging_folder}/work/${staging_hardware_folder}/../">
+    <copy todir="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/../">
       <fileset dir="shared" includes="lib/**" />
       <fileset file="shared/revisions.txt" />
       <fileset file="shared/ceu-compiler.bat" />
       <fileset file="shared/ceu-compiler.sh" />
     </copy>
 
-    <mkdir dir="${staging_folder}/work" />
-    <mkdir dir="${staging_folder}/work/${staging_hardware_folder}" />
+    <mkdir dir="${staging_folder}/arduino-1.8.8" />
+    <mkdir dir="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}" />
 
     <antcall target="macosx-build-avr-toolchain" />
 
     <antcall target="assemble">
-      <param name="target.path" value="${staging_folder}/work/${staging_hardware_folder}/.." />
+      <param name="target.path" value="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/.." />
     </antcall>
 
     <antcall target="unzip">
@@ -518,10 +518,10 @@
       <param name="final_folder" value="${staging_folder}/libastylej-2.05.1" />
       <param name="dest_folder" value="${staging_folder}" />
     </antcall>
-    <copy file="macosx/libastylej-2.05.1/libastylej.jnilib" todir="macosx/work/${staging_hardware_folder}/../lib/" />
-    <chmod perm="755" file="macosx/work/${staging_hardware_folder}/../lib/libastylej.jnilib" />
-    <copy file="macosx/libastylej-2.05.1/libastylej.jnilib" tofile="macosx/work/${staging_hardware_folder}/../lib/libastylej.dylib" />
-    <chmod perm="755" file="macosx/work/${staging_hardware_folder}/../lib/libastylej.dylib" />
+    <copy file="macosx/libastylej-2.05.1/libastylej.jnilib" todir="macosx/arduino-1.8.8/${staging_hardware_folder}/../lib/" />
+    <chmod perm="755" file="macosx/arduino-1.8.8/${staging_hardware_folder}/../lib/libastylej.jnilib" />
+    <copy file="macosx/libastylej-2.05.1/libastylej.jnilib" tofile="macosx/arduino-1.8.8/${staging_hardware_folder}/../lib/libastylej.dylib" />
+    <chmod perm="755" file="macosx/arduino-1.8.8/${staging_hardware_folder}/../lib/libastylej.dylib" />
 
     <antcall target="unzip">
       <param name="archive_file" value="./liblistSerials-${LIBLISTSERIAL-VERSION}.zip" />
@@ -529,13 +529,13 @@
       <param name="final_folder" value="${staging_folder}/liblistSerials-${LIBLISTSERIAL-VERSION}" />
       <param name="dest_folder" value="${staging_folder}" />
     </antcall>
-    <copy file="macosx/liblistSerials-${LIBLISTSERIAL-VERSION}/osx/liblistSerialsj.dylib" todir="macosx/work/${staging_hardware_folder}/../lib/" />
-    <chmod perm="755" file="macosx/work/${staging_hardware_folder}/../lib/liblistSerialsj.dylib" />
+    <copy file="macosx/liblistSerials-${LIBLISTSERIAL-VERSION}/osx/liblistSerialsj.dylib" todir="macosx/arduino-1.8.8/${staging_hardware_folder}/../lib/" />
+    <chmod perm="755" file="macosx/arduino-1.8.8/${staging_hardware_folder}/../lib/liblistSerialsj.dylib" />
 
     <antcall target="build-arduino-builder" />
 
     <antcall target="portable-${portable}">
-      <param name="parentdir" value="macosx/work/${staging_hardware_folder}/.." />
+      <param name="parentdir" value="macosx/arduino-1.8.8/${staging_hardware_folder}/.." />
     </antcall>
   </target>
 
@@ -552,15 +552,15 @@
     </antcall>
 
     <chmod perm="+x">
-      <fileset dir="${staging_folder}/work/${staging_hardware_folder}/tools" includes="**/bin/*"/>
-      <fileset dir="${staging_folder}/work/${staging_hardware_folder}/tools" includes="**/libexec/gcc/avr/4.8.1/*"/>
+      <fileset dir="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/tools" includes="**/bin/*"/>
+      <fileset dir="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/tools" includes="**/libexec/gcc/avr/4.8.1/*"/>
     </chmod>
   </target>
 
   <target name="macosx-run" depends="build,start"/>
 
   <target name="macosx-start">
-    <exec executable="macosx/work/Arduino.app/Contents/MacOS/Arduino" spawn="false" failonerror="true"/>
+    <exec executable="macosx/arduino-1.8.8/Arduino.app/Contents/MacOS/Arduino" spawn="false" failonerror="true"/>
   </target>
 
   <!-- - - - - - - - - - - - - - - - -->
@@ -571,30 +571,30 @@
     <fail unless="version" message="Please set the property 'version' to correctly sign distribution file" />
 
     <!-- Remove everything from working folder -->
-    <delete dir="macosx/work/Arduino.app" />
+    <delete dir="macosx/arduino-1.8.8/Arduino.app" />
 
     <!-- Unzip unsigned app into working dir -->
-    <unzip src="../arduino-${version}-${platform}.zip" dest="macosx/work"/>
+    <unzip src="../arduino-${version}-${platform}.zip" dest="macosx/arduino-1.8.8"/>
 
     <!-- Unlock keychain file -->
-    <exec executable="security" dir="macosx/work" failonerror="true">
+    <exec executable="security" dir="macosx/arduino-1.8.8" failonerror="true">
       <arg line="unlock-keychain -p &quot;${macosx-sign-keychain-pass}&quot; &quot;${macosx-sign-keychain}&quot;" />
     </exec>
 
     <!-- Sign app -->
-    <exec executable="codesign" dir="macosx/work" failonerror="true">
+    <exec executable="codesign" dir="macosx/arduino-1.8.8" failonerror="true">
       <arg line="--keychain &quot;${macosx-sign-keychain}&quot; --force -s &quot;${macosx-sign-id}&quot; --deep -v Arduino.app/" />
     </exec>
 
     <!-- Check for successful signing -->
-    <exec executable="codesign" dir="macosx/work" failonerror="true">
+    <exec executable="codesign" dir="macosx/arduino-1.8.8" failonerror="true">
       <arg line="-vvvv Arduino.app/" />
     </exec>
 
     <delete file="macosx/arduino-${version}-${platform}.zip" />
 
     <!-- Create signed zip file -->
-    <exec executable="zip" dir="macosx/work" failonerror="true">
+    <exec executable="zip" dir="macosx/arduino-1.8.8" failonerror="true">
       <arg line="-q -r ../arduino-${full-version}-signed.zip ." />
     </exec>
 
@@ -617,7 +617,7 @@
   <!-- Build distribution file for MacOSX. -->
   <!-- - - - - - - - - - - - - - - - - - - -->
   <target name="macosx-dist" if="macosx" depends="build" description="Create a downloadable .zip for the Mac OS X version">
-    <exec executable="zip" dir="macosx/work" failonerror="true">
+    <exec executable="zip" dir="macosx/arduino-1.8.8" failonerror="true">
       <arg line="-q -r ../arduino-${full-version}.zip ." />
     </exec>
 
@@ -635,7 +635,7 @@
   <!-- - - - - - - - -->
 
   <target name="linux-clean" depends="subprojects-clean" description="Clean linux version">
-    <delete dir="linux/work" />
+    <delete dir="linux/arduino-1.8.8" />
     <delete>
       <fileset dir="linux" includes="arduino-*linux*.tar.xz"/>
     </delete>
@@ -657,44 +657,59 @@
   </target>
 
   <target name="linux-build" depends="revision-check, linux-checkos, subprojects-build" description="Build linux version">
-    <mkdir dir="linux/work" />
-    <mkdir dir="linux/work/${staging_hardware_folder}" />
-
-    <copy todir="linux/work">
+    <mkdir dir="linux/arduino-1.8.8" />
+    <mkdir dir="linux/arduino-1.8.8/${staging_hardware_folder}" />
+	
+	<mkdir dir="linux/arduino-1.8.8/Plugins" />
+    <copy todir="linux/arduino-1.8.8">
       <fileset dir="shared" includes="lib/**" />
+      <fileset dir="shared" includes="Plugins/**" />
       <fileset file="shared/revisions.txt" />
       <fileset file="shared/ceu-compiler.sh" />
+      <fileset file="shared/ceu-uploader.sh" />
+      <fileset file="shared/pico-compiler.sh" />
+      <fileset file="shared/pico-run.sh" />
     </copy>
+	
+	<copy todir="linux/arduino-1.8.8/Plugins">
+	  <fileset file="shared/compile.sh" />
+    </copy>
+	
+	<chmod perm="755" dir="linux/arduino-1.8.8/ceu-compiler.sh" />
+	<chmod perm="755" dir="linux/arduino-1.8.8/ceu-uploader.sh" />
+	<chmod perm="755" dir="linux/arduino-1.8.8/pico-compiler.sh" />
+	<chmod perm="755" dir="linux/arduino-1.8.8/pico-run.sh" />
+	<chmod perm="755" dir="linux/run/lua/src/lua" />
 
-    <copy todir="linux/work">
+    <copy todir="linux/arduino-1.8.8">
       <fileset dir="linux/dist" includes="lib/**" />
     </copy>
 
-    <copy todir="linux/work/lib">
+    <copy todir="linux/arduino-1.8.8/lib">
       <fileset dir="shared" includes="icons/**/*.png" />
     </copy>
 
-    <copy todir="linux/work/lib" flatten="true">
+    <copy todir="linux/arduino-1.8.8/lib" flatten="true">
       <fileset refid="runtime.jars" />
     </copy>
 
     <antcall target="assemble">
-      <param name="target.path" value="linux/work" />
+      <param name="target.path" value="linux/arduino-1.8.8" />
     </antcall>
 
-    <copy tofile="linux/work/lib/arduino-arduinoide.xml" file="linux/dist/mime.xml" />
-    <copy todir="linux/work/lib" file="linux/dist/desktop.template" />
-    <copy todir="linux/work/lib" file="linux/dist/appdata.xml" />
+    <copy tofile="linux/arduino-1.8.8/lib/arduino-arduinoide.xml" file="linux/dist/mime.xml" />
+    <copy todir="linux/arduino-1.8.8/lib" file="linux/dist/desktop.template" />
+    <copy todir="linux/arduino-1.8.8/lib" file="linux/dist/appdata.xml" />
 
-    <copy todir="linux/work" file="linux/dist/arduino" />
-    <copy todir="linux/work" file="linux/dist/install.sh" />
-    <copy todir="linux/work" file="linux/dist/arduino-linux-setup.sh" />
-    <copy todir="linux/work" file="linux/dist/uninstall.sh" />
+    <copy todir="linux/arduino-1.8.8" file="linux/dist/arduino" />
+    <copy todir="linux/arduino-1.8.8" file="linux/dist/install.sh" />
+    <copy todir="linux/arduino-1.8.8" file="linux/dist/arduino-linux-setup.sh" />
+    <copy todir="linux/arduino-1.8.8" file="linux/dist/uninstall.sh" />
 
     <chmod perm="ugo+x">
-        <fileset dir="linux/work" includes="arduino" />
-        <fileset dir="linux/work" includes="**/*.sh" />
-        <fileset dir="linux/work/lib" includes="**/*desktop*" />
+        <fileset dir="linux/arduino-1.8.8" includes="arduino" />
+        <fileset dir="linux/arduino-1.8.8" includes="**/*.sh" />
+        <fileset dir="linux/arduino-1.8.8/lib" includes="**/*desktop*" />
     </chmod>
   </target>
 
@@ -705,11 +720,11 @@
       <param name="final_folder" value="${staging_folder}/libastylej-2.05.1" />
       <param name="dest_folder" value="${staging_folder}" />
     </antcall>
-    <copy file="linux/libastylej-2.05.1/libastylej${arch-bits}.so" tofile="linux/work/lib/libastylej.so" />
-    <chmod perm="755" file="linux/work/lib/libastylej.so" />
+    <copy file="linux/libastylej-2.05.1/libastylej${arch-bits}.so" tofile="linux/arduino-1.8.8/lib/libastylej.so" />
+    <chmod perm="755" file="linux/arduino-1.8.8/lib/libastylej.so" />
 
     <antcall target="portable-${portable}">
-      <param name="parentdir" value="linux/work" />
+      <param name="parentdir" value="linux/arduino-1.8.8" />
     </antcall>
 
     <antcall target="unzip">
@@ -718,8 +733,8 @@
       <param name="final_folder" value="${staging_folder}/liblistSerials-${LIBLISTSERIAL-VERSION}" />
       <param name="dest_folder" value="${staging_folder}" />
     </antcall>
-    <copy file="linux/liblistSerials-${LIBLISTSERIAL-VERSION}/linux${arch-bits}/liblistSerialsj.so" todir="linux/work/lib/" />
-    <chmod perm="755" file="linux/work/lib/liblistSerialsj.so" />
+    <copy file="linux/liblistSerials-${LIBLISTSERIAL-VERSION}/linux${arch-bits}/liblistSerialsj.so" todir="linux/arduino-1.8.8/lib/" />
+    <chmod perm="755" file="linux/arduino-1.8.8/lib/liblistSerialsj.so" />
 
   </target>
 
@@ -730,11 +745,11 @@
       <param name="final_folder" value="${staging_folder}/libastylej-2.05.1" />
       <param name="dest_folder" value="${staging_folder}" />
     </antcall>
-    <copy file="linux/libastylej-2.05.1/libastylej_arm.so" tofile="linux/work/lib/libastylej.so" />
-    <chmod perm="755" file="linux/work/lib/libastylej.so" />
+    <copy file="linux/libastylej-2.05.1/libastylej_arm.so" tofile="linux/arduino-1.8.8/lib/libastylej.so" />
+    <chmod perm="755" file="linux/arduino-1.8.8/lib/libastylej.so" />
 
     <antcall target="portable-${portable}">
-      <param name="parentdir" value="linux/work" />
+      <param name="parentdir" value="linux/arduino-1.8.8" />
     </antcall>
 
     <antcall target="unzip">
@@ -743,8 +758,8 @@
       <param name="final_folder" value="${staging_folder}/liblistSerials-${LIBLISTSERIAL-VERSION}" />
       <param name="dest_folder" value="${staging_folder}" />
     </antcall>
-    <copy file="linux/liblistSerials-${LIBLISTSERIAL-VERSION}/arm/liblistSerialsj.so" todir="linux/work/lib/" />
-    <chmod perm="755" file="linux/work/lib/liblistSerialsj.so" />
+    <copy file="linux/liblistSerials-${LIBLISTSERIAL-VERSION}/arm/liblistSerialsj.so" todir="linux/arduino-1.8.8/lib/" />
+    <chmod perm="755" file="linux/arduino-1.8.8/lib/liblistSerialsj.so" />
 
   </target>
 
@@ -773,11 +788,11 @@
       <param name="final_folder" value="${staging_folder}/libastylej-2.05.1" />
       <param name="dest_folder" value="${staging_folder}" />
     </antcall>
-    <copy file="linux/libastylej-2.05.1/libastylej_aarch64.so" tofile="linux/work/lib/libastylej.so" />
-    <chmod perm="755" file="linux/work/lib/libastylej.so" />
+    <copy file="linux/libastylej-2.05.1/libastylej_aarch64.so" tofile="linux/arduino-1.8.8/lib/libastylej.so" />
+    <chmod perm="755" file="linux/arduino-1.8.8/lib/libastylej.so" />
 
     <antcall target="portable-${portable}">
-      <param name="parentdir" value="linux/work" />
+      <param name="parentdir" value="linux/arduino-1.8.8" />
     </antcall>
 
     <antcall target="unzip">
@@ -786,8 +801,8 @@
       <param name="final_folder" value="${staging_folder}/liblistSerials-${LIBLISTSERIAL-VERSION}" />
       <param name="dest_folder" value="${staging_folder}" />
     </antcall>
-    <copy file="linux/liblistSerials-${LIBLISTSERIAL-VERSION}/aarch64/liblistSerialsj.so" todir="linux/work/lib/" />
-    <chmod perm="755" file="linux/work/lib/liblistSerialsj.so" />
+    <copy file="linux/liblistSerials-${LIBLISTSERIAL-VERSION}/aarch64/liblistSerialsj.so" todir="linux/arduino-1.8.8/lib/" />
+    <chmod perm="755" file="linux/arduino-1.8.8/lib/liblistSerialsj.so" />
   </target>
 
   <target name="linuxaarch64-build" depends="linux-libastyle-aarch64" description="Build Linux (AArch64) version">
@@ -847,12 +862,12 @@
   <target name="linux-jvm-noop"/>
 
   <target name="linux-jvm-bundle">
-    <mkdir dir="${staging_folder}/work/java" />
+    <mkdir dir="${staging_folder}/arduino-1.8.8/java" />
 
     <exec executable="rsync">
       <arg value="-a"/>
       <arg value="${JVM}"/>
-      <arg value="${staging_folder}/work/java/"/>
+      <arg value="${staging_folder}/arduino-1.8.8/java/"/>
     </exec>
   </target>
 
@@ -865,19 +880,19 @@
   <target name="linuxaarch64-run" depends="build,start"/>
 
   <target name="linux32-start">
-    <exec executable="./linux/work/arduino" spawn="false" failonerror="true"/>
+    <exec executable="./linux/arduino-1.8.8/arduino" spawn="false" failonerror="true"/>
   </target>
 
   <target name="linux64-start">
-    <exec executable="./linux/work/arduino" spawn="false" failonerror="true"/>
+    <exec executable="./linux/arduino-1.8.8/arduino" spawn="false" failonerror="true"/>
   </target>
 
   <target name="linuxarm-start">
-    <exec executable="./linux/work/arduino" spawn="false" failonerror="true"/>
+    <exec executable="./linux/arduino-1.8.8/arduino" spawn="false" failonerror="true"/>
   </target>
 
   <target name="linuxaarch64-start">
-    <exec executable="./linux/work/arduino" spawn="false" failonerror="true"/>
+    <exec executable="./linux/arduino-1.8.8/arduino" spawn="false" failonerror="true"/>
   </target>
 
   <target name="build-arduino-builder" unless="no_arduino_builder">
@@ -889,10 +904,10 @@
       <param name="final_folder" value="${staging_folder}/arduino-builder-${platform}/arduino-builder" />
       <param name="dest_folder" value="${staging_folder}/arduino-builder-${platform}" />
     </antcall>
-    <copy file="${staging_folder}/arduino-builder-${platform}/arduino-builder" tofile="${staging_folder}/work/${staging_hardware_folder}/../arduino-builder" />
-    <chmod perm="755" file="${staging_folder}/work/${staging_hardware_folder}/../arduino-builder" />
-    <move file="${staging_folder}/arduino-builder-${platform}/tools" tofile="${staging_folder}/work/${staging_hardware_folder}/../tools-builder"/>
-    <copy todir="${staging_folder}/work/${staging_hardware_folder}" overwrite="true">
+    <copy file="${staging_folder}/arduino-builder-${platform}/arduino-builder" tofile="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/../arduino-builder" />
+    <chmod perm="755" file="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/../arduino-builder" />
+    <move file="${staging_folder}/arduino-builder-${platform}/tools" tofile="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/../tools-builder"/>
+    <copy todir="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}" overwrite="true">
       <fileset dir="${staging_folder}/arduino-builder-${platform}/hardware" includes="*.txt"/>
     </copy>
     <delete dir="${staging_folder}/arduino-builder-${platform}" includeemptydirs="true"/>
@@ -977,7 +992,7 @@
   <target name="linux-dist" depends="build"
 	  description="Build .tar.xz of linux version">
 
-    <move file="linux/work" tofile="linux/arduino-${version}" />
+    <move file="linux/arduino-1.8.8" tofile="linux/arduino-${version}" />
 
     <exec executable="tar" dir="linux" failonerror="true">
       <arg value="--lzma"/>
@@ -987,7 +1002,7 @@
       <arg value="arduino-${version}"/>
     </exec>
 
-    <move file="linux/arduino-${version}" tofile="linux/work" />
+    <move file="linux/arduino-${version}" tofile="linux/arduino-1.8.8" />
 
     <echo>
       =======================================================
@@ -1016,7 +1031,7 @@
 
   <target name="windows-clean" depends="subprojects-clean"
 	  description="Clean windows version">
-    <delete dir="windows/work" />
+    <delete dir="windows/arduino-1.8.8" />
     <delete>
       <fileset dir="windows" includes="arduino-*windows*.zip"/>
     </delete>
@@ -1055,33 +1070,42 @@
   <target name="windows-build"
 	  depends="revision-check, windows-checkos, subprojects-build"
 	  description="Build windows version">
-    <mkdir dir="windows/work" />
-    <mkdir dir="windows/work/${staging_hardware_folder}" />
+    <mkdir dir="windows/arduino-1.8.8" />
+    <mkdir dir="windows/arduino-1.8.8/${staging_hardware_folder}" />
 
-    <copy todir="windows/work/lib">
+    <copy todir="windows/arduino-1.8.8/lib">
       <fileset dir="shared" includes="icons/**/*.png"/>
     </copy>
 
     <!-- assemble the pde -->
-    <mkdir dir="windows/work/lib" />
-    <copy todir="windows/work/lib" flatten="true">
+    <mkdir dir="windows/arduino-1.8.8/lib" />
+    <copy todir="windows/arduino-1.8.8/lib" flatten="true">
       <fileset refid="runtime.jars" />
     </copy>
 
-    <copy todir="windows/work">
+	<mkdir dir="windows/arduino-1.8.8/Plugins" />
+    <copy todir="windows/arduino-1.8.8">
       <fileset dir="shared" includes="lib/**" />
+      <fileset dir="shared" includes="Plugins/**" />
       <fileset file="shared/revisions.txt" />
       <fileset file="shared/ceu-compiler.bat" />
+      <fileset file="shared/ceu-uploader.bat" />
+      <fileset file="shared/pico-compiler.bat" />
+      <fileset file="shared/pico-run.bat" />
+    </copy>
+	
+	<copy todir="windows/arduino-1.8.8/Plugins">
+      <fileset file="shared/compile.bat" />
     </copy>
 
-    <fixcrlf file="windows/work/revisions.txt" eol="dos"/>
-    <fixcrlf file="windows/work/lib/formatter.conf" eol="dos"/>
+    <fixcrlf file="windows/arduino-1.8.8/revisions.txt" eol="dos"/>
+    <fixcrlf file="windows/arduino-1.8.8/lib/formatter.conf" eol="dos"/>
 
-    <copy todir="windows/work">
+    <copy todir="windows/arduino-1.8.8">
       <fileset dir="windows/dist" includes="*.dll" />
     </copy>
 
-    <copy todir="windows/work">
+    <copy todir="windows/arduino-1.8.8">
       <fileset dir="windows/dist" includes="drivers/**" />
     </copy>
 
@@ -1093,9 +1117,9 @@
       <param name="final_folder" value="${staging_folder}/libastylej-2.05.1" />
       <param name="dest_folder" value="${staging_folder}" />
     </antcall>
-    <copy file="windows/libastylej-2.05.1/AStylej.dll" todir="windows/work/lib" />
-    <copy file="windows/msvcp100.dll" todir="windows/work" />
-    <copy file="windows/msvcr100.dll" todir="windows/work" />
+    <copy file="windows/libastylej-2.05.1/AStylej.dll" todir="windows/arduino-1.8.8/lib" />
+    <copy file="windows/msvcp100.dll" todir="windows/arduino-1.8.8" />
+    <copy file="windows/msvcr100.dll" todir="windows/arduino-1.8.8" />
 
     <antcall target="unzip">
       <param name="archive_file" value="./liblistSerials-${LIBLISTSERIAL-VERSION}.zip" />
@@ -1103,9 +1127,9 @@
       <param name="final_folder" value="${staging_folder}/liblistSerials-${LIBLISTSERIAL-VERSION}" />
       <param name="dest_folder" value="${staging_folder}" />
     </antcall>
-    <copy file="windows/liblistSerials-${LIBLISTSERIAL-VERSION}/windows/listSerialsj.dll" todir="windows/work/lib/" />
+    <copy file="windows/liblistSerials-${LIBLISTSERIAL-VERSION}/windows/listSerialsj.dll" todir="windows/arduino-1.8.8/lib/" />
     <antcall target="make-file-executable">
-      <param name="file" value="windows/work/lib/listSerialsj.dll" />
+      <param name="file" value="windows/arduino-1.8.8/lib/listSerialsj.dll" />
     </antcall>
 
     <delete dir="${staging_folder}/arduino-builder-windows" includeemptydirs="true"/>
@@ -1116,53 +1140,53 @@
       <param name="final_folder" value="${staging_folder}/arduino-builder-windows/arduino-builder.exe" />
       <param name="dest_folder" value="${staging_folder}/arduino-builder-windows" />
     </antcall>
-    <copy file="${staging_folder}/arduino-builder-windows/arduino-builder.exe" tofile="windows/work/arduino-builder.exe" />
+    <copy file="${staging_folder}/arduino-builder-windows/arduino-builder.exe" tofile="windows/arduino-1.8.8/arduino-builder.exe" />
     <antcall target="make-file-executable">
-      <param name="file" value="windows/work/arduino-builder.exe" />
+      <param name="file" value="windows/arduino-1.8.8/arduino-builder.exe" />
     </antcall>
-    <move file="${staging_folder}/arduino-builder-windows/tools" tofile="windows/work/tools-builder"/>
+    <move file="${staging_folder}/arduino-builder-windows/tools" tofile="windows/arduino-1.8.8/tools-builder"/>
     <antcall target="make-file-executable">
-      <param name="file" value="windows/work/tools-builder/ctags/5.8-arduino11/ctags.exe" />
+      <param name="file" value="windows/arduino-1.8.8/tools-builder/ctags/5.8-arduino11/ctags.exe" />
     </antcall>
-    <copy todir="windows/work/hardware" overwrite="true">
+    <copy todir="windows/arduino-1.8.8/hardware" overwrite="true">
       <fileset dir="${staging_folder}/arduino-builder-windows/hardware" includes="*.txt"/>
     </copy>
     <delete dir="${staging_folder}/arduino-builder-windows" includeemptydirs="true"/>
 
-    <unzip src="../arduino-core/lib/jna-4.2.2.jar" dest="windows/work/lib">
+    <unzip src="../arduino-core/lib/jna-4.2.2.jar" dest="windows/arduino-1.8.8/lib">
       <patternset>
         <include name="com/sun/jna/win32-x86/jnidispatch.dll"/>
       </patternset>
       <mapper type="flatten"/>
     </unzip>
-    <move file="windows/work/lib/jnidispatch.dll" tofile="windows/work/lib/jnidispatch-4.2.2-win32-x86.dll" />
+    <move file="windows/arduino-1.8.8/lib/jnidispatch.dll" tofile="windows/arduino-1.8.8/lib/jnidispatch-4.2.2-win32-x86.dll" />
     <antcall target="make-file-executable">
-      <param name="file" value="windows/work/lib/jnidispatch-4.2.2-win32-x86.dll" />
+      <param name="file" value="windows/arduino-1.8.8/lib/jnidispatch-4.2.2-win32-x86.dll" />
     </antcall>
 
-    <unzip src="../arduino-core/lib/jssc-2.8.0-arduino3.jar" dest="windows/work/lib">
+    <unzip src="../arduino-core/lib/jssc-2.8.0-arduino3.jar" dest="windows/arduino-1.8.8/lib">
       <patternset>
         <include name="libs/windows/jSSC-2.8_x86.dll"/>
       </patternset>
       <mapper type="flatten"/>
     </unzip>
-    <move file="windows/work/lib/jSSC-2.8_x86.dll" tofile="windows/work/lib/jSSC-2.8_x86.dll" />
+    <move file="windows/arduino-1.8.8/lib/jSSC-2.8_x86.dll" tofile="windows/arduino-1.8.8/lib/jSSC-2.8_x86.dll" />
     <antcall target="make-file-executable">
-      <param name="file" value="windows/work/lib/jSSC-2.8_x86.dll" />
+      <param name="file" value="windows/arduino-1.8.8/lib/jSSC-2.8_x86.dll" />
     </antcall>
-    <unzip src="../arduino-core/lib/jssc-2.8.0-arduino3.jar" dest="windows/work/lib">
+    <unzip src="../arduino-core/lib/jssc-2.8.0-arduino3.jar" dest="windows/arduino-1.8.8/lib">
       <patternset>
         <include name="libs/windows/jSSC-2.8_x86_64.dll"/>
       </patternset>
       <mapper type="flatten"/>
     </unzip>
-    <move file="windows/work/lib/jSSC-2.8_x86_64.dll" tofile="windows/work/lib/jSSC-2.8_x86_64.dll" />
+    <move file="windows/arduino-1.8.8/lib/jSSC-2.8_x86_64.dll" tofile="windows/arduino-1.8.8/lib/jSSC-2.8_x86_64.dll" />
     <antcall target="make-file-executable">
-      <param name="file" value="windows/work/lib/jSSC-2.8_x86_64.dll" />
+      <param name="file" value="windows/arduino-1.8.8/lib/jSSC-2.8_x86_64.dll" />
     </antcall>
 
     <antcall target="assemble">
-      <param name="target.path" value="windows/work" />
+      <param name="target.path" value="windows/arduino-1.8.8" />
     </antcall>
 
     <delete dir="windows/launcher/launch4j"/>
@@ -1173,18 +1197,18 @@
 	     classname="net.sf.launch4j.ant.Launch4jTask"
 	     classpath="${launch4j.dir}/launch4j.jar; ${launch4j.dir}/lib/xstream.jar" />
 
-    <copy todir="windows/work">
+    <copy todir="windows/arduino-1.8.8">
       <fileset dir="windows/launcher"
 	       includes="application.ico, config.xml, config_debug.xml, arduino.l4j.ini, wrapper-manifest.xml"/>
     </copy>
-    <launch4j configFile="windows/work/config.xml" fileVersion="${revision}.0" txtFileVersion="${revision}" productVersion="${revision}.0" txtProductVersion="${revision}"/>
-    <launch4j configFile="windows/work/config_debug.xml" fileVersion="${revision}.0" txtFileVersion="${revision}" productVersion="${revision}.0" txtProductVersion="${revision}"/>
-    <delete dir="windows/work" includes="application.ico, config.xml, config_debug.xml" />
-    <copy file="windows/work/arduino.l4j.ini" tofile="windows/work/arduino_debug.l4j.ini" />
+    <launch4j configFile="windows/arduino-1.8.8/config.xml" fileVersion="${revision}.0" txtFileVersion="${revision}" productVersion="${revision}.0" txtProductVersion="${revision}"/>
+    <launch4j configFile="windows/arduino-1.8.8/config_debug.xml" fileVersion="${revision}.0" txtFileVersion="${revision}" productVersion="${revision}.0" txtProductVersion="${revision}"/>
+    <delete dir="windows/arduino-1.8.8" includes="application.ico, config.xml, config_debug.xml" />
+    <copy file="windows/arduino-1.8.8/arduino.l4j.ini" tofile="windows/arduino-1.8.8/arduino_debug.l4j.ini" />
 
     <!-- cygwin requires html, dll, and exe to have the +x flag -->
     <chmod perm="755">
-      <fileset dir="windows/work" includes="**/*.html, **/*.dll, **/*.exe" />
+      <fileset dir="windows/arduino-1.8.8" includes="**/*.html, **/*.dll, **/*.exe" />
     </chmod>
 
     <!-- For JVM within JDK, release file is in parent directory -->
@@ -1199,12 +1223,12 @@
       </condition>
     </fail>
 
-    <copy todir="${staging_folder}/work/java" includeemptydirs="true" preservelastmodified="true" overwrite="true" failonerror="true">
+    <copy todir="${staging_folder}/arduino-1.8.8/java" includeemptydirs="true" preservelastmodified="true" overwrite="true" failonerror="true">
       <fileset dir="${WINDOWS_BUNDLED_JVM}" includes="*/**"/>
     </copy>
 
     <antcall target="portable-${portable}">
-      <param name="parentdir" value="${staging_folder}/work" />
+      <param name="parentdir" value="${staging_folder}/arduino-1.8.8" />
     </antcall>
   </target>
 
@@ -1223,13 +1247,13 @@
   <target name="windows-run" depends="build,start"/>
 
   <target name="windows-start">
-    <exec executable="windows/work/arduino.exe" dir="windows/work" spawn="false" failonerror="true"/>
+    <exec executable="windows/arduino-1.8.8/arduino.exe" dir="windows/arduino-1.8.8" spawn="false" failonerror="true"/>
   </target>
 
   <target name="windows-dist" depends="build" description="Create .zip files of windows version">
-    <zip destfile="windows/arduino-${full-version}.zip" level="9">
-      <zipfileset dir="windows/work" prefix="arduino-${version}"/>
-    </zip>
+    <!--<zip destfile="windows/arduino-${full-version}.zip" level="9">
+      <zipfileset dir="windows/arduino-1.8.8" prefix="arduino-${version}"/>
+    </zip>-->
 
     <echo>
       =======================================================
@@ -1258,7 +1282,7 @@
 			     **/*.bz2,
 			     **/build/macosx/,
 			     **/build/windows/,
-			     **/work/,
+			     **/arduino-1.8.8/,
 			     **/.git/,
 			     **/*.class"
 		  />
@@ -1284,46 +1308,46 @@
 
   <target name="avr-toolchain-bundle" unless="light_bundle">
     <!-- Unzip AVR tools -->
-    <mkdir dir="${staging_folder}/work/${staging_hardware_folder}/tmp/gcc"/>
+    <mkdir dir="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/tmp/gcc"/>
 
     <antcall target="${unpack_target}">
       <param name="archive_file" value="${staging_folder}/${gcc_archive_file}"/>
       <param name="archive_url" value="https://downloads.arduino.cc/tools/${gcc_archive_file}"/>
-      <param name="final_folder" value="${staging_folder}/work/${staging_hardware_folder}/tmp/gcc/${gcc_version}/"/>
-      <param name="dest_folder" value="${staging_folder}/work/${staging_hardware_folder}/tmp/gcc/"/>
+      <param name="final_folder" value="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/tmp/gcc/${gcc_version}/"/>
+      <param name="dest_folder" value="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/tmp/gcc/"/>
     </antcall>
 
-    <mkdir dir="${staging_folder}/work/${staging_hardware_folder}/tmp/avrdude"/>
+    <mkdir dir="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/tmp/avrdude"/>
 
     <antcall target="${unpack_target}">
       <param name="archive_file" value="${staging_folder}/${avrdude_archive_file}"/>
       <param name="archive_url" value="https://downloads.arduino.cc/tools/${avrdude_archive_file}"/>
-      <param name="final_folder" value="${staging_folder}/work/${staging_hardware_folder}/tmp/avrdude/${avrdude_version}"/>
-      <param name="dest_folder" value="${staging_folder}/work/${staging_hardware_folder}/tmp/avrdude/"/>
+      <param name="final_folder" value="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/tmp/avrdude/${avrdude_version}"/>
+      <param name="dest_folder" value="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/tmp/avrdude/"/>
     </antcall>
 
-    <mkdir dir="${staging_folder}/work/${staging_hardware_folder}/tmp/arduinoOTA"/>
+    <mkdir dir="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/tmp/arduinoOTA"/>
 
     <antcall target="${unpack_target}">
       <param name="archive_file" value="${staging_folder}/${arduinoOTA_archive_file}"/>
       <param name="archive_url" value="http://downloads.arduino.cc/tools/${arduinoOTA_archive_file}"/>
-      <param name="final_folder" value="${staging_folder}/work/${staging_hardware_folder}/tmp/arduinoOTA/${arduinoOTA_version}"/>
-      <param name="dest_folder" value="${staging_folder}/work/${staging_hardware_folder}/tmp/arduinoOTA/"/>
+      <param name="final_folder" value="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/tmp/arduinoOTA/${arduinoOTA_version}"/>
+      <param name="dest_folder" value="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/tmp/arduinoOTA/"/>
     </antcall>
 
-    <move file="${staging_folder}/work/${staging_hardware_folder}/tmp/gcc/avr" tofile="${staging_folder}/work/${staging_hardware_folder}/tools/avr"/>
-    <move file="${staging_folder}/work/${staging_hardware_folder}/tmp/avrdude/avrdude" tofile="${staging_folder}/work/${staging_hardware_folder}/tools/avr"/>
-    <move file="${staging_folder}/work/${staging_hardware_folder}/tmp/arduinoOTA/arduinoOTA/" tofile="${staging_folder}/work/${staging_hardware_folder}/tools/avr"/>
+    <move file="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/tmp/gcc/avr" tofile="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/tools/avr"/>
+    <move file="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/tmp/avrdude/avrdude" tofile="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/tools/avr"/>
+    <move file="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/tmp/arduinoOTA/arduinoOTA/" tofile="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/tools/avr"/>
 
-    <echo append="true" file="${staging_folder}/work/${staging_hardware_folder}/tools/avr/builtin_tools_versions.txt" message="arduino.avrdude=${avrdude_version}${line.separator}"/>
-    <echo append="true" file="${staging_folder}/work/${staging_hardware_folder}/tools/avr/builtin_tools_versions.txt" message="arduino.arduinoOTA=${arduinoOTA_version}${line.separator}"/>
-    <echo append="true" file="${staging_folder}/work/${staging_hardware_folder}/tools/avr/builtin_tools_versions.txt" message="arduino.avr-gcc=${gcc_version}${line.separator}"/>
+    <echo append="true" file="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/tools/avr/builtin_tools_versions.txt" message="arduino.avrdude=${avrdude_version}${line.separator}"/>
+    <echo append="true" file="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/tools/avr/builtin_tools_versions.txt" message="arduino.arduinoOTA=${arduinoOTA_version}${line.separator}"/>
+    <echo append="true" file="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/tools/avr/builtin_tools_versions.txt" message="arduino.avr-gcc=${gcc_version}${line.separator}"/>
 
-    <delete dir="${staging_folder}/work/${staging_hardware_folder}/tmp"/>
+    <delete dir="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/tmp"/>
   </target>
 
   <target name="generate-hourly-build-txt" if="hourly">
-    <echo file="${staging_folder}/work/${staging_hardware_folder}/../lib/hourlyBuild.txt">${BUILD_DATE}</echo>
+    <echo file="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/../lib/hourlyBuild.txt">${BUILD_DATE}</echo>
   </target>
 
   <target name="portable-true">

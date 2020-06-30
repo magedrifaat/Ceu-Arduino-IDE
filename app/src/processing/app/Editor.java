@@ -34,11 +34,19 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.awt.AWTEvent;
+import java.awt.event.AWTEventListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusListener;
+import java.awt.event.FocusEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.Point;
 import java.awt.print.PageFormat;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
@@ -50,6 +58,7 @@ import java.net.ConnectException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -67,6 +76,7 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -111,6 +121,9 @@ import processing.app.syntax.CustomKeywords;
 import processing.app.syntax.SketchTextArea;
 import processing.app.tools.MenuScroller;
 import processing.app.tools.Tool;
+import processing.app.packages.UserLibrary;
+import processing.app.packages.UserLibraryFolder;
+import processing.app.packages.UserLibraryFolder.Location;
 
 /**
  * Main editor panel for the Processing Development Environment.
@@ -126,6 +139,7 @@ public class Editor extends JFrame implements RunnerListener {
   private final Box upper;
   private ArrayList<EditorTab> tabs = new ArrayList<>();
   private int currentTabIndex = -1;
+  private int currentSideTabIndex = -1;
 
   private static class ShouldSaveIfModified
       implements Predicate<SketchController> {
@@ -156,6 +170,7 @@ public class Editor extends JFrame implements RunnerListener {
   final Base base;
   private ProjectConfig projectConfig;
   private CustomKeywords customKeywords;
+  PluginManager pluginManager;
 
   // otherwise, if the window is resized with the message label
   // set to blank, it's preferredSize() will be fukered
@@ -218,6 +233,18 @@ public class Editor extends JFrame implements RunnerListener {
 
   /** Contains all EditorTabs, of which only one will be visible */
   private JPanel codePanel;
+  
+  private JSplitPane middleSplit;
+  private JPanel sidePanel;
+  private SideBarHeader sideHeader;
+  private JPanel sideHeaderPanel;
+  private boolean sideIsPinned;
+  
+  private class SideTab {
+    public String tabName;
+    public JPanel tabPanel;
+  }
+  private ArrayList<SideTab> sidePanelTabs;
 
   //Runner runtime;
 
@@ -250,6 +277,8 @@ public class Editor extends JFrame implements RunnerListener {
 
     Base.setIcon(this);
     
+    sidePanelTabs = new ArrayList<> ();
+    
     String firstName = file.getName();
     String extension = null;
     if (firstName.lastIndexOf('.') != -1) {
@@ -258,6 +287,9 @@ public class Editor extends JFrame implements RunnerListener {
     projectConfig = ProjectConfig.inferConfig(extension);    
     customKeywords = new CustomKeywords(projectConfig.getKeywordsFile());
     customKeywords.reload();
+    
+    pluginManager = new PluginManager(this);
+    pluginManager.fire(PluginManager.Hooks.START);
 
     // Install default actions for Run, Present, etc.
     resetHandlers();
@@ -265,6 +297,7 @@ public class Editor extends JFrame implements RunnerListener {
     // add listener to handle window close box hit event
     addWindowListener(new WindowAdapter() {
         public void windowClosing(WindowEvent e) {
+          pluginManager.fire(PluginManager.Hooks.QUIT);
           base.handleClose(Editor.this);
         }
       });
@@ -312,13 +345,15 @@ public class Editor extends JFrame implements RunnerListener {
 
     Box box = Box.createVerticalBox();
     upper = Box.createVerticalBox();
+    
+    JPanel toolbarPanel = new JPanel(new BorderLayout());
 
     if (toolbarMenu == null) {
       toolbarMenu = new JMenu();
       base.rebuildToolbarMenu(toolbarMenu);
     }
     toolbar = new EditorToolbar(this, toolbarMenu);
-    upper.add(toolbar);
+    toolbarPanel.add(toolbar, BorderLayout.CENTER);
 
     header = new EditorHeader(this);
     upper.add(header);
@@ -338,11 +373,12 @@ public class Editor extends JFrame implements RunnerListener {
 
     lineStatus = new EditorLineStatus();
     consolePanel.add(lineStatus, BorderLayout.SOUTH);
-
+  
     codePanel = new JPanel(new BorderLayout());
     upper.add(codePanel);
-
+    
     splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, upper, consolePanel);
+    
 
     // repaint child panes while resizing
     splitPane.setContinuousLayout(true);
@@ -365,7 +401,23 @@ public class Editor extends JFrame implements RunnerListener {
     // the following changed from 600, 400 for netbooks
     // http://code.google.com/p/arduino/issues/detail?id=52
     splitPane.setMinimumSize(scale(new Dimension(600, 100)));
-    box.add(splitPane);
+    
+    sidePanel = new JPanel(new BorderLayout());
+    sidePanel.setBackground(Theme.getColor("editor.bgcolor"));
+    
+    middleSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sidePanel, splitPane);
+    middleSplit.setContinuousLayout(true);
+    middleSplit.setBorder(null);
+    Keys.killBinding(middleSplit, Keys.ctrl(KeyEvent.VK_TAB));
+    Keys.killBinding(middleSplit, Keys.ctrlShift(KeyEvent.VK_TAB));
+    middleSplit.setDividerSize(scale(middleSplit.getDividerSize() / 2));
+    
+    JPanel pnl = new JPanel(new BorderLayout());
+    pnl.add(toolbarPanel, BorderLayout.NORTH);
+    sideHeaderPanel = new JPanel(new BorderLayout());
+    pnl.add(sideHeaderPanel, BorderLayout.WEST);
+    pnl.add(middleSplit, BorderLayout.CENTER);
+    box.add(pnl);
 
     // hopefully these are no longer needed w/ swing
     // (har har har.. that was wishful thinking)
@@ -387,6 +439,11 @@ public class Editor extends JFrame implements RunnerListener {
 
     // Set the window bounds and the divider location before setting it visible
     setPlacement(storedLocation, defaultLocation);
+    
+    // TODO: handle cases of error or timeout to prevent plugin
+    //  from hanging the IDE
+    pluginManager.fire(PluginManager.Hooks.SIDE);
+    populateSidePanel();
 
     // Open the document that was passed in
     boolean loaded = handleOpenInternal(file);
@@ -517,7 +574,43 @@ public class Editor extends JFrame implements RunnerListener {
 
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
+  
+  private void populateSidePanel() {
+    ArrayList<String> tabNames = sidePanelTabs.stream().map(tab -> tab.tabName).collect(Collectors.toCollection(ArrayList::new));
+    
+    currentSideTabIndex = -1;
+    sideIsPinned = false;
+    
+    sideHeader = new SideBarHeader(this, tabNames);
+    sideHeader.rebuild();
+    sideHeaderPanel.add(sideHeader, BorderLayout.CENTER);
+    
+    sidePanel.setMinimumSize(new Dimension(200, 0));
+    sidePanel.setVisible(false);
+    sidePanel.setEnabled(false);
+    
+    // This basically catches any mouse click event that happened anywhere
+    // and closes the side bar if it is not pinned and the mouse click
+    // occurred outside its bounds.
+    // This shouldn't be the best way to do this but after a lot of reasearch
+    // and a lot of bugs in other methods, this works really well
+    Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
+      public void eventDispatched(AWTEvent event) {
+        if(event instanceof MouseEvent){
+          MouseEvent e = (MouseEvent)event;
+          if(e.getID() == MouseEvent.MOUSE_CLICKED){
+            if (!isSidePinned()) {
+              Rectangle b = sidePanel.getBounds();
+              Point mousepos = sidePanel.getParent().getMousePosition();
+              if (mousepos != null && !(mousepos.x < b.getX() + b.getWidth() && mousepos.y > b.getY())) {
+                setToolState(false);
+              }
+            }
+          }
+        }
+      }
+    }, AWTEvent.MOUSE_EVENT_MASK);
+  }
 
   private void buildMenuBar() {
     JMenuBar menubar = new JMenuBar();
@@ -582,6 +675,19 @@ public class Editor extends JFrame implements RunnerListener {
     menubar.add(buildProjectTypeMenu());
 	
     setJMenuBar(menubar);
+    
+    JLabel sep = new JLabel("|");
+    menubar.add(sep);
+    
+    int count = menubar.getMenuCount();
+    pluginManager.fire(PluginManager.Hooks.MENU);
+    
+    // No menus were added, remove the separator
+    if (count == menubar.getMenuCount()) {
+      menubar.remove(sep);
+      menubar.revalidate();
+      menubar.repaint();
+    }
   }
 
   private JMenu buildProjectTypeMenu() {
@@ -648,7 +754,10 @@ public class Editor extends JFrame implements RunnerListener {
     fileMenu.add(examplesMenu);
 
     item = Editor.newJMenuItem(tr("Close"), 'W');
-    item.addActionListener(event -> base.handleClose(Editor.this));
+    item.addActionListener(event -> {
+      pluginManager.fire(PluginManager.Hooks.QUIT);
+      base.handleClose(Editor.this);
+    });
     fileMenu.add(item);
 
     saveMenuItem = newJMenuItem(tr("Save"), 'S');
@@ -680,7 +789,10 @@ public class Editor extends JFrame implements RunnerListener {
       fileMenu.addSeparator();
 
       item = newJMenuItem(tr("Quit"), 'Q');
-      item.addActionListener(event -> base.handleQuit());
+      item.addActionListener(event -> {
+        pluginManager.fire(PluginManager.Hooks.QUIT);
+        base.handleQuit();
+      });
       fileMenu.add(item);
     }
     return fileMenu;
@@ -1029,6 +1141,7 @@ public class Editor extends JFrame implements RunnerListener {
     item.setName("menuToolsAutoFormat");
     int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
     item.setAccelerator(KeyStroke.getKeyStroke('T', modifiers));
+    item.addActionListener(e -> pluginManager.fire(PluginManager.Hooks.FORMAT));
     menu.add(item);
 
     //menu.add(createToolMenuItem("processing.app.tools.CreateFont"));
@@ -1494,6 +1607,10 @@ public class Editor extends JFrame implements RunnerListener {
   public int getCurrentTabIndex() {
     return currentTabIndex;
   }
+  
+  public int getCurrentSideTabIndex() {
+    return currentSideTabIndex;
+  }
 
   /**
    * Returns an (unmodifiable) list of currently opened tabs.
@@ -1536,6 +1653,33 @@ public class Editor extends JFrame implements RunnerListener {
 
   public void selectPrevTab() {
     selectTab((currentTabIndex - 1 + tabs.size()) % tabs.size());
+  }
+  
+  public void selectSideTab(final int index) {
+    if (sidePanelTabs.size() == 0)
+      return;
+    
+    currentSideTabIndex = index;
+    sideHeader.rebuild();
+    setToolState(true);
+    SwingUtilities.invokeLater(() -> {
+      sidePanel.removeAll();
+      sidePanel.add(sidePanelTabs.get(index).tabPanel , BorderLayout.CENTER);
+      sidePanel.revalidate();
+      sidePanel.repaint();
+    });
+  }
+  
+  public void selectNextSideTab() {
+    selectSideTab((currentSideTabIndex + 1) % sidePanelTabs.size());
+  }
+
+  public void selectPrevSideTab() {
+    selectSideTab((currentSideTabIndex - 1 + sidePanelTabs.size()) % sidePanelTabs.size());
+  }
+  
+  boolean isSidePinned() {
+    return sideIsPinned;
   }
 
   public EditorTab findTab(final SketchFile file) {
@@ -1621,6 +1765,27 @@ public class Editor extends JFrame implements RunnerListener {
     int index = findTabIndex(file);
     tabs.remove(index);
   }
+  
+  public void setToolState(boolean show, boolean pin) {
+    sideIsPinned = pin;
+    if (show && currentSideTabIndex == -1) {
+      selectSideTab(0);
+    }
+    setToolState(show);
+  }
+  
+  public void setToolState(boolean show) {
+    sidePanel.setVisible(show);
+    sidePanel.setEnabled(show);
+    if (show) {
+      middleSplit.setDividerLocation(0.2);
+    }
+    else
+    {
+      currentSideTabIndex = -1;
+    }
+    sideHeader.repaint();
+  }
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
@@ -1693,6 +1858,7 @@ public class Editor extends JFrame implements RunnerListener {
 
     @Override
     public void run() {
+      pluginManager.fire(PluginManager.Hooks.COMPILE);
       try {
         removeAllLineHighlights();
         if (sketch.isLegacy()) {
@@ -1722,6 +1888,10 @@ public class Editor extends JFrame implements RunnerListener {
   }
 
   public void addLineHighlight(int line) throws BadLocationException {
+    addLineHighlight(line, new Color(1, 0, 0, 0.2f));
+  }
+
+  public void addLineHighlight(int line, Color color) throws BadLocationException {
     SketchTextArea textArea = getCurrentTab().getTextArea();
     FoldManager foldManager = textArea.getFoldManager();
     if (foldManager.isLineHidden(line)) {
@@ -1731,7 +1901,11 @@ public class Editor extends JFrame implements RunnerListener {
         }
       }
     }
-    textArea.addLineHighlight(line, new Color(1, 0, 0, 0.2f));
+    
+    if (color == null) {
+      color = new Color(1, 0, 0, 0.2f);
+    }
+    textArea.addLineHighlight(line, color);
     textArea.setCaretPosition(textArea.getLineStartOffset(line));
   }
 
@@ -2119,6 +2293,7 @@ public class Editor extends JFrame implements RunnerListener {
     }
 
     public void run() {
+      pluginManager.fire(PluginManager.Hooks.UPLOAD);
       try {
         removeAllLineHighlights();
         if (serialMonitor != null) {
@@ -2693,4 +2868,42 @@ public class Editor extends JFrame implements RunnerListener {
     updateTitle();
   }
   
+  
+  /* -------------- Helpers for Plugins API -------------*/
+  void addMenu(JMenu newMenu) {
+    this.getJMenuBar().add(newMenu);
+  }
+  
+  AbstractAction getIncludeAction(File folder) {
+    // create a UserLibrary from the given folder with a dummy location
+    UserLibrary lib;
+    try {
+      lib = UserLibrary.create(new UserLibraryFolder(folder, Location.SKETCHBOOK));
+    }
+    catch (IOException e) {
+      System.out.println("Unable to access library in " + folder.getAbsolutePath() + " : " + e.getMessage());
+      return null;
+    }
+    
+    return new AbstractAction(lib.getName()) {
+      public void actionPerformed(ActionEvent event) {
+        try {
+          sketchController.importLibrary(lib);
+        } catch (IOException e) {
+          statusError("Unable to list header files in " + lib.getSrcFolder());
+        }
+      }
+    };
+  }
+  
+  void addSideTab(String tabName, JPanel tabPanel) {
+    SideTab newTab = new SideTab();
+    newTab.tabName = tabName;
+    newTab.tabPanel = tabPanel;
+    sidePanelTabs.add(newTab);
+  }
+  
+  String getMainFilePath() {
+    return sketch.getMainFilePath();
+  }
 }

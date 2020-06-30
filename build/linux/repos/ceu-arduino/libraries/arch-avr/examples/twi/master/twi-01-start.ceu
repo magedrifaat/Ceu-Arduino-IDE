@@ -1,0 +1,89 @@
+// compile with CEU_DEFS=-DCEU_PM_MIN
+
+/*
+ * The following program illustrates the start condition of the TWI.
+ * The program starts by setting the value of the Bit Rate (TWBR).
+ * It then sets the start condition which should generate an interrupt.
+ * The start condition further changes the TWDR to SLA Read and the TWCR is set
+ * to resume the transfer.
+ *
+ * Testing:
+ *  - The NACK was achieved by just the master connected to the slave without
+ *    the SDA and SLA connected which makes the slave not respond (NACK).
+ *  - The ACK from the slave was acheived by a fully connected master slave TWI
+ *    system.
+ *  - The two (NACK/ACK) can be differentiated by the number of fast blinks in
+ *    LED 13.
+ *  - The ACK/NACK interrupt is triggered as usual in case of await forever in
+ *    place of 300ms even though the program is not terminated
+ *  - When a wrong address is mentioned the NACK is assumed and the assert is
+ *    called accordingly.
+ *
+ * Flags:
+ *  - By setting the TWIE (Two wire Interrupt Enable) bit to 1, TWI interrupt
+ *    request will be activated for as long as the TWINT Flag is high.
+ *  - Setting the TWEN (Two wire Enable) bit to 1 enables the TWI operation and
+ *    activates the TWI interface.
+ *  - The TWINT (Two wire Interrupt) bit is set when the TWI has finished its
+ *    current job and expects application software response. Clearing this flag
+ *    starts the operation of the TWI, so all accesses to the TWI Address
+ *    Register must be completed before doing that.
+ *  - TWSTA and TWSTO bit when set to high respectively send a start/stop
+ *    condition. The start condition is sent when the device desires to become
+ *    a Master on the 2-wire Serial Bus.
+ *
+ *  Here are the value of the respective Flags:
+ *      TWINT        7
+ *      TWSTA        5
+ *      TWSTO        4
+ *      TWEN         2
+ *      TWIE         0
+ *
+ * Registers:
+ *  TWCR: Control Register (Controls the Interrupt Routine)
+ *  TWDR: Data Register (Holds Data)
+ */
+
+#include "wclock.ceu"
+
+native
+    _TWI_vect,
+;
+
+native/pre do
+    ##include <compat/twi.h>
+    int SLA=4;
+end
+
+spawn async/isr [_TWI_vect] do
+{
+  switch(TW_STATUS) {
+    case TW_START:
+        // change TW_STATUS to SLA+R
+        TWDR = (SLA << 1) | TW_READ;                // read from slave
+        TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWIE);  // continue transfer by enabling interrupt
+        break;
+    
+    case TW_MR_SLA_ACK:
+        // data received with an ACK
+        ceu_arduino_assert(0,7);
+        break;    
+
+    case TW_MR_SLA_NACK:
+        // data received with a NACK
+        ceu_arduino_assert(0,5);
+        break;    
+        
+    default:
+        // should never occur
+        ceu_arduino_assert(0,3);
+  }
+}
+end
+
+{
+    TWBR = ((F_CPU / 100000L) - 16) / 2;                // set bit rate
+    TWCR = (1<<TWINT)|(1<<TWSTA)|(1<<TWEN)|(1<<TWIE);   // set start condition
+}
+
+await FOREVER;

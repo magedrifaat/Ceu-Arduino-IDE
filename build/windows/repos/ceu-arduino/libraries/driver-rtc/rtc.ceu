@@ -1,0 +1,37 @@
+code/await Rtc (var on/off v)->none;        // await RTC to begin or stop
+
+
+// events to read and write the RTC registers
+
+code/await Rtc_write_register8 (var u8 reg, var u8 value) -> none;
+code/await Rtc_read_register8 (var u8 reg) -> u8;
+
+
+// TIME
+
+code/await Rtc_get_time (var&[] u16 values) -> none;
+code/await Rtc_set_time (var u16 year,var u8 month, var u8 day, var u8 hour, var u8 minute, var u8 second) -> none;
+
+
+// TEMPERATURE
+
+code/await Rtc_force_conversion (none) -> none;
+code/await Rtc_read_temperature (none) -> r32;
+
+
+// ALARMS
+
+code/await Rtc_get_alarm1 (var&[] u8 values) -> none;
+code/await Rtc_get_alarm_type1(none) -> u16;
+code/await Rtc_arm_alarm1(var bool armed) -> none;
+code/await Rtc_clear_alarm1(none) -> none;
+code/await Rtc_set_alarm1(var u8 dydw, var u8 hour, var u8 minute, var u8 second, var u8 mode, var bool armed) -> none;
+code/await Rtc_is_alarm1(var bool clear) -> bool;
+code/await Rtc_is_armed1 (none) -> bool;
+code/await Rtc_get_alarm2(var&[] u8 values) -> none;
+code/await Rtc_get_alarm_type2(none) -> u8;
+code/await Rtc_arm_alarm2(var bool armed) -> none;
+code/await Rtc_is_armed2(none) -> on/off;
+code/await Rtc_clear_alarm2(none) -> none;
+code/await Rtc_set_alarm2(var u8 dydw,var u8 hour,var u8 minute, var u8 mode, var bool armed) -> none;
+code/await Rtc_is_alarm2(var bool clear) ->  bool;

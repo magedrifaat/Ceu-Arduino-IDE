@@ -1,0 +1,10 @@
+#include "out.ceu"
+#include "int0.ceu"     // UNO=D2, MEGA=D21
+
+output high/low OUT_13;
+
+emit OUT_13(call INT0_Get());
+every INT0 do
+    emit OUT_13(call INT0_Get());
+end
+

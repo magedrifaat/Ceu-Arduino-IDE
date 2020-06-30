@@ -291,6 +291,19 @@ preferences.readonly=false
 #allow_insecure_packages=true
 
 
-project-types = legacy, ceu-arduino
+project-types = pico-ceu, ceu-arduino, legacy
 legacy-title = Legacy Arduino
+legacy-extensions=ino
+legacy-keywords=keywords.txt
+
 ceu-arduino-title = Ceu-Arduino
+ceu-arduino-compile=ceu-compiler
+ceu-arduino-upload=ceu-uploader
+ceu-arduino-extensions=ceu
+ceu-arduino-keywords=keywords_ceu.txt
+
+pico-ceu-title= pico-Ceu
+pico-ceu-compile=pico-compiler
+pico-ceu-upload=pico-run
+pico-ceu-extensions=ceu
+pico-ceu-keywords=keywords_ceu.txt

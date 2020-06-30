@@ -1,0 +1,78 @@
+#include "../wdt.ceu"
+
+///////////////////////////////////////////////////////////////////////////////
+// INITIALIZATION
+///////////////////////////////////////////////////////////////////////////////
+
+native/pre do
+	##include <avr/wdt.h>
+end
+
+// Possible sleep timeouts:
+// WDTO_15MS,  WDTO_30MS, WDTO_60MS, WDTO_120MS, WDTO_250MS,
+// WDTO_500MS, WDTO_1S,   WDTO_2S,   WDTO_4S,    WDTO_8S,
+
+///////////////////////////////////////////////////////////////////////////////
+// INPUT / OUTPUT
+///////////////////////////////////////////////////////////////////////////////
+
+output (int period) WDT_REQUEST do
+    {
+        //wdt_disable();
+        wdt_enable(@period);
+        bitSet(WDTCSR, WDIE);	
+    }
+end
+
+native/const _WDT_vect;
+spawn async/isr [_WDT_vect, 0] do
+    //{wdt_disable();}
+    emit WDT_DONE;
+end
+
+///////////////////////////////////////////////////////////////////////////////
+// ABSTRACTIONS
+///////////////////////////////////////////////////////////////////////////////
+
+code/await Wdt (var int ms) -> none do
+    loop do
+        if ms <= 0 then
+            break;
+        end
+        var int period = do
+            if ms >= 8000 then
+                ms = ms - 8000;
+                escape {WDTO_8S};
+            else/if ms >= 4000 then
+                ms = ms - 4000;
+                escape {WDTO_4S};
+            else/if ms >= 2000 then
+                ms = ms - 2000;
+                escape {WDTO_2S};
+            else/if ms >= 1000 then
+                ms = ms - 1000;
+                escape {WDTO_1S};
+            else/if ms >= 500 then
+                ms = ms - 500;
+                escape {WDTO_500MS};
+            else/if ms >= 250 then
+                ms = ms - 250;
+                escape {WDTO_250MS};
+            else/if ms >= 120 then
+                ms = ms - 120;
+                escape {WDTO_120MS};
+            else/if ms >= 60 then
+                ms = ms - 60;
+                escape {WDTO_60MS};
+            else/if ms >= 30 then
+                ms = ms - 30;
+                escape {WDTO_30MS};
+            else
+                ms = ms - 15;
+                escape {WDTO_15MS};
+            end
+        end;
+        emit WDT_REQUEST(period);
+        await WDT_DONE;
+    end
+end

@@ -1,0 +1,203 @@
+native/pre do
+    ##if _WIN32 || _WIN64
+        ##define WIN_OS
+    ##endif
+end
+
+native/pre do
+    ##ifdef WIN_OS
+        ##include <windows.h>
+        HANDLE hSerial;
+    ##else
+        // ver o que realmente é necessário
+        ##include <errno.h>
+        ##include <fcntl.h> 
+        ##include <stdio.h>
+        ##include <stdlib.h>
+        ##include <string.h>
+        ##include <termios.h>
+        ##include <unistd.h>
+    ##endif
+end 
+
+{##ifndef WIN_OS}
+var int fd=_;
+{##endif}
+    
+code/await USART_Init (var text port, var int? bps) -> NEVER do
+    if (not bps?) then
+        bps = 9600;
+    end
+
+    {##ifdef WIN_OS}
+        var int portNumber = {atoi(@port)};
+        {
+        char portStr[15];
+
+        if (@portNumber > 9){
+            sprintf(portStr, "\\\\.\\COM%d", @portNumber);
+        }else{
+            sprintf(portStr, "COM%d", @portNumber);
+        }
+
+        // OPEN
+        hSerial = CreateFile(portStr,
+                GENERIC_READ | GENERIC_WRITE,
+                0,
+                NULL,
+                OPEN_EXISTING,
+                FILE_ATTRIBUTE_NORMAL,
+                NULL);
+
+        //ToDo check when this error occurs
+        ceu_assert(hSerial != INVALID_HANDLE_VALUE, "bug found. Check if the Arduino board is connect on the used port and if this port is busy.");
+
+        DCB dcbSerialParams = {0};
+        ceu_assert(GetCommState(hSerial,&dcbSerialParams), "bug found in Usart on GetCommState invocation");
+
+        dcbSerialParams.BaudRate    = @bps!;
+        dcbSerialParams.ByteSize    = 8;
+        dcbSerialParams.StopBits    = ONESTOPBIT;
+        dcbSerialParams.Parity      = NOPARITY;
+        dcbSerialParams.fDtrControl = DTR_CONTROL_ENABLE;
+        ceu_assert(SetCommState(hSerial, &dcbSerialParams), "bug found in Usart on SetCommState invocation");
+
+        PurgeComm(hSerial, PURGE_RXCLEAR | PURGE_TXCLEAR);
+    ##endif} 
+
+    {##ifndef WIN_OS}
+        outer.fd = _open(port, {O_RDWR});
+        _ceu_assert(outer.fd != -1, "serial error");
+        // Set bps 
+        {
+            int get_baud(int baud){
+                switch (baud) {
+                    case 9600:
+                        return B9600;
+                    case 19200:
+                        return B19200;
+                    case 38400:
+                        return B38400;
+                    case 57600:
+                        return B57600;
+                    case 115200:
+                        return B115200;
+                    case 230400:
+                        return B230400;
+                    case 460800:
+                        return B460800;
+                    case 500000:
+                        return B500000;
+                    case 576000:
+                        return B576000;
+                    case 921600:
+                        return B921600;
+                    case 1000000:
+                        return B1000000;
+                    case 1152000:
+                        return B1152000;
+                    case 1500000:
+                        return B1500000;
+                    case 2000000:
+                        return B2000000;
+                    case 2500000:
+                        return B2500000;
+                    case 3000000:
+                        return B3000000;
+                    case 3500000:
+                        return B3500000;
+                    case 4000000:
+                        return B4000000;
+                    default: 
+                        return -1;
+                }
+            }
+
+            struct termios settings;
+            tcgetattr(@outer.fd, &settings);
+            // set baud rate
+            int bps = get_baud(@bps!);
+            ceu_assert(bps != -1, "invalid bps");
+            cfsetospeed(&settings, bps);
+            // apply the settings
+            tcsetattr(@outer.fd, TCSANOW, &settings);
+            tcflush(@outer.fd, TCOFLUSH);
+        }
+
+        var int flags = _fcntl(outer.fd, _F_GETFL, 0);
+        var int ok    = _fcntl(outer.fd, _F_SETFL, flags|_O_NONBLOCK);
+        _ceu_assert(ok == 0, "serial error");
+    {##endif}
+
+
+    do finalize with
+        {
+            ##ifdef WIN_OS
+                CloseHandle(hSerial);
+            ##else
+                close(@(outer.fd));
+            ##endif
+        }
+    end
+
+
+    await FOREVER;
+end
+
+code/await USART_Tx (var&[] byte buf) -> none do
+    {
+        const char* strC = @&&buf[0] as _char&&;
+        int nbChar = strlen(strC);
+    }
+
+    {
+        ##ifdef WIN_OS    
+            DWORD bytesSend;
+
+            ceu_assert(WriteFile(hSerial, (void*)strC, nbChar, &bytesSend, 0), "bug found in Usart_TX on WriteFile invocation");
+            ceu_assert(bytesSend == nbChar, "bug found in Usart_TX on bytesSend verification");
+        ##else
+            int bytesSend = write(@(outer.fd), strC, nbChar);
+            ceu_assert(bytesSend == nbChar, "bug found in Usart_TX on bytesSend verification");
+            tcdrain(@(outer.fd));
+        
+        ##endif
+    }
+end
+
+code/await USART_Rx (var&[] byte buf, var usize? n) -> none do
+    if (not n?) then
+        n = 1; //default: as soon as something is received
+    end
+    
+    {##ifdef WIN_OS}
+        every 10ms do
+            {
+                DWORD errors;
+                COMSTAT status;
+
+                ClearCommError(hSerial, &errors, &status);
+                if (status.cbInQue >= @n!)
+                    break;
+            }
+        end
+
+        {
+            DWORD bytesRead;
+
+            char* strC = @&&buf[0] as _char&&;
+
+            ceu_assert(ReadFile(hSerial, strC, @n!, &bytesRead, NULL), "bug found");
+            ceu_assert(bytesRead ==  @n!, "bug found");
+        }
+    {##else}
+        every 10ms do
+            {
+                char* strC = @&&buf[0] as _char&&;
+                int nRead = read (@(outer.fd), strC, @n!);
+                if (nRead >= @n!)
+                    break;
+            }
+        end
+    {##endif}
+end

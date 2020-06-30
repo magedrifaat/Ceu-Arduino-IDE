@@ -1,0 +1,36 @@
+native/pre do
+    ##define CEU_PM_IMPL
+
+    #include "../pm.c"
+    ##include "LowPower.h"
+    ##include "LowPower.cpp"
+
+    enum {
+        CEU_PM_ADC = 0,
+        CEU_PM_RTC,
+        CEU_PM_SERCOM4,
+        CEU_PM_TC4,
+        CEU_PM_N,
+    };
+
+    void ceu_pm_init (void) {
+        // ok
+    }
+
+    void ceu_pm_sleep (void) {
+#ifdef CEU_PM_MIN
+        LowPower.idle(IDLE_0);          // awakes: TC4
+#else
+        if (0) {
+            LowPower.idle(IDLE_0);      // awakes: TC4
+        } else if (0) {
+            LowPower.idle(IDLE_1);      // awakes: TC4
+        } else if (CEU_PM_STATE(CEU_PM_TC4)) {
+            LowPower.idle(IDLE_2);      // awakes: TC4
+        } else {
+//ceu_arduino_assert(0, 5);
+            LowPower.standby();         // doesnt: TC4
+        }
+#endif
+    }
+end
