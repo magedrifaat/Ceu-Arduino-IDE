@@ -139,8 +139,12 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
 
     //which[buttonCount++] = NOTHING;
     which[buttonCount++] = VERIFY;
-    which[buttonCount++] = EXPORT;
-    which[buttonCount++] = RUN;
+    if (editor.getProjectConfig().isUploadable()) {
+      which[buttonCount++] = EXPORT;
+    }
+    if (editor.getProjectConfig().isRunnable()) {
+      which[buttonCount++] = RUN;
+    }
     which[buttonCount++] = NEW;
     which[buttonCount++] = OPEN;
     which[buttonCount++] = SAVE;
@@ -178,19 +182,19 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
     touchBarButtons = new TouchBarButton[BUTTON_COUNT];
     touchBar.setCustomizationIdentifier("Arduino");
     
-    for (int i = 0; i < BUTTON_COUNT; i++) {
-      final int selection = i;
+    for (int i = 0; i < buttonCount; i++) {
+      final int selection = which[i];
       
       // add spacers before NEW and SERIAL buttons
-      if (i == NEW) {
+      if (which[i] == NEW) {
         touchBar.addItem(new TouchBarItem(TouchBarItem.NSTouchBarItemIdentifierFixedSpaceSmall));
-      } else if (i == SERIAL) {
+      } else if (which[i] == SERIAL) {
         touchBar.addItem(new TouchBarItem(TouchBarItem.NSTouchBarItemIdentifierFlexibleSpace));
       }
       
-      touchBarButtons[i] = new TouchBarButton();
-      touchBarButtons[i].setImage(touchBarImages[i][ROLLOVER]);
-      touchBarButtons[i].setAction(event -> {
+      touchBarButtons[which[i]] = new TouchBarButton();
+      touchBarButtons[which[i]].setImage(touchBarImages[which[i]][ROLLOVER]);
+      touchBarButtons[which[i]].setAction(event -> {
         // Run event handler later to prevent hanging if a dialog needs to be open
         EventQueue.invokeLater(new Runnable() {
           @Override
@@ -200,8 +204,8 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
         });
       });
       
-      TouchBarItem touchBarItem = new TouchBarItem(title[i], touchBarButtons[i], true);
-      touchBarItem.setCustomizationLabel(title[i]);
+      TouchBarItem touchBarItem = new TouchBarItem(title[which[i]], touchBarButtons[which[i]], true);
+      touchBarItem.setCustomizationLabel(title[which[i]]);
       
       touchBar.addItem(touchBarItem);
     }
@@ -266,15 +270,15 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
 
     // this happens once per instance of EditorToolbar
     if (stateImage == null) {
-      state = new int[buttonCount];
-      stateImage = new Image[buttonCount];
+      state = new int[BUTTON_COUNT];
+      stateImage = new Image[BUTTON_COUNT];
       for (int i = 0; i < buttonCount; i++) {
-        setState(i, INACTIVE, false);
+        setState(which[i], INACTIVE, false);
       }
       y1 = 0;
       y2 = BUTTON_HEIGHT;
-      x1 = new int[buttonCount];
-      x2 = new int[buttonCount];
+      x1 = new int[BUTTON_COUNT];
+      x2 = new int[BUTTON_COUNT];
     }
 
     Dimension size = getSize();
@@ -286,10 +290,10 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
 
       int offsetX = 3;
       for (int i = 0; i < buttonCount; i++) {
-        x1[i] = offsetX;
-        if (i == NEW || i == 6) x1[i] += BUTTON_GAP;
-        x2[i] = x1[i] + BUTTON_WIDTH;
-        offsetX = x2[i];
+        x1[which[i]] = offsetX;
+        if (which[i] == NEW || i == 6) x1[which[i]] += BUTTON_GAP;
+        x2[which[i]] = x1[which[i]] + BUTTON_WIDTH;
+        offsetX = x2[which[i]];
       }
 
       // Serial button must be on the right
@@ -301,7 +305,7 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
     g.fillRect(0, 0, width, height);
 
     for (int i = 0; i < buttonCount; i++) {
-      g.drawImage(stateImage[i], x1[i], y1, null);
+      g.drawImage(stateImage[which[i]], x1[which[i]], y1, null);
     }
 
     g.setColor(statusColor);
@@ -388,10 +392,10 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
     if ((x1 == null) || (x2 == null)) return -1;
 
     for (int i = 0; i < buttonCount; i++) {
-      if ((y > y1) && (x > x1[i]) &&
-        (y < y2) && (x < x2[i])) {
+      if ((y > y1) && (x > x1[which[i]]) &&
+        (y < y2) && (x < x2[which[i]])) {
         //System.out.println("sel is " + i);
-        return i;
+        return which[i];
       }
     }
     return -1;
@@ -400,7 +404,7 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
 
   private void setState(int slot, int newState, boolean updateAfter) {
     state[slot] = newState;
-    stateImage[slot] = buttonImages[which[slot]][newState];
+    stateImage[slot] = buttonImages[slot][newState];
     if (updateAfter) {
       repaint();
     }

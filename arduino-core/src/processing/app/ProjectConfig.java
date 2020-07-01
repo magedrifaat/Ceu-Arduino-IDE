@@ -103,19 +103,27 @@ public class ProjectConfig {
   }
   
   public String getRunCommand() {
+    if (runCommand == null || runCommand.isEmpty()) {
+      return "";
+    }
+    
     return runCommand;
   }
   
   public String getUploadCommand() {
+    if (uploadCommand == null || uploadCommand.isEmpty()) {
+      return "";
+    }
+    
     return uploadCommand;
   }
   
   public boolean isRunnable() {
-    return runCommand == null;
+    return !getRunCommand().isEmpty();
   }
   
   public boolean isUploadable() {
-    return uploadCommand == null;
+    return !getUploadCommand().isEmpty() || isLegacy();
   }
   
   public boolean isCorrectExtension(String extension) {
