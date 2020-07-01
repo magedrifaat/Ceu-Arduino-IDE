@@ -55,14 +55,14 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
    * Rollover titles for each button.
    */
   private static final String[] title = {
-    tr("Verify"), tr("Upload"), tr("New"), tr("Open"), tr("Save"), tr("Serial Monitor")
+    tr("Verify"), tr("Upload"), tr("Run"), tr("New"), tr("Open"), tr("Save"), tr("Serial Monitor")
   };
 
   /**
    * Titles for each button when the shift key is pressed.
    */
   private static final String[] titleShift = {
-    tr("Verify"), tr("Upload Using Programmer"), tr("New"), tr("Open"), tr("Save As..."), tr("Serial Monitor")
+    tr("Verify"), tr("Upload Using Programmer"), tr("Run"), tr("New"), tr("Open"), tr("Save As..."), tr("Serial Monitor")
   };
 
   private static final int BUTTON_COUNT = title.length;
@@ -84,14 +84,15 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
   private static final int BUTTON_IMAGE_SIZE = scale(33);
 
 
-  private static final int RUN = 0;
+  private static final int VERIFY = 0;
   private static final int EXPORT = 1;
+  private static final int RUN = 2;
 
-  private static final int NEW = 2;
-  private static final int OPEN = 3;
-  private static final int SAVE = 4;
+  private static final int NEW = 3;
+  private static final int OPEN = 4;
+  private static final int SAVE = 5;
 
-  private static final int SERIAL = 5;
+  private static final int SERIAL = 6;
 
   private static final int INACTIVE = 0;
   private static final int ROLLOVER = 1;
@@ -137,8 +138,9 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
     which = new int[BUTTON_COUNT];
 
     //which[buttonCount++] = NOTHING;
-    which[buttonCount++] = RUN;
+    which[buttonCount++] = VERIFY;
     which[buttonCount++] = EXPORT;
+    which[buttonCount++] = RUN;
     which[buttonCount++] = NEW;
     which[buttonCount++] = OPEN;
     which[buttonCount++] = SAVE;
@@ -285,7 +287,7 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
       int offsetX = 3;
       for (int i = 0; i < buttonCount; i++) {
         x1[i] = offsetX;
-        if (i == 2 || i == 6) x1[i] += BUTTON_GAP;
+        if (i == NEW || i == 6) x1[i] += BUTTON_GAP;
         x2[i] = x1[i] + BUTTON_WIDTH;
         offsetX = x2[i];
       }
@@ -460,7 +462,7 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
   
   private void handleSelectionPressed(int sel, boolean isShiftDown, int x, int y) {
     switch (sel) {
-      case RUN:
+      case VERIFY:
         if (!editor.avoidMultipleOperations) {
           editor.handleRun(false, editor.presentHandler, editor.runHandler);
           editor.avoidMultipleOperations = true;
@@ -518,7 +520,7 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
   }
 
   public void activateRun() {
-    activate(RUN);
+    activate(VERIFY);
   }
 
   public void activateSave() {
@@ -539,7 +541,7 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
   }
 
   public void deactivateRun() {
-    deactivate(RUN);
+    deactivate(VERIFY);
   }
 
   public void deactivateSave() {
