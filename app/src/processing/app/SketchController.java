@@ -704,13 +704,8 @@ public class SketchController {
     
     List<String> cmd = new ArrayList<>();
     
-    String compileCommand = editor.getProjectConfig().getCompileCommand();
-    if (OSUtils.isWindows() && !compileCommand.endsWith(".bat")) {
-      compileCommand = compileCommand + ".bat";
-    }
-    else if (!OSUtils.isWindows() && !compileCommand.endsWith(".sh")) {
-      compileCommand = compileCommand + ".sh";
-    }
+    String compileCommand = getBatOrBash(editor.getProjectConfig().getCompileCommand());
+    
     cmd.add(BaseNoGui.getContentFile(compileCommand).getAbsolutePath());
     
     // add the main file as first argument
@@ -731,19 +726,6 @@ public class SketchController {
     cmd.add(filePath);
 
     try {
-      // // upload flag
-      // cmd.add(Boolean.toString(false));
-      
-      // // The board name
-      // TargetBoard board = BaseNoGui.getTargetBoard();
-      // if (board == null) {
-        // throw new RunnerException("Board is not selected");
-      // }
-      // cmd.add(board.getId());
-      
-      // // The Architecture
-      // TargetPlatform platform = board.getContainerPlatform();
-      // cmd.add(platform.getId());
       
       // run the batch and process the output
       int result;
@@ -830,41 +812,13 @@ public class SketchController {
     editor.status.progressNotice(tr("Compiling Sketch..."));
     buildCustom();
     
-    String uploadCommand = editor.getProjectConfig().getUploadCommand();
+    String uploadCommand = getBatOrBash(editor.getProjectConfig().getUploadCommand());
     
-    if (OSUtils.isWindows() && !uploadCommand.endsWith(".bat")) {
-      uploadCommand = uploadCommand + ".bat";
-    }
-    else if (!OSUtils.isWindows() && !uploadCommand.endsWith(".sh")) {
-      uploadCommand = uploadCommand + ".sh";
-    }
     List<String> cmd = new ArrayList<>();
     cmd.add(BaseNoGui.getContentFile(uploadCommand).getAbsolutePath());
     
     // add the main file as first argument
     cmd.add(sketch.getPrimaryFile().getFile().getAbsolutePath());
-    
-    // // upload flag
-    // cmd.add(Boolean.toString(true));
-    
-    // // The board name
-    // TargetBoard board = BaseNoGui.getTargetBoard();
-    // if (board == null) {
-      // throw new RunnerException("Board is not selected");
-    // }
-    // cmd.add(board.getId());
-    
-    // // The Architecture
-    // TargetPlatform platform = board.getContainerPlatform();
-    // cmd.add(platform.getId());
-    
-    
-    // // The serial port
-    // String port = PreferencesData.get("serial.port");
-    // if (port == null || port.isEmpty()) {
-      // throw new SerialNotFoundException();
-    // }
-    // cmd.add(port);
     
     editor.status.progressNotice(tr("Uploading..."));
     
@@ -905,6 +859,76 @@ public class SketchController {
     editor.status.progressUpdate(100);
     System.out.println("Done Uploading");
     return true;
+  }
+  
+  /**
+   * Handle Running sketches
+   *
+   */
+  public boolean runSketch() throws Exception {
+    
+    editor.status.progressNotice(tr("Running the program..."));
+    buildCustom();
+    
+    String runCommand = getBatOrBash(editor.getProjectConfig().getRunCommand());
+    
+    List<String> cmd = new ArrayList<>();
+    cmd.add(BaseNoGui.getContentFile(runCommand).getAbsolutePath());
+    
+    // add the main file as first argument
+    cmd.add(sketch.getPrimaryFile().getFile().getAbsolutePath());
+    
+    editor.status.progressUpdate(20);
+    editor.status.progressNotice(tr("Running..."));
+    
+    // run the batch and process the output
+    int result;
+    RunnerException ex = null;
+    try {
+      Process process = ProcessUtils.exec(cmd.toArray(new String[0]));
+      
+      EditorConsole.setCurrentEditorConsole(editor.console);
+      
+      // process and output the input and error streams of the batch file
+      BufferedReader inBuf = new BufferedReader(new InputStreamReader(process.getInputStream()));
+      BufferedReader errBuf = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+      
+      String line;
+      while ((line = inBuf.readLine())  != null) {
+        System.out.println(line);
+      }
+      inBuf.close();
+      
+      while ((line = errBuf.readLine())  != null) {
+        System.err.println(line);
+      }
+      errBuf.close();
+      
+      result = process.waitFor();
+    } catch (Exception e) {
+      throw new RunnerException(e);
+    }
+    
+    if (result != 0) {
+      RunnerException re = new RunnerException("Error Running");
+      re.hideStackTrace();
+      throw re;
+    }
+    
+    editor.status.progressUpdate(100);
+    System.out.println("Run Finished");
+    return true;
+  }
+  
+  private String getBatOrBash(String command) {
+    if (OSUtils.isWindows() && !command.endsWith(".bat")) {
+      command = command + ".bat";
+    }
+    else if (!OSUtils.isWindows() && !command.endsWith(".sh")) {
+      command = command + ".sh";
+    }
+    
+    return command;
   }
   
   /**

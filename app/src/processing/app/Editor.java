@@ -260,13 +260,14 @@ public class Editor extends JFrame implements RunnerListener {
 
   private FindReplace find;
 
-  Runnable runHandler;
+  Runnable verifyHandler;
   Runnable presentHandler;
-  private Runnable runAndSaveHandler;
+  private Runnable verifyAndSaveHandler;
   private Runnable presentAndSaveHandler;
   private UploadHandler uploadHandler;
   private UploadHandler uploadUsingProgrammerHandler;
   private Runnable timeoutUploadHandler;
+  private RunHandler runHandler;
 
   private Map<String, Tool> internalToolCache = new HashMap<String, Tool>();
 
@@ -809,7 +810,7 @@ public class Editor extends JFrame implements RunnerListener {
     sketchMenu.removeAll();
 
     JMenuItem item = newJMenuItem(tr("Verify/Compile"), 'R');
-    item.addActionListener(event -> handleRun(false, presentHandler, runHandler));
+    item.addActionListener(event -> handleCompile(false, presentHandler, verifyHandler));
     sketchMenu.add(item);
 
     item = newJMenuItem(tr("Upload"), 'U');
@@ -826,7 +827,7 @@ public class Editor extends JFrame implements RunnerListener {
         System.out.println(tr("Export canceled, changes must first be saved."));
         return;
       }
-      handleRun(false, new CanExportInSketchFolder(), presentAndSaveHandler, runAndSaveHandler);
+      handleCompile(false, new CanExportInSketchFolder(), presentAndSaveHandler, verifyAndSaveHandler);
 
     });
     sketchMenu.add(item);
@@ -1565,9 +1566,10 @@ public class Editor extends JFrame implements RunnerListener {
 
 
   private void resetHandlers() {
-    runHandler = new BuildHandler();
+    verifyHandler = new BuildHandler();
+    runHandler = new RunHandler();
     presentHandler = new BuildHandler(true);
-    runAndSaveHandler = new BuildHandler(false, true);
+    verifyAndSaveHandler = new BuildHandler(false, true);
     presentAndSaveHandler = new BuildHandler(true, true);
     uploadHandler = new UploadHandler();
     uploadHandler.setUsingProgrammer(false);
@@ -1814,15 +1816,15 @@ public class Editor extends JFrame implements RunnerListener {
    * @param verboseHandler
    * @param nonVerboseHandler
    */
-  public void handleRun(final boolean verbose, Runnable verboseHandler, Runnable nonVerboseHandler) {
-    handleRun(verbose, new ShouldSaveIfModified(), verboseHandler, nonVerboseHandler);
+  public void handleCompile(final boolean verbose, Runnable verboseHandler, Runnable nonVerboseHandler) {
+    handleCompile(verbose, new ShouldSaveIfModified(), verboseHandler, nonVerboseHandler);
   }
 
-  private void handleRun(final boolean verbose, Predicate<SketchController> shouldSavePredicate, Runnable verboseHandler, Runnable nonVerboseHandler) {
+  private void handleCompile(final boolean verbose, Predicate<SketchController> shouldSavePredicate, Runnable verboseHandler, Runnable nonVerboseHandler) {
     if (shouldSavePredicate.test(sketchController)) {
       handleSave(true);
     }
-    toolbar.activateRun();
+    toolbar.activateVerify();
     status.progress(tr("Compiling sketch..."));
 
     // do this to advance/clear the terminal window / dos prompt / etc
@@ -1877,7 +1879,7 @@ public class Editor extends JFrame implements RunnerListener {
       }
 
       status.unprogress();
-      toolbar.deactivateRun();
+      toolbar.deactivateVerify();
       avoidMultipleOperations = false;
     }
   }
@@ -1916,7 +1918,7 @@ public class Editor extends JFrame implements RunnerListener {
   private void handleStop() {  // called by menu or buttons
 //    toolbar.activate(EditorToolbar.STOP);
 
-    toolbar.deactivateRun();
+    toolbar.deactivateVerify();
 //    toolbar.deactivate(EditorToolbar.STOP);
 
     // focus the PDE again after quitting presentation mode [toxi 030903]
@@ -2254,18 +2256,56 @@ public class Editor extends JFrame implements RunnerListener {
     return true;
   }
 
+  synchronized public void handleRun(final boolean external) {
+    if (PreferencesData.getBoolean("editor.save_on_verify")) {
+      if (sketch.isModified() && !sketchController.isReadOnly()) {
+        handleSave(true);
+      }
+    }
+    toolbar.activateRun();
+    console.clear();
+    status.progress(tr("Running the program..."));
+
+    avoidMultipleOperations = true;
+
+    new Thread(runHandler).start();
+  }
+
+  class RunHandler implements Runnable {
+    boolean external = false;
+
+    public void setExternal(boolean external) {
+      this.external = external;
+    }
+
+    public void run() {
+      pluginManager.fire(PluginManager.Hooks.RUN);
+      try {
+        removeAllLineHighlights();
+
+        boolean success = sketchController.runSketch();
+        
+        if (success) {
+          statusNotice(tr("Run finished."));
+        }
+      } catch (RunnerException e) {
+        status.unprogress();
+        statusError(e);
+      } catch (Exception e) {
+        e.printStackTrace();
+      } finally {
+        avoidMultipleOperations = false;
+      }
+      status.unprogress();
+      toolbar.deactivateRun();
+    }
+  }
+
   /**
    * Called by Sketch &rarr; Export.
    * Handles calling the export() function on sketch, and
    * queues all the gui status stuff that comes along with it.
    * <p/>
-   * Made synchronized to (hopefully) avoid problems of people
-   * hitting export twice, quickly, and horking things up.
-   */
-  /**
-   * Handles calling the export() function on sketch, and
-   * queues all the gui status stuff that comes along with it.
-   *
    * Made synchronized to (hopefully) avoid problems of people
    * hitting export twice, quickly, and horking things up.
    */
@@ -2756,7 +2796,7 @@ public class Editor extends JFrame implements RunnerListener {
     System.err.println(what);
     status.error(what);
     //new Exception("deactivating RUN").printStackTrace();
-    toolbar.deactivateRun();
+    toolbar.deactivateVerify();
   }
 
 

@@ -62,7 +62,7 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
    * Titles for each button when the shift key is pressed.
    */
   private static final String[] titleShift = {
-    tr("Verify"), tr("Upload Using Programmer"), tr("Run"), tr("New"), tr("Open"), tr("Save As..."), tr("Serial Monitor")
+    tr("Verify"), tr("Upload Using Programmer"), tr("Run External"), tr("New"), tr("Open"), tr("Save As..."), tr("Serial Monitor")
   };
 
   private static final int BUTTON_COUNT = title.length;
@@ -468,7 +468,7 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
     switch (sel) {
       case VERIFY:
         if (!editor.avoidMultipleOperations) {
-          editor.handleRun(false, editor.presentHandler, editor.runHandler);
+          editor.handleCompile(false, editor.presentHandler, editor.verifyHandler);
           editor.avoidMultipleOperations = true;
         }
         break;
@@ -504,6 +504,12 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
           editor.handleExport(isShiftDown);
         }
         break;
+      
+      case RUN:
+        if (!editor.avoidMultipleOperations) {
+          editor.handleRun(isShiftDown);
+        }
+        break;
 
       case SERIAL:
         editor.handleSerial();
@@ -523,7 +529,7 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
     }
   }
 
-  public void activateRun() {
+  public void activateVerify() {
     activate(VERIFY);
   }
 
@@ -533,6 +539,10 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
 
   public void activateExport() {
     activate(EXPORT);
+  }
+  
+  public void activateRun() {
+    activate(RUN);
   }
 
   /**
@@ -544,7 +554,7 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
     }
   }
 
-  public void deactivateRun() {
+  public void deactivateVerify() {
     deactivate(VERIFY);
   }
 
@@ -554,6 +564,10 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
 
   public void deactivateExport() {
     deactivate(EXPORT);
+  }
+  
+  public void deactivateRun() {
+    deactivate(RUN);
   }
 
   public Dimension getPreferredSize() {
