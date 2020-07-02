@@ -118,7 +118,7 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
   private int buttonCount;
   private int[] state = new int[BUTTON_COUNT];
   private Image[] stateImage;
-  private final int[] which; // mapping indices to implementation
+  private int[] which; // mapping indices to implementation
 
   private int[] x1;
   private int[] x2;
@@ -134,21 +134,7 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
     this.editor = editor;
     this.menu = menu;
 
-    buttonCount = 0;
-    which = new int[BUTTON_COUNT];
-
-    //which[buttonCount++] = NOTHING;
-    which[buttonCount++] = VERIFY;
-    if (editor.getProjectConfig().isUploadable()) {
-      which[buttonCount++] = EXPORT;
-    }
-    if (editor.getProjectConfig().isRunnable()) {
-      which[buttonCount++] = RUN;
-    }
-    which[buttonCount++] = NEW;
-    which[buttonCount++] = OPEN;
-    which[buttonCount++] = SAVE;
-    which[buttonCount++] = SERIAL;
+    resetWhich();
 
     currentRollover = -1;
 
@@ -171,6 +157,24 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
     addMouseListener(this);
     addMouseMotionListener(this);
     KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(this);
+  }
+  
+  private void resetWhich() {
+    buttonCount = 0;
+    which = new int[BUTTON_COUNT];
+
+    //which[buttonCount++] = NOTHING;
+    which[buttonCount++] = VERIFY;
+    if (editor.getProjectConfig().isUploadable()) {
+      which[buttonCount++] = EXPORT;
+    }
+    if (editor.getProjectConfig().isRunnable()) {
+      which[buttonCount++] = RUN;
+    }
+    which[buttonCount++] = NEW;
+    which[buttonCount++] = OPEN;
+    which[buttonCount++] = SAVE;
+    which[buttonCount++] = SERIAL;
   }
   
   private void buildTouchBar() {
@@ -341,7 +345,15 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
       screen.fillRect(0, 0, getWidth(), getHeight());
     }
   }
-
+  
+  public void handleProjectTypeChanged() {
+    resetWhich();
+    stateImage = null;
+    offscreen = null;
+    currentRollover = -1;
+    buildTouchBar();
+    repaint();
+  }
 
   public void mouseMoved(MouseEvent e) {
     if (!isEnabled())

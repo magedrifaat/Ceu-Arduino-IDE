@@ -304,6 +304,7 @@ ceu-arduino-keywords=keywords_ceu.txt
 
 pico-ceu-title= pico-Ceu
 pico-ceu-compile=pico-compiler
-pico-ceu-upload=pico-run
+pico-ceu-upload=
+pico-ceu-run=pico-run
 pico-ceu-extensions=ceu
 pico-ceu-keywords=keywords_ceu.txt

@@ -2906,6 +2906,7 @@ public class Editor extends JFrame implements RunnerListener {
     sketch.setProjectConfig(newConfig);
     updateKeywords(base.getPdeKeywords());
     updateTitle();
+    toolbar.handleProjectTypeChanged();
   }
   
   
