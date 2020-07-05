@@ -2012,7 +2012,6 @@ public class Editor extends JFrame implements RunnerListener {
     File file = Sketch.checkSketchFile(sketchFile, projectConfig.getDefaultExtension());
 
     if (file == null) {
-      // TODO: customize error message
       if (!projectConfig.hasAcceptableExtension(fileName)) {
 
         Base.showWarning(tr("Bad file selected"), tr("Arduino can only open its own sketches and\n" +
@@ -2021,8 +2020,7 @@ public class Editor extends JFrame implements RunnerListener {
         return false;
 
       } else {
-        // TODO: handle extensions that aren't 3 characters long
-        String properParent = fileName.substring(0, fileName.length() - 4);
+        String properParent = fileName.substring(0, fileName.lastIndexOf('.'));
         
         if (!properParent.equals(sketchFile.getParentFile().getName()))
         {

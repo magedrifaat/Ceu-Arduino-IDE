@@ -41,6 +41,11 @@ public class ProjectConfig {
     }
   }
   
+  /**
+   * Try to infer project type from extesnion.
+   * First check if it matches the default extesion of any Config,
+   *  then see if it matches any sub extension of any config.
+   */
   public static ProjectConfig inferConfig(String extension) {
     if (extension == null) {
       return LEGACY_CONFIG;
@@ -48,6 +53,12 @@ public class ProjectConfig {
     
     for (ProjectConfig conf : configs) {
       if (conf.getDefaultExtension().equals(extension)) {
+        return conf;
+      }
+    }
+    
+    for (ProjectConfig conf : configs) {
+      if (conf.hasAcceptableExtension("test." + extension)) {
         return conf;
       }
     }
