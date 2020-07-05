@@ -140,6 +140,8 @@ public class Editor extends JFrame implements RunnerListener {
   private ArrayList<EditorTab> tabs = new ArrayList<>();
   private int currentTabIndex = -1;
   private int currentSideTabIndex = -1;
+  
+  private JRadioButtonMenuItem lastSelected;
 
   private static class ShouldSaveIfModified
       implements Predicate<SketchController> {
@@ -698,9 +700,25 @@ public class Editor extends JFrame implements RunnerListener {
     for (String title : ProjectConfig.getTitles()) {
       boolean selected = title.equals(projectConfig.getTitle());
       JRadioButtonMenuItem item = new JRadioButtonMenuItem(title, selected);
+      if (selected) {
+        lastSelected = item;
+      }
       item.addActionListener(event -> {
         if (item.isSelected()) {
-          changeProjectConfig(ProjectConfig.fromTitle(title));
+          ProjectConfig newConfig = ProjectConfig.fromTitle(title);
+          // TODO: reopen sketch with new config to reset primary file
+          if (newConfig.hasAcceptableExtension(sketch.getPrimaryFile().getFileName())) {
+            changeProjectConfig(newConfig);
+            lastSelected = item;
+          }
+          else {
+            Base.showWarning("Not supported!", 
+                             "The project type you are trying to switch to doesn't support\n" + 
+                             "the file type that is currently opened.",
+                             null);
+            item.setSelected(false);
+            lastSelected.setSelected(true);
+          }
         }
       });
       group.add(item);
