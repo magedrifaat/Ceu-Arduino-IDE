@@ -811,7 +811,6 @@ public class Base {
    * @throws Exception
    */
   public void handleOpenPrompt() throws Exception {
-    // TODO: handle other extensions in opening
     
     // get the frontmost window frame for placing file dialog
     FileDialog fd = new FileDialog(activeEditor, tr("Open an Arduino sketch..."), FileDialog.LOAD);

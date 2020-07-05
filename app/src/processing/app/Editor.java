@@ -442,7 +442,7 @@ public class Editor extends JFrame implements RunnerListener {
     setPlacement(storedLocation, defaultLocation);
     
     // TODO: handle cases of error or timeout to prevent plugin
-    //  from hanging the IDE
+    //  from hanging the IDE (swing support for gui multithreading?)
     pluginManager.fire(PluginManager.Hooks.SIDE);
     populateSidePanel();
 
@@ -2015,8 +2015,9 @@ public class Editor extends JFrame implements RunnerListener {
       // TODO: customize error message
       if (!projectConfig.hasAcceptableExtension(fileName)) {
 
-        Base.showWarning(tr("Bad file selected"), tr("Arduino can only open its own sketches\n" +
-          "and other files ending in .ino or .pde"), null);
+        Base.showWarning(tr("Bad file selected"), tr("Arduino can only open its own sketches and\n" +
+                                                     "other files ending in .ino, or user defined\n" +
+                                                     "extensions in the preferences file."), null);
         return false;
 
       } else {
