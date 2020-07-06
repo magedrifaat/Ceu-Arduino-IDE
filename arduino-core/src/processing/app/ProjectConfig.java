@@ -174,18 +174,22 @@ public class ProjectConfig {
     return new ArrayList<String> (Arrays.asList(csvExtensions.replaceAll(" ", "").split(",")));
   }
   
+  /**
+   *  Returns the preference [projectType]-[command].
+   *  If the preference doesn't exist, returns an empty string
+   */
   private String getPrefCommand(String command) {
     String res = PreferencesData.getDefault(projectType + "-" + command);
     if (res == null) {
       res = PreferencesData.get(projectType + "-" + command);
     }
     
-    return res;
+    return res != null? res: "";
   }
   
   public File getKeywordsFile() {
     String fileName;
-    if (isLegacy()) {
+    if (isLegacy() || getPrefCommand("keywords") == "") {
       fileName = "keywords.txt";
     }
     else {

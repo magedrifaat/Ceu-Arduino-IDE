@@ -392,8 +392,6 @@ public class SketchController {
     newName = SketchController.checkName(newName);
 
     File newFolder;
-    // TODO: look into this case
-    // TODO: this probably produces a bug, file name is not modified
     // User may want to overwrite a .ino
     // check if the parent folder name ends with the sketch name
     if (newName.endsWith(".ino") && newParentDir.endsWith(newName.substring(0, newName.lastIndexOf('.'))+ File.separator)) {
@@ -704,7 +702,15 @@ public class SketchController {
     
     List<String> cmd = new ArrayList<>();
     
-    String compileCommand = getBatOrBash(editor.getProjectConfig().getCompileCommand());
+    String compileFile = editor.getProjectConfig().getCompileCommand();
+    // Compile command can't be empty
+    if (compileFile.isEmpty()) {
+      RunnerException re = new RunnerException("Compile command not found.");
+      re.hideStackTrace();
+      throw re;
+    }
+    
+    String compileCommand = getBatOrBash(compileFile);
     
     cmd.add(BaseNoGui.getContentFile(compileCommand).getAbsolutePath());
     

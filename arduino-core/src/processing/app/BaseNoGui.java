@@ -528,7 +528,6 @@ public class BaseNoGui {
     }
   }
 
-  // TODO: look into using portable folder for preferences file
   static public void initPortableFolder() {
     // Portable folder
     portableFolder = getContentFile("portable");
