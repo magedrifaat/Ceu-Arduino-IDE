@@ -59,13 +59,13 @@ public class Sketch {
    
    // TODO: check for calls that don't set projecttype for sketch
    Sketch(File file) throws IOException {
-     this(file, new ProjectConfig("legacy"));
+     this(file, ProjectConfig.getLegacyConfig());
    }
    
   Sketch(File file, ProjectConfig projectConfig) throws IOException {
     
     if (projectConfig == null) {
-      this.projectConfig = new ProjectConfig("legacy");
+      this.projectConfig = ProjectConfig.getLegacyConfig();
     }
     else {
       this.projectConfig = projectConfig;

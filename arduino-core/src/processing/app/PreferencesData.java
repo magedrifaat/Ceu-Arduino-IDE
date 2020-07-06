@@ -52,7 +52,6 @@ public class PreferencesData {
 
     // start by loading the defaults, in case something
     // important was deleted from the user prefs
-    // TODO: try switching order with later pref.load to make new changes prevail
     try {
       prefs.load(new File(BaseNoGui.getContentFile("lib"), PREFS_FILE));
     } catch (IOException e) {

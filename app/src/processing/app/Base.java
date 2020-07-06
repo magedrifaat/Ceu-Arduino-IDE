@@ -771,7 +771,7 @@ public class Base {
       projectConfig = ProjectConfig.inferConfig(activeEditor.getProjectConfig().getDefaultExtension());
     }
     else {
-      projectConfig = ProjectConfig.inferConfig(null);
+      projectConfig = ProjectConfig.getLegacyConfig();
     }
     
     File newbieFile = new File(newbieDir, newbieName + "." + projectConfig.getDefaultExtension());

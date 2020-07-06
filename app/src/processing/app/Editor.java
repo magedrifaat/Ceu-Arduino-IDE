@@ -2918,7 +2918,6 @@ public class Editor extends JFrame implements RunnerListener {
     if (newConfig == projectConfig)
       return;
     
-    // TODO: allow changing only when extension allows it
     projectConfig = newConfig;
     sketch.setProjectConfig(newConfig);
     updateKeywords(base.getPdeKeywords());

@@ -18,9 +18,7 @@ public class ProjectConfig {
   private String uploadCommand;
   
   public ProjectConfig(String projectType) {
-    // TODO: handle all null cases
     
-    // TODO: add all data as preferences instead of config files
     this.projectType = projectType;
     projectTitle = getPrefCommand("title");
     extensions = getPrefExtensions();
@@ -31,6 +29,7 @@ public class ProjectConfig {
   }
   
   public static void loadConfigs() {
+    configs.clear();
     String types = PreferencesData.get("project-types");
     for (String type : types.replaceAll(" ", "").split(",")) {
       ProjectConfig newConfig = new ProjectConfig(type);
@@ -41,6 +40,13 @@ public class ProjectConfig {
     }
   }
   
+  public static ProjectConfig getLegacyConfig() {
+    if (LEGACY_CONFIG == null) {
+      loadConfigs();
+    }
+    
+    return LEGACY_CONFIG;
+  }
   /**
    * Try to infer project type from extesnion.
    * First check if it matches the default extesion of any Config,
@@ -145,6 +151,12 @@ public class ProjectConfig {
     return extensions.get(0);
   }
   
+  /**
+   *  Returns true if the type o the project is legacy arduino.
+   *  Checks for legacy should be done through this method only
+   *   and not through string comparison to improve modularity and
+   *   maintainability.
+   */
   public boolean isLegacy() {
     return projectType.equals("legacy");
   }
