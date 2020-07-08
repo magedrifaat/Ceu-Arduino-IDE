@@ -1153,7 +1153,7 @@
     </copy>
     <delete dir="${staging_folder}/arduino-builder-windows" includeemptydirs="true"/>
 
-    <unzip src="../arduino-core/lib/jna-4.2.2.jar" dest="windows/arduino-1.8.8/lib">
+    <unzip src="../arduino-core/lib/jna-4.5.0.jar" dest="windows/arduino-1.8.8/lib">
       <patternset>
         <include name="com/sun/jna/win32-x86/jnidispatch.dll"/>
       </patternset>

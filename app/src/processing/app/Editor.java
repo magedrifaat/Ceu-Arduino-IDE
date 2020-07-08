@@ -830,7 +830,8 @@ public class Editor extends JFrame implements RunnerListener {
     JMenuItem item = newJMenuItem(tr("Verify/Compile"), 'R');
     item.addActionListener(event -> handleCompile(false, presentHandler, verifyHandler));
     sketchMenu.add(item);
-
+    
+    // TODO: Add run menu item and selectively disable either depending on project config
     item = newJMenuItem(tr("Upload"), 'U');
     item.addActionListener(event -> handleExport(false));
     sketchMenu.add(item);

@@ -27,6 +27,8 @@ import cc.arduino.Compiler;
 import cc.arduino.CompilerProgressListener;
 import cc.arduino.UploaderUtils;
 import cc.arduino.packages.Uploader;
+import cc.arduino.MessageConsumerOutputStream;
+import cc.arduino.i18n.I18NAwareMessageConsumer;
 import processing.app.debug.RunnerException;
 import processing.app.debug.*;
 import processing.app.forms.PasswordAuthorizationDialog;
@@ -42,12 +44,14 @@ import java.awt.*;
 import java.io.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -55,6 +59,7 @@ import java.util.regex.*;
 
 import static processing.app.I18n.tr;
 
+import com.pty4j.PtyProcess;
 
 /**
  * Handles various tasks related to a sketch, in response to user inter-action.
@@ -62,6 +67,8 @@ import static processing.app.I18n.tr;
 public class SketchController {
   private final Editor editor;
   private final Sketch sketch;
+  
+  private RunnerException exception;
 
   public SketchController(Editor _editor, Sketch _sketch) {
     editor = _editor;
@@ -888,32 +895,7 @@ public class SketchController {
     editor.status.progressNotice(tr("Running..."));
     
     // run the batch and process the output
-    int result;
-    RunnerException ex = null;
-    try {
-      Process process = ProcessUtils.exec(cmd.toArray(new String[0]));
-      
-      EditorConsole.setCurrentEditorConsole(editor.console);
-      
-      // process and output the input and error streams of the batch file
-      BufferedReader inBuf = new BufferedReader(new InputStreamReader(process.getInputStream()));
-      BufferedReader errBuf = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-      
-      String line;
-      while ((line = inBuf.readLine())  != null) {
-        System.out.println(line);
-      }
-      inBuf.close();
-      
-      while ((line = errBuf.readLine())  != null) {
-        System.err.println(line);
-      }
-      errBuf.close();
-      
-      result = process.waitFor();
-    } catch (Exception e) {
-      throw new RunnerException(e);
-    }
+    int result = listenToProcess(cmd);
     
     if (result != 0) {
       RunnerException re = new RunnerException("Error Running");
@@ -935,6 +917,49 @@ public class SketchController {
     }
     
     return command;
+  }
+  
+  /**
+   *  Creates a process from the passed command and listens to the output
+   *  and error streams of the process.
+   *  Excepts an executable file as first element of the command cmd
+   */
+  private int listenToProcess(List<String> cmd) throws RunnerException {
+    MessageConsumerOutputStream outStream = new MessageConsumerOutputStream(new I18NAwareMessageConsumer(System.out), "\n");
+    MessageConsumerOutputStream errStream = new MessageConsumerOutputStream(new I18NAwareMessageConsumer(System.err), "\n");
+    int result = 1;
+    exception = null;
+    try {
+      // Using pty4j for unbuffered output to make console output realtime
+      // Ommitting the optional flags seems to add escape characters to the console
+      PtyProcess proc = PtyProcess.exec(cmd.toArray(new String[0]), (Map<String, String>)null, null, true);
+      MessageSiphon in = new MessageSiphon(proc.getInputStream(), (msg) -> {
+        try {
+          // Remove CR as it adds unnecessary newline on windows
+          msg = msg.replace(Character.toString('\r'), "");
+          outStream.write(msg.getBytes());
+        } catch (Exception e) {
+          exception = new RunnerException(e);
+        }
+      }, 100);
+      MessageSiphon err = new MessageSiphon(proc.getErrorStream(), (msg) -> {
+        try {
+          errStream.write(msg.getBytes());
+        } catch (Exception e) {
+          exception = new RunnerException(e);
+        }
+      }, 100);
+      in.join();
+      err.join();
+      result = proc.waitFor();
+    } catch (Exception e) {
+      throw new RunnerException(e);
+    }
+    
+    outStream.flush();
+    errStream.flush();
+    
+    return result;
   }
   
   /**
