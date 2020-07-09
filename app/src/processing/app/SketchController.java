@@ -896,7 +896,6 @@ public class SketchController {
     
     // run the batch and process the output
     int result = listenToProcess(cmd);
-    
     if (result != 0) {
       RunnerException re = new RunnerException("Error Running");
       re.hideStackTrace();
@@ -922,17 +921,22 @@ public class SketchController {
   /**
    *  Creates a process from the passed command and listens to the output
    *  and error streams of the process.
-   *  Excepts an executable file as first element of the command cmd
+   *  Excepts an executable script as first element of the command cmd
    */
   private int listenToProcess(List<String> cmd) throws RunnerException {
     MessageConsumerOutputStream outStream = new MessageConsumerOutputStream(new I18NAwareMessageConsumer(System.out), "\n");
     MessageConsumerOutputStream errStream = new MessageConsumerOutputStream(new I18NAwareMessageConsumer(System.err), "\n");
     int result = 1;
     exception = null;
+    if (OSUtils.isLinux()) {
+      // Solve bug on ubuntu where pty can't seem to run the script on its own
+      cmd.add(0, "/bin/bash");
+    }
     try {
       // Using pty4j for unbuffered output to make console output realtime
       // Ommitting the optional flags seems to add escape characters to the console
       PtyProcess proc = PtyProcess.exec(cmd.toArray(new String[0]), (Map<String, String>)null, null, true);
+      
       MessageSiphon in = new MessageSiphon(proc.getInputStream(), (msg) -> {
         try {
           // Remove CR as it adds unnecessary newline on windows
