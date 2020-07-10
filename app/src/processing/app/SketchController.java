@@ -894,8 +894,25 @@ public class SketchController {
     editor.status.progressUpdate(20);
     editor.status.progressNotice(tr("Running..."));
     
+    editor.console.enableUserInput();
+    
     // run the batch and process the output
-    int result = listenToProcess(cmd);
+    int result = -1;
+    try {
+      result = listenToProcess(cmd);
+    }
+    catch (RunnerException ex) {
+      exception = ex;
+    }
+    finally {
+      editor.console.disableUserInput();
+    }
+    
+    if (result != 0 && exception != null) {
+      exception.hideStackTrace();
+      throw exception;
+    }
+    
     if (result != 0) {
       RunnerException re = new RunnerException("Error Running");
       re.hideStackTrace();

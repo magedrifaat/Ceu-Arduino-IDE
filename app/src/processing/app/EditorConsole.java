@@ -26,6 +26,8 @@ import cc.arduino.ConsoleOutputStream;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
+import java.awt.event.FocusListener;
+import java.awt.event.FocusEvent;
 import java.io.PrintStream;
 
 import static processing.app.Theme.scale;
@@ -57,6 +59,7 @@ public class EditorConsole extends JScrollPane {
 
   private final DefaultStyledDocument document;
   private final JTextPane consoleTextPane;
+  private final FocusListener caretListener;
 
   private SimpleAttributeSet stdOutStyle;
   private SimpleAttributeSet stdErrStyle;
@@ -67,11 +70,12 @@ public class EditorConsole extends JScrollPane {
     consoleTextPane = new JTextPane(document);
     consoleTextPane.setEditable(false);
     DefaultCaret caret = (DefaultCaret) consoleTextPane.getCaret();
-    caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+    caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
     consoleTextPane.setFocusTraversalKeysEnabled(false);
 
     Color backgroundColour = Theme.getColor("console.color");
     consoleTextPane.setBackground(backgroundColour);
+    consoleTextPane.setCaretColor(Theme.getColor("console.output.color"));
 
     Font consoleFont = Theme.getFont("console.font");
     Font editorFont = PreferencesData.getFont("editor.font");
@@ -86,7 +90,7 @@ public class EditorConsole extends JScrollPane {
     StyleConstants.setItalic(stdOutStyle, actualFont.isItalic());
 
     consoleTextPane.setParagraphAttributes(stdOutStyle, true);
-
+    
     stdErrStyle = new SimpleAttributeSet();
     StyleConstants.setForeground(stdErrStyle, Theme.getColor("console.error.color"));
     StyleConstants.setBackground(stdErrStyle, backgroundColour);
@@ -113,6 +117,18 @@ public class EditorConsole extends JScrollPane {
 
     // Add font size adjustment listeners.
     base.addEditorFontResizeListeners(consoleTextPane);
+    
+    caretListener = new FocusListener() {
+        @Override
+        public void focusGained(FocusEvent e) {
+          consoleTextPane.getCaret().setVisible(true);
+        }
+        
+        @Override
+        public void focusLost(FocusEvent e) {
+          consoleTextPane.getCaret().setVisible(false);
+        }
+    };
   }
 
   public void applyPreferences() {
@@ -187,6 +203,16 @@ public class EditorConsole extends JScrollPane {
 
   public String getText() {
     return consoleTextPane.getText().trim();
+  }
+  
+  public void enableUserInput() {
+    consoleTextPane.addFocusListener(caretListener);
+    consoleTextPane.requestFocusInWindow();
+  }
+  
+  public void disableUserInput() {
+    consoleTextPane.removeFocusListener(caretListener);
+    consoleTextPane.getCaret().setVisible(false);
   }
 
 }
