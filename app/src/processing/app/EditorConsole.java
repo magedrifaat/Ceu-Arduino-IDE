@@ -31,6 +31,7 @@ import java.awt.event.*;
 import java.io.PrintStream;
 
 import static processing.app.Theme.scale;
+import processing.app.helpers.Keys;
 
 /**
  * Message console that sits below the editing area.
@@ -60,10 +61,11 @@ public class EditorConsole extends JScrollPane {
   private final DefaultStyledDocument document;
   private final JTextPane consoleTextPane;
 
-  private final FocusListener focusListener;
-  private final KeyListener keyListener;
-  private final CaretListener caretListener;
+  private FocusListener focusListener;
+  private KeyListener keyListener;
+  private CaretListener caretListener;
   private int fixedTextOffset;
+  private String userInput;
 
   private SimpleAttributeSet stdOutStyle;
   private SimpleAttributeSet stdErrStyle;
@@ -121,10 +123,14 @@ public class EditorConsole extends JScrollPane {
     EditorConsole.init(stdOutStyle, System.out, stdErrStyle, System.err);
 
     fixedTextOffset = 0;
+    userInput = "";
+    initializeListeners();
 
     // Add font size adjustment listeners.
     base.addEditorFontResizeListeners(consoleTextPane);
-    
+  }
+
+  private void initializeListeners() {
     focusListener = new FocusListener() {
       @Override
       public void focusGained(FocusEvent e) {
@@ -136,12 +142,21 @@ public class EditorConsole extends JScrollPane {
         consoleTextPane.getCaret().setVisible(false);
       }
     };
-
+    
+    Keys.killBinding(consoleTextPane, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0));
+    // TODO: change keyListener to key bindings
     keyListener = new KeyAdapter() {
       @Override
       public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-
+          try {
+            userInput = document.getText(fixedTextOffset, document.getLength() - fixedTextOffset) + "\n";
+            insertString("\n", stdOutStyle);
+            // Send user input to the active process
+          }
+          catch (BadLocationException ex) {
+            // Ignore
+          }
         }
         else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
           int position = consoleTextPane.getCaretPosition();
@@ -235,6 +250,7 @@ public class EditorConsole extends JScrollPane {
     int offset = document.getLength();
     document.insertString(offset, line, attributes);
     fixedTextOffset = document.getLength();
+    consoleTextPane.setCaretPosition(document.getLength());
   }
 
   public String getText() {
