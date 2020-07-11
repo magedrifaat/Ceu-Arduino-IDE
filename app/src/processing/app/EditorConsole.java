@@ -29,6 +29,8 @@ import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.PrintStream;
+import java.io.OutputStream;
+import java.io.IOException;
 
 import static processing.app.Theme.scale;
 import processing.app.helpers.Keys;
@@ -40,6 +42,7 @@ public class EditorConsole extends JScrollPane {
 
   private static ConsoleOutputStream out;
   private static ConsoleOutputStream err;
+  private static OutputStream procInput;
 
   private static synchronized void init(SimpleAttributeSet outStyle, PrintStream outStream, SimpleAttributeSet errStyle, PrintStream errStream) {
     if (out != null) {
@@ -56,6 +59,10 @@ public class EditorConsole extends JScrollPane {
   public static void setCurrentEditorConsole(EditorConsole console) {
     out.setCurrentEditorConsole(console);
     err.setCurrentEditorConsole(console);
+  }
+
+  public static void setProcInputStream(OutputStream stream) {
+    procInput = stream;
   }
 
   private final DefaultStyledDocument document;
@@ -151,11 +158,18 @@ public class EditorConsole extends JScrollPane {
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
           try {
             userInput = document.getText(fixedTextOffset, document.getLength() - fixedTextOffset) + "\n";
-            insertString("\n", stdOutStyle);
+            //insertString("\n", stdOutStyle);
+            document.remove(fixedTextOffset, userInput.length() - 1);
             // Send user input to the active process
+            if (procInput != null) {
+              procInput.write(userInput.getBytes());
+            }
           }
           catch (BadLocationException ex) {
             // Ignore
+          }
+          catch (IOException ioexp) {
+            // Failed to write, Ignore
           }
         }
         else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
@@ -261,14 +275,18 @@ public class EditorConsole extends JScrollPane {
     consoleTextPane.addFocusListener(focusListener);
     consoleTextPane.addCaretListener(caretListener);
     consoleTextPane.addKeyListener(keyListener);
+    // Show caret (alternative to setVisible as it causes problems in non-GUI threads)
+    consoleTextPane.setCaretColor(Theme.getColor("console.output.color"));
     consoleTextPane.requestFocusInWindow();
+    
   }
   
   public void disableUserInput() {
     consoleTextPane.removeFocusListener(focusListener);
     consoleTextPane.removeCaretListener(caretListener);
     consoleTextPane.removeKeyListener(keyListener);
-    consoleTextPane.getCaret().setVisible(false);
+    // Hide caret (alternative to setVisible as it causes problems in non-GUI threads)
+    consoleTextPane.setCaretColor(Theme.getColor("console.color"));
     consoleTextPane.setEditable(false);
   }
 

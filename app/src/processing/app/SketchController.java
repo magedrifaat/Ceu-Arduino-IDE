@@ -970,9 +970,13 @@ public class SketchController {
           exception = new RunnerException(e);
         }
       }, 100);
+
+      EditorConsole.setProcInputStream(proc.getOutputStream());
+
       in.join();
       err.join();
       result = proc.waitFor();
+      EditorConsole.setProcInputStream(null);
     } catch (Exception e) {
       throw new RunnerException(e);
     }
