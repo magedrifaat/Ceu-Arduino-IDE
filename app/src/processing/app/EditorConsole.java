@@ -275,8 +275,6 @@ public class EditorConsole extends JScrollPane {
     consoleTextPane.addFocusListener(focusListener);
     consoleTextPane.addCaretListener(caretListener);
     consoleTextPane.addKeyListener(keyListener);
-    // Show caret (alternative to setVisible as it causes problems in non-GUI threads)
-    consoleTextPane.setCaretColor(Theme.getColor("console.output.color"));
     consoleTextPane.requestFocusInWindow();
     
   }
@@ -285,9 +283,9 @@ public class EditorConsole extends JScrollPane {
     consoleTextPane.removeFocusListener(focusListener);
     consoleTextPane.removeCaretListener(caretListener);
     consoleTextPane.removeKeyListener(keyListener);
-    // Hide caret (alternative to setVisible as it causes problems in non-GUI threads)
-    consoleTextPane.setCaretColor(Theme.getColor("console.color"));
     consoleTextPane.setEditable(false);
+    // Remove focus from text pane to hide caret
+    this.requestFocusInWindow();
   }
 
 }
