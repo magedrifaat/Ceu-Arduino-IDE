@@ -24,10 +24,10 @@ package processing.app;
 import cc.arduino.ConsoleOutputStream;
 
 import javax.swing.*;
+import javax.swing.event.*;
 import javax.swing.text.*;
 import java.awt.*;
-import java.awt.event.FocusListener;
-import java.awt.event.FocusEvent;
+import java.awt.event.*;
 import java.io.PrintStream;
 
 import static processing.app.Theme.scale;
@@ -59,10 +59,15 @@ public class EditorConsole extends JScrollPane {
 
   private final DefaultStyledDocument document;
   private final JTextPane consoleTextPane;
-  private final FocusListener caretListener;
+
+  private final FocusListener focusListener;
+  private final KeyListener keyListener;
+  private final CaretListener caretListener;
+  private int fixedTextOffset;
 
   private SimpleAttributeSet stdOutStyle;
   private SimpleAttributeSet stdErrStyle;
+
 
   public EditorConsole(Base base) {
     document = new DefaultStyledDocument();
@@ -115,19 +120,48 @@ public class EditorConsole extends JScrollPane {
 
     EditorConsole.init(stdOutStyle, System.out, stdErrStyle, System.err);
 
+    fixedTextOffset = 0;
+
     // Add font size adjustment listeners.
     base.addEditorFontResizeListeners(consoleTextPane);
     
-    caretListener = new FocusListener() {
-        @Override
-        public void focusGained(FocusEvent e) {
-          consoleTextPane.getCaret().setVisible(true);
+    focusListener = new FocusListener() {
+      @Override
+      public void focusGained(FocusEvent e) {
+        consoleTextPane.getCaret().setVisible(true);
+      }
+      
+      @Override
+      public void focusLost(FocusEvent e) {
+        consoleTextPane.getCaret().setVisible(false);
+      }
+    };
+
+    keyListener = new KeyAdapter() {
+      @Override
+      public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+
         }
-        
-        @Override
-        public void focusLost(FocusEvent e) {
-          consoleTextPane.getCaret().setVisible(false);
+        else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+          int position = consoleTextPane.getCaretPosition();
+          if (position == fixedTextOffset) {
+            try {
+              // Insert dummy character to be deleted
+              document.insertString(position, "A", stdOutStyle);
+            } catch (BadLocationException ex) {
+              // Ignore
+            }
+          }
         }
+      }
+    };
+
+    caretListener = new CaretListener() {
+      @Override
+      public void caretUpdate(CaretEvent e) {
+        consoleTextPane.setEditable(e.getDot() >= fixedTextOffset);
+      }
     };
   }
 
@@ -180,6 +214,7 @@ public class EditorConsole extends JScrollPane {
   public void clear() {
     try {
       document.remove(0, document.getLength());
+      fixedTextOffset = 0;
     } catch (BadLocationException e) {
       // ignore the error otherwise this will cause an infinite loop
       // maybe not a good idea in the long run?
@@ -199,6 +234,7 @@ public class EditorConsole extends JScrollPane {
     line = line.replace("\r\n", "\n").replace("\r", "\n");
     int offset = document.getLength();
     document.insertString(offset, line, attributes);
+    fixedTextOffset = document.getLength();
   }
 
   public String getText() {
@@ -206,13 +242,18 @@ public class EditorConsole extends JScrollPane {
   }
   
   public void enableUserInput() {
-    consoleTextPane.addFocusListener(caretListener);
+    consoleTextPane.addFocusListener(focusListener);
+    consoleTextPane.addCaretListener(caretListener);
+    consoleTextPane.addKeyListener(keyListener);
     consoleTextPane.requestFocusInWindow();
   }
   
   public void disableUserInput() {
-    consoleTextPane.removeFocusListener(caretListener);
+    consoleTextPane.removeFocusListener(focusListener);
+    consoleTextPane.removeCaretListener(caretListener);
+    consoleTextPane.removeKeyListener(keyListener);
     consoleTextPane.getCaret().setVisible(false);
+    consoleTextPane.setEditable(false);
   }
 
 }
