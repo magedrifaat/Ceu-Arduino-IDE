@@ -158,7 +158,7 @@ public class EditorConsole extends JScrollPane {
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
           try {
             userInput = document.getText(fixedTextOffset, document.getLength() - fixedTextOffset) + "\n";
-            //insertString("\n", stdOutStyle);
+            // Remove user input as it will be echoed by the process
             document.remove(fixedTextOffset, userInput.length() - 1);
             // Send user input to the active process
             if (procInput != null) {

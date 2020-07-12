@@ -941,8 +941,6 @@ public class SketchController {
    *  Excepts an executable script as first element of the command cmd
    */
   private int listenToProcess(List<String> cmd) throws RunnerException {
-    MessageConsumerOutputStream outStream = new MessageConsumerOutputStream(new I18NAwareMessageConsumer(System.out), "\n");
-    MessageConsumerOutputStream errStream = new MessageConsumerOutputStream(new I18NAwareMessageConsumer(System.err), "\n");
     int result = 1;
     exception = null;
     if (OSUtils.isLinux()) {
@@ -958,14 +956,15 @@ public class SketchController {
         try {
           // Remove CR as it adds unnecessary newline on windows
           msg = msg.replace(Character.toString('\r'), "");
-          outStream.write(msg.getBytes());
+          System.out.write(msg.getBytes());
         } catch (Exception e) {
           exception = new RunnerException(e);
         }
       }, 100);
       MessageSiphon err = new MessageSiphon(proc.getErrorStream(), (msg) -> {
         try {
-          errStream.write(msg.getBytes());
+          msg = msg.replace(Character.toString('\r'), "");
+          System.out.write(msg.getBytes());
         } catch (Exception e) {
           exception = new RunnerException(e);
         }
@@ -980,9 +979,6 @@ public class SketchController {
     } catch (Exception e) {
       throw new RunnerException(e);
     }
-    
-    outStream.flush();
-    errStream.flush();
     
     return result;
   }
