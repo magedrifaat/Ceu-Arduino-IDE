@@ -21,6 +21,7 @@
 
 package processing.app;
 
+import processing.app.helpers.OSUtils;
 import cc.arduino.ConsoleOutputStream;
 
 import javax.swing.*;
@@ -158,8 +159,12 @@ public class EditorConsole extends JScrollPane {
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
           try {
             userInput = document.getText(fixedTextOffset, document.getLength() - fixedTextOffset) + "\n";
-            // Remove user input as it will be echoed by the process
-            document.remove(fixedTextOffset, userInput.length() - 1);
+            // Remove user input as it will be echoed by the process in windows
+            if (OSUtils.isWindows()) {
+              document.remove(fixedTextOffset, userInput.length() - 1);
+            } else {
+              insertString("\n", stdOutStyle);
+            }
             // Send user input to the active process
             if (procInput != null) {
               procInput.write(userInput.getBytes());
