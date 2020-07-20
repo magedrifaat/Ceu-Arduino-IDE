@@ -1,0 +1,29 @@
+#include <c.ceu>
+par/or do
+    every 1s do
+        _printf("[sync] hello\n");
+    end
+with
+    await async/thread do
+        loop do
+            _sleep(1);
+            _printf("[thread] world\n");
+        end
+    end
+with
+    await async do
+        var int i;
+        loop i in [0->5[ do
+            emit 1s;
+            _sleep(1);
+        end
+    end
+end
+escape 0;
+
+#if 0
+#@ Description: Interleaves "[sync] hello" and "[thread] world".
+#@ Features:
+#@  - same as `test-02.ceu`
+#@  - `async/thread` to execute an independent block in another OS thread
+#endif

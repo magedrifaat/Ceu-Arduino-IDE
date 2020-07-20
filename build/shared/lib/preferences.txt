@@ -291,14 +291,14 @@ preferences.readonly=false
 #allow_insecure_packages=true
 
 
-project-types = pico-ceu, ceu-arduino, legacy
+project-types = ceu, pico-ceu, ceu-arduino, legacy
 legacy-title = Legacy Arduino
 legacy-extensions=ino
 legacy-keywords=keywords.txt
 
 ceu-arduino-title = Ceu-Arduino
-ceu-arduino-compile=ceu-compiler
-ceu-arduino-upload=ceu-uploader
+ceu-arduino-compile=ceu-arduino-compiler
+ceu-arduino-upload=ceu-arduino-uploader
 ceu-arduino-extensions=ceu
 ceu-arduino-keywords=keywords_ceu.txt
 
@@ -308,3 +308,10 @@ pico-ceu-upload=
 pico-ceu-run=pico-run
 pico-ceu-extensions=ceu
 pico-ceu-keywords=keywords_ceu.txt
+
+ceu-title=Ceu-Scipt
+ceu-compile=ceu-compiler
+ceu-upload=
+ceu-run=ceu-run
+ceu-extensions=ceu
+ceu-keywords=keywords_ceu.txt

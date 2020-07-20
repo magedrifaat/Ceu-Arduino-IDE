@@ -30,7 +30,7 @@ public class ProjectConfig {
   
   public static void loadConfigs() {
     configs.clear();
-    String types = PreferencesData.get("project-types");
+    String types = PreferencesData.getDefault("project-types");
     for (String type : types.replaceAll(" ", "").split(",")) {
       ProjectConfig newConfig = new ProjectConfig(type);
       configs.add(newConfig);

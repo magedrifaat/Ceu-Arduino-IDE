@@ -499,8 +499,6 @@
     <copy todir="${staging_folder}/arduino-1.8.8/${staging_hardware_folder}/../">
       <fileset dir="shared" includes="lib/**" />
       <fileset file="shared/revisions.txt" />
-      <fileset file="shared/ceu-compiler.bat" />
-      <fileset file="shared/ceu-compiler.sh" />
     </copy>
 
     <mkdir dir="${staging_folder}/arduino-1.8.8" />
@@ -657,28 +655,22 @@
   </target>
 
   <target name="linux-build" depends="revision-check, linux-checkos, subprojects-build" description="Build linux version">
-    <mkdir dir="linux/arduino-1.8.8" />
-    <mkdir dir="linux/arduino-1.8.8/${staging_hardware_folder}" />
+  <mkdir dir="linux/arduino-1.8.8" />
+  <mkdir dir="linux/arduino-1.8.8/${staging_hardware_folder}" />
 	
 	<mkdir dir="linux/arduino-1.8.8/Plugins" />
-    <copy todir="linux/arduino-1.8.8">
-      <fileset dir="shared" includes="lib/**" />
-      <fileset dir="shared" includes="Plugins/**" />
-      <fileset file="shared/revisions.txt" />
-      <fileset file="shared/ceu-compiler.sh" />
-      <fileset file="shared/ceu-uploader.sh" />
-      <fileset file="shared/pico-compiler.sh" />
-      <fileset file="shared/pico-run.sh" />
-    </copy>
+  <copy todir="linux/arduino-1.8.8">
+    <fileset dir="shared" includes="lib/**" />
+    <fileset dir="shared" includes="Plugins/**" />
+    <fileset file="shared/revisions.txt" />
+    <fileset dir="shared" includes="**/*.sh" />
+  </copy>
 	
 	<copy todir="linux/arduino-1.8.8/Plugins">
 	  <fileset file="shared/compile.sh" />
     </copy>
 	
-	<chmod perm="755" dir="linux/arduino-1.8.8/ceu-compiler.sh" />
-	<chmod perm="755" dir="linux/arduino-1.8.8/ceu-uploader.sh" />
-	<chmod perm="755" dir="linux/arduino-1.8.8/pico-compiler.sh" />
-	<chmod perm="755" dir="linux/arduino-1.8.8/pico-run.sh" />
+	<chmod perm="755" dir="linux/arduino-1.8.8/" includes="**/*.sh" />
 	<chmod perm="755" dir="linux/run/lua/src/lua" />
 
     <copy todir="linux/arduino-1.8.8">
@@ -1088,10 +1080,7 @@
       <fileset dir="shared" includes="lib/**" />
       <fileset dir="shared" includes="Plugins/**" />
       <fileset file="shared/revisions.txt" />
-      <fileset file="shared/ceu-compiler.bat" />
-      <fileset file="shared/ceu-uploader.bat" />
-      <fileset file="shared/pico-compiler.bat" />
-      <fileset file="shared/pico-run.bat" />
+      <fileset dir="shared" includes="**/*.bat" />
     </copy>
 	
 	<copy todir="windows/arduino-1.8.8/Plugins">
