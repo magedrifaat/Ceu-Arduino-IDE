@@ -67,14 +67,14 @@ typedef double   r64;
 
 /* CEU_C */
 
+#undef CEU_FEATURES_EXCEPTION
 #define CEU_FEATURES_ISR static
 #define CEU_FEATURES_ISR_STATIC
+#undef CEU_FEATURES_THREAD
+#undef CEU_FEATURES_POOL
 #undef CEU_FEATURES_ASYNC
 #undef CEU_FEATURES_LUA
-#undef CEU_FEATURES_THREAD
-#undef CEU_FEATURES_EXCEPTION
 #undef CEU_FEATURES_DYNAMIC
-#undef CEU_FEATURES_POOL
 #undef CEU_FEATURES_OS
 #undef CEU_FEATURES_PAUSE
 #undef CEU_FEATURES_TRACE
@@ -114,7 +114,7 @@ typedef u8  tceu_nstk;   /* TODO */
 typedef u8 tceu_ntrl;
 typedef u8 tceu_nlbl;
 
-#define CEU_TRAILS_N 7
+#define CEU_TRAILS_N 1
 #ifndef CEU_STACK_N
 #define CEU_STACK_N 500
 #endif
@@ -438,8 +438,6 @@ void ceu_pm_set (u8 dev, bool v) {
     s32 ceu_wclock_dt (void);
     u32 ceu_wclock_now (void);
 
-#define USART_BAUD(bps) ((F_CPU/4/bps - 1) / 2)
-
 
 /* EVENTS_ENUM */
 
@@ -465,8 +463,6 @@ CEU_INPUT__PRIM,
 
 //CEU_INPUT__MIN,
     CEU_INPUT_CEU_WCLOCK,
-CEU_INPUT_USART_RX,
-CEU_INPUT_USART_TX_DONE,
 
 //CEU_INPUT__MAX,
 
@@ -563,19 +559,15 @@ static void ceu_trace (tceu_trace trace, const char* msg) {
 #define ceu_trace(a,b)
 #endif
 
-#define CEU_ISRS_N 4
+#define CEU_ISRS_N 2
 
 /* CEU_ISRS_DEFINES */
 #define CEU_ISR__TIMER1_COMPA_vect
-#define CEU_ISR__USART_RX_vect
-#define CEU_ISR__USART_TX_vect
 
 
 /* EVENTS_DEFINES */
 #define _CEU_OUTPUT_OUT_
 #define _CEU_INPUT_CEU_WCLOCK_
-#define _CEU_INPUT_USART_RX_
-#define _CEU_INPUT_USART_TX_DONE_
 #define _CEU_OUTPUT_OUT_13_
 
 
@@ -947,14 +939,14 @@ typedef struct tceu_pool_pak {
 
 #pragma pack(push,1)
 typedef struct tceu_data_Lock {
-    #line 1 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+    #line 1 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 bool  is_locked;
-#line 1 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 1 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 } tceu_data_Lock;
 
 typedef struct tceu_data_Exception {
     tceu_ndata _enum;
-    #line 1 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+    #line 1 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 char*  message;
 } tceu_data_Exception;
 
@@ -1007,10 +999,6 @@ union {
 } tceu_output_mem_OUT;
 typedef struct tceu_input_CEU_WCLOCK {
 } tceu_input_CEU_WCLOCK;
-typedef struct tceu_input_USART_RX {
-} tceu_input_USART_RX;
-typedef struct tceu_input_USART_TX_DONE {
-} tceu_input_USART_TX_DONE;
 typedef struct tceu_output_OUT_13 {
     bool _1;
 } tceu_output_OUT_13;
@@ -1072,65 +1060,17 @@ union {
 };
     };
 } tceu_code_mem_WCLOCK_Freeze;
-typedef struct tceu_code_mem_USART_Init {
-    tceu_code_mem _mem;
-    tceu_trl      _trails[5];
-    byte          _params[0];
-    union {
-        /* MULTIS */
-        struct {
-union {
-struct {
-union {
-struct {
-union {
-};
-};
-};
-union {
-struct {
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-int  bps;
-union {
-union {
-};
-struct {
-union {
-struct {
-union {
-struct {
-union {
-struct {
-union {
-};
-};
-};
-union {
-};
-};
-};
-};
-};
-};
-};
-};
-};
-};
-};
-};
-    };
-} tceu_code_mem_USART_Init;
 typedef struct tceu_code_mem_ROOT {
     tceu_code_mem _mem;
-    tceu_trl      _trails[7];
+    tceu_trl      _trails[1];
     byte          _params[0];
     struct {
-#line 1 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-#line 1 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-#line 1 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-#line 1 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-#line 1 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-#line 1 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 1 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
+#line 1 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
+#line 1 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
+#line 1 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
+#line 1 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
+#line 1 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 int  _RET;
 #line 6 "././include/arduino/arduino.ceu"
 #line 6 "././include/arduino/arduino.ceu"
@@ -1206,106 +1146,17 @@ int  _RET;
 #line 8 "./libraries/driver-gpio/out.ceu"
 #line 14 "./libraries/driver-wclock/avr/timer1-compa.ceu"
 #line 67 "./libraries/driver-wclock/avr/../wclock.ceu"
-#line 30 "./libraries/driver-usart/avr/usart.ceu"
-#line 32 "./libraries/driver-usart/avr/usart.ceu"
-#line 33 "./libraries/driver-usart/avr/usart.ceu"
-#line 35 "./libraries/driver-usart/avr/usart.ceu"
-#line 35 "./libraries/driver-usart/avr/usart.ceu"
-#line 36 "./libraries/driver-usart/avr/usart.ceu"
-#line 36 "./libraries/driver-usart/avr/usart.ceu"
-#line 9 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 4 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 union {
 struct {
 #line 7 "./libraries/driver-wclock/avr/../wclock.ceu"
 #line 11 "./libraries/driver-wclock/avr/../wclock.ceu"
-#line 5 "./libraries/driver-usart/avr/../usart.ceu"
-#line 6 "./libraries/driver-usart/avr/../usart.ceu"
-#line 7 "./libraries/driver-usart/avr/../usart.ceu"
-#line 17 "./libraries/driver-usart/avr/usart.ceu"
-tceu_data_Lock  usart_lock;
-#line 18 "./libraries/driver-usart/avr/usart.ceu"
-u8  usart_pm_refs;
-#line 20 "./libraries/driver-usart/avr/usart.ceu"
-byte usart_rx_buf_110_buf[32];
-tceu_vector usart_rx_buf_110;
-#line 7 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-byte str_346_buf[20];
-tceu_vector str_346;
-#line 10 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-int  i;
-union {
-struct {
-union {
-tceu_code_mem_USART_Init __mem_335;
-};
 union {
 struct {
 struct {
 union {
-struct {
-union {
-struct {
-struct {
-union {
-struct {
-struct {
-union {
-s32 __wclk_359;
-};
-};
-struct {
-union {
-struct {
-struct {
-union {
-s32 __wclk_369;
-s32 __wclk_378;
-};
-};
-};
-};
-};
-};
-};
-};
-int __fr_950;
-int __lim_950;
-};
-};
-};
-struct {
-union {
-struct {
-struct {
-union {
-struct {
-struct {
-union {
-s32 __wclk_394;
-};
-};
-struct {
-union {
-struct {
-struct {
-union {
-s32 __wclk_404;
-s32 __wclk_415;
-};
-};
-};
-};
-};
-};
-};
-};
-int __fr_958;
-int __lim_958;
-};
-};
-};
-};
-};
+s32 __wclk_83;
+s32 __wclk_91;
 };
 };
 };
@@ -1344,102 +1195,19 @@ CEU_LABEL_Code_WCLOCK_Freeze,
 CEU_LABEL_WCLOCK_Freeze_Code_WCLOCK_Freeze__TERM_23,
 CEU_LABEL_Block__CLR_24,
 CEU_LABEL_Async_Isr__FIN_25,
-CEU_LABEL_USART_Init_Par_Or_sub_1_IN_26,
-CEU_LABEL_USART_Init_Par_Or_sub_2_IN_27,
-CEU_LABEL_USART_Init_Par_Or__OUT_28,
-CEU_LABEL_USART_Init_Par_Or__CLR_29,
-CEU_LABEL_USART_Init_Block__CLR_30,
-CEU_LABEL_USART_Init_Finalize_Case__IN_31,
-CEU_LABEL_USART_Init_Block__CLR_32,
-CEU_LABEL_USART_Init_Block__CLR_33,
-CEU_LABEL_USART_Init_Do__OUT_34,
-CEU_LABEL_USART_Init_Do__CLR_35,
-CEU_LABEL_USART_Init_Block__CLR_36,
-CEU_LABEL_Code_USART_Init,
-CEU_LABEL_USART_Init_Code_USART_Init__TERM_38,
-CEU_LABEL_Block__CLR_39,
-CEU_LABEL_Async_Isr__FIN_40,
-CEU_LABEL_Block__CLR_41,
-CEU_LABEL_Block__CLR_42,
-CEU_LABEL_Block__CLR_43,
-CEU_LABEL_Async_Isr__FIN_44,
-CEU_LABEL_USART_Init_Par_Or_sub_1_IN_45,
-CEU_LABEL_USART_Init_Par_Or_sub_2_IN_46,
-CEU_LABEL_USART_Init_Par_Or__OUT_47,
-CEU_LABEL_USART_Init_Par_Or__CLR_48,
-CEU_LABEL_USART_Init_Block__CLR_49,
-CEU_LABEL_USART_Init_Finalize_Case__IN_50,
-CEU_LABEL_USART_Init_Par_Or_sub_1_IN_51,
-CEU_LABEL_USART_Init_Par_Or_sub_2_IN_52,
-CEU_LABEL_USART_Init_Par_Or__OUT_53,
-CEU_LABEL_USART_Init_Par_Or__CLR_54,
-CEU_LABEL_USART_Init_Block__CLR_55,
-CEU_LABEL_USART_Init_Finalize_Case__IN_56,
-CEU_LABEL_USART_Init_Block__CLR_57,
-CEU_LABEL_USART_Init_Block__CLR_58,
-CEU_LABEL_USART_Init_Block__CLR_59,
-CEU_LABEL_USART_Init_Do__OUT_60,
-CEU_LABEL_USART_Init_Do__CLR_61,
-CEU_LABEL_USART_Init_Block__CLR_62,
-CEU_LABEL_USART_Init_Code_USART_Init__TERM_63,
-CEU_LABEL_Par_Or_sub_1_IN_64,
-CEU_LABEL_Par_Or_sub_2_IN_65,
-CEU_LABEL_Par_Or__OUT_66,
-CEU_LABEL_Par_Or__CLR_67,
-CEU_LABEL_Await_Spawn__OUT_68,
-CEU_LABEL_Par_Or_sub_1_IN_69,
-CEU_LABEL_Par_Or_sub_2_IN_70,
-CEU_LABEL_Par_Or__OUT_71,
-CEU_LABEL_Par_Or__CLR_72,
-CEU_LABEL_Await_Wclock__OUT_73,
-CEU_LABEL_Block__CLR_74,
-CEU_LABEL_Emit_Ext_emit__OUT_13__OUT_75,
-CEU_LABEL_Await_Wclock__OUT_76,
-CEU_LABEL_Emit_Ext_emit__OUT_13__OUT_77,
-CEU_LABEL_Await_Wclock__OUT_78,
-CEU_LABEL_Block__CLR_79,
-CEU_LABEL_Loop__CLR_80,
-CEU_LABEL_Loop_Continue__CNT_81,
-CEU_LABEL_Loop_Continue__CLR_82,
-CEU_LABEL_Loop_Break__OUT_83,
-CEU_LABEL_Block__CLR_84,
-CEU_LABEL_Block__CLR_85,
-CEU_LABEL_Loop__CLR_86,
-CEU_LABEL_Loop_Continue__CNT_87,
-CEU_LABEL_Loop_Continue__CLR_88,
-CEU_LABEL_Loop_Break__OUT_89,
-CEU_LABEL_Block__CLR_90,
-CEU_LABEL_Par_Or_sub_1_IN_91,
-CEU_LABEL_Par_Or_sub_2_IN_92,
-CEU_LABEL_Par_Or__OUT_93,
-CEU_LABEL_Par_Or__CLR_94,
-CEU_LABEL_Await_Wclock__OUT_95,
-CEU_LABEL_Block__CLR_96,
-CEU_LABEL_Emit_Ext_emit__OUT_13__OUT_97,
-CEU_LABEL_Await_Wclock__OUT_98,
-CEU_LABEL_Emit_Ext_emit__OUT_13__OUT_99,
-CEU_LABEL_Await_Wclock__OUT_100,
-CEU_LABEL_Block__CLR_101,
-CEU_LABEL_Loop__CLR_102,
-CEU_LABEL_Loop_Continue__CNT_103,
-CEU_LABEL_Loop_Continue__CLR_104,
-CEU_LABEL_Loop_Break__OUT_105,
-CEU_LABEL_Block__CLR_106,
-CEU_LABEL_Block__CLR_107,
-CEU_LABEL_Loop__CLR_108,
-CEU_LABEL_Loop_Continue__CNT_109,
-CEU_LABEL_Loop_Continue__CLR_110,
-CEU_LABEL_Loop_Break__OUT_111,
-CEU_LABEL_Block__CLR_112,
-CEU_LABEL_Block__CLR_113,
-CEU_LABEL_Loop__CLR_114,
-CEU_LABEL_Loop_Continue__CNT_115,
-CEU_LABEL_Loop_Continue__CLR_116,
-CEU_LABEL_Loop_Break__OUT_117,
-CEU_LABEL_Block__CLR_118,
-CEU_LABEL_Do__OUT_119,
-CEU_LABEL_Do__CLR_120,
-CEU_LABEL_Block__CLR_121,
+CEU_LABEL_Emit_Ext_emit__OUT_13__OUT_26,
+CEU_LABEL_Await_Wclock__OUT_27,
+CEU_LABEL_Emit_Ext_emit__OUT_13__OUT_28,
+CEU_LABEL_Await_Wclock__OUT_29,
+CEU_LABEL_Block__CLR_30,
+CEU_LABEL_Loop__CLR_31,
+CEU_LABEL_Loop_Continue__CNT_32,
+CEU_LABEL_Loop_Continue__CLR_33,
+CEU_LABEL_Loop_Break__OUT_34,
+CEU_LABEL_Block__CLR_35,
+CEU_LABEL_Do__OUT_36,
+CEU_LABEL_Do__CLR_37,
+CEU_LABEL_Block__CLR_38,
 
 };
 
@@ -1680,9 +1448,6 @@ static int ceu_lbl (tceu_nstk _ceu_level, tceu_stk* _ceu_cur, tceu_stk* _ceu_nxt
         return ((s32)(((double)(TCNT1))*1000000L*1024/F_CPU)+1);
     }
 
-    tceu_vector* usart_tx_buf;
-    usize usart_tx_buf_i;
-
 
 static u32 /* space */
 CEU_CODE_WCLOCK_Now (tceu_code_mem_WCLOCK_Now mem_,
@@ -1731,11 +1496,6 @@ CEU_CODE_WCLOCK_Freeze (tceu_code_mem_WCLOCK_Freeze mem_,
     tceu_nlbl lbl = CEU_LABEL_Code_WCLOCK_Freeze;
     ceu_lbl(0, NULL, NULL, (tceu_code_mem*)mem, lbl, 0);
 }
-static tceu_nlbl CEU_CODE_USART_Init_to_lbl (tceu_code_mem_USART_Init* mem)
-{
-    tceu_nlbl lbl = CEU_LABEL_Code_USART_Init;
-    return lbl;
-}
 
 
 #ifdef CEU_FEATURES_TRACE
@@ -1767,7 +1527,7 @@ digitalWrite((((*ps)._1)),(((*ps)._2)));
 #line 9 "./libraries/driver-gpio/out.ceu"
 }
 
-/* Do (n=702, ln=8) */
+/* Do (n=369, ln=8) */
 
 #line 8 "./libraries/driver-gpio/out.ceu"
 CEU_LABEL_Do__OUT_5:;
@@ -1827,183 +1587,6 @@ ceu_wclock_done();
 /* Block (n=70, ln=69) */
 
 #line 69 "./libraries/driver-wclock/avr/../wclock.ceu"
-}
-}
-typedef struct tceu_isr_mem_141 {
-    struct {
-union {
-};
-};
-} tceu_isr_mem_141;
-
-#ifndef CEU_ISR
-#error Missing architecture definition for `CEU_ISR`.
-#endif
-
-CEU_ISR(USART_RX_vect)
-{
-    tceu_code_mem* _ceu_mem = &CEU_APP.root._mem;
-    tceu_isr_mem_141 _ceu_loc;
-    
-/* Block (n=140, ln=44) */
-
-#line 44 "./libraries/driver-usart/avr/usart.ceu"
-{
-
-/* Set_Vec (n=134, ln=44) */
-
-#line 44 "./libraries/driver-usart/avr/usart.ceu"
-{
-    usize __ceu_nxt;
-
-/* Set_Vec (n=134, ln=44) */
-
-#line 44 "./libraries/driver-usart/avr/usart.ceu"
-    __ceu_nxt = ((CEU_APP.root.usart_rx_buf_110)).len;
-
-/* Set_Vec (n=134, ln=44) */
-
-#line 44 "./libraries/driver-usart/avr/usart.ceu"
-    __ceu_nxt = ((CEU_APP.root.usart_rx_buf_110)).len;
-
-/* Set_Vec (n=134, ln=44) */
-
-#line 44 "./libraries/driver-usart/avr/usart.ceu"
-    ceu_vector_setlen(&((CEU_APP.root.usart_rx_buf_110)), (((CEU_APP.root.usart_rx_buf_110)).len + 1), 1);
-
-/* Set_Vec (n=134, ln=44) */
-
-#line 44 "./libraries/driver-usart/avr/usart.ceu"
-    *((byte*)
-        ceu_vector_buf_get(&((CEU_APP.root.usart_rx_buf_110)), __ceu_nxt++)) = UDR0;
-
-/* Set_Vec (n=134, ln=44) */
-
-#line 44 "./libraries/driver-usart/avr/usart.ceu"
-
-/* Set_Vec (n=134, ln=44) */
-
-#line 44 "./libraries/driver-usart/avr/usart.ceu"
-}
-
-/* Emit_Ext_emit (n=138, ln=45) */
-
-#line 45 "./libraries/driver-usart/avr/usart.ceu"
-{
-
-/* Emit_Ext_emit (n=138, ln=45) */
-
-#line 45 "./libraries/driver-usart/avr/usart.ceu"
-{
-#ifdef CEU_FEATURES_ISR_STATIC
-    tceu_isr_evt __ceu_evt = { ((tceu_evt){CEU_INPUT_USART_RX,{NULL}}).id, 0, NULL };
-    ceu_callback_isr_emit(2, (void*)&__ceu_evt, CEU_TRACE(0));
-#else
-    tceu_evt_id_params __ceu_evt = { ((tceu_evt){CEU_INPUT_USART_RX,{NULL}}).id, NULL };
-    ceu_callback_isr_emit(USART_RX_vect, (void*)&__ceu_evt, CEU_TRACE(0));
-#endif
-}
-
-/* Emit_Ext_emit (n=138, ln=45) */
-
-#line 45 "./libraries/driver-usart/avr/usart.ceu"
-}
-
-/* Block (n=140, ln=44) */
-
-#line 44 "./libraries/driver-usart/avr/usart.ceu"
-}
-}
-typedef struct tceu_isr_mem_160 {
-    struct {
-union {
-struct {
-union {
-};
-};
-struct {
-union {
-};
-};
-};
-};
-} tceu_isr_mem_160;
-
-#ifndef CEU_ISR
-#error Missing architecture definition for `CEU_ISR`.
-#endif
-
-CEU_ISR(USART_TX_vect)
-{
-    tceu_code_mem* _ceu_mem = &CEU_APP.root._mem;
-    tceu_isr_mem_160 _ceu_loc;
-    
-/* Block (n=159, ln=54) */
-
-#line 54 "./libraries/driver-usart/avr/usart.ceu"
-{
-
-/* If (n=157, ln=54) */
-
-#line 54 "./libraries/driver-usart/avr/usart.ceu"
-if (((usart_tx_buf_i)<(usart_tx_buf->len))) {
-    
-/* Block (n=151, ln=55) */
-
-#line 55 "./libraries/driver-usart/avr/usart.ceu"
-{
-
-/* Nat_Stmt (n=148, ln=55) */
-
-#line 55 "./libraries/driver-usart/avr/usart.ceu"
- UDR0 = *(byte*)(ceu_vector_geti(usart_tx_buf,usart_tx_buf_i)); 
-/* Nat_Stmt (n=149, ln=56) */
-
-#line 56 "./libraries/driver-usart/avr/usart.ceu"
- usart_tx_buf_i++; 
-/* Block (n=151, ln=55) */
-
-#line 55 "./libraries/driver-usart/avr/usart.ceu"
-}
-} else {
-    
-/* Block (n=156, ln=58) */
-
-#line 58 "./libraries/driver-usart/avr/usart.ceu"
-{
-
-/* Emit_Ext_emit (n=154, ln=58) */
-
-#line 58 "./libraries/driver-usart/avr/usart.ceu"
-{
-
-/* Emit_Ext_emit (n=154, ln=58) */
-
-#line 58 "./libraries/driver-usart/avr/usart.ceu"
-{
-#ifdef CEU_FEATURES_ISR_STATIC
-    tceu_isr_evt __ceu_evt = { ((tceu_evt){CEU_INPUT_USART_TX_DONE,{NULL}}).id, 0, NULL };
-    ceu_callback_isr_emit(3, (void*)&__ceu_evt, CEU_TRACE(0));
-#else
-    tceu_evt_id_params __ceu_evt = { ((tceu_evt){CEU_INPUT_USART_TX_DONE,{NULL}}).id, NULL };
-    ceu_callback_isr_emit(USART_TX_vect, (void*)&__ceu_evt, CEU_TRACE(0));
-#endif
-}
-
-/* Emit_Ext_emit (n=154, ln=58) */
-
-#line 58 "./libraries/driver-usart/avr/usart.ceu"
-}
-
-/* Block (n=156, ln=58) */
-
-#line 58 "./libraries/driver-usart/avr/usart.ceu"
-}
-}
-
-/* Block (n=159, ln=54) */
-
-#line 54 "./libraries/driver-usart/avr/usart.ceu"
 }
 }
 
@@ -2145,19 +1728,19 @@ _CEU_LBL_:
         case CEU_LABEL_NONE:
             break;
         
-/* ROOT (n=472, ln=1) */
+/* ROOT (n=139, ln=1) */
 
-#line 1 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 1 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 case CEU_LABEL_ROOT:;
 
-/* Block (n=471, ln=1) */
+/* Block (n=138, ln=1) */
 
-#line 1 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 1 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 {
 
-/* Block (n=466, ln=1) */
+/* Block (n=133, ln=1) */
 
-#line 1 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 1 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 {
 
 /* Nat_Stmt (n=27, ln=50) */
@@ -2207,29 +1790,29 @@ case CEU_LABEL_ROOT:;
     pinMode(13, OUTPUT);
 #endif
 
-/* Code (n=724, ln=7) */
+/* Code (n=391, ln=7) */
 
 #line 7 "./libraries/driver-wclock/avr/../wclock.ceu"
 /* do not enter from outside */
 if (0)
 {
 
-/* Code (n=724, ln=7) */
+/* Code (n=391, ln=7) */
 
 #line 7 "./libraries/driver-wclock/avr/../wclock.ceu"
 case CEU_LABEL_Code_WCLOCK_Now:;
 
-/* Block (n=723, ln=7) */
+/* Block (n=390, ln=7) */
 
 #line 7 "./libraries/driver-wclock/avr/../wclock.ceu"
 {
 
-/* Block (n=715, ln=7) */
+/* Block (n=382, ln=7) */
 
 #line 7 "./libraries/driver-wclock/avr/../wclock.ceu"
 {
 
-/* Block (n=713, ln=7) */
+/* Block (n=380, ln=7) */
 
 #line 7 "./libraries/driver-wclock/avr/../wclock.ceu"
 {
@@ -2239,7 +1822,7 @@ case CEU_LABEL_Code_WCLOCK_Now:;
 #line 8 "./libraries/driver-wclock/avr/../wclock.ceu"
 {
 
-/* Set_Exp (n=725, ln=8) */
+/* Set_Exp (n=392, ln=8) */
 
 #line 8 "./libraries/driver-wclock/avr/../wclock.ceu"
 (((*((tceu_code_mem_WCLOCK_Now*)_ceu_mem))._ret)) = ( ceu_wclock_now() );
@@ -2254,64 +1837,64 @@ CEU_GOTO(CEU_LABEL_WCLOCK_Now_Do__OUT_11);
 #line 8 "./libraries/driver-wclock/avr/../wclock.ceu"
 }
 
-/* Block (n=713, ln=7) */
+/* Block (n=380, ln=7) */
 
 #line 7 "./libraries/driver-wclock/avr/../wclock.ceu"
 }
 
-/* Block (n=715, ln=7) */
+/* Block (n=382, ln=7) */
 
 #line 7 "./libraries/driver-wclock/avr/../wclock.ceu"
 }
 
-/* Do (n=716, ln=7) */
+/* Do (n=383, ln=7) */
 
 #line 7 "./libraries/driver-wclock/avr/../wclock.ceu"
 ceu_assert(0, "reached end of `do`");
 
-/* Do (n=716, ln=7) */
+/* Do (n=383, ln=7) */
 
 #line 7 "./libraries/driver-wclock/avr/../wclock.ceu"
 case CEU_LABEL_WCLOCK_Now_Do__OUT_11:;
 
-/* Block (n=723, ln=7) */
+/* Block (n=390, ln=7) */
 
 #line 7 "./libraries/driver-wclock/avr/../wclock.ceu"
 }
 
-/* Code (n=724, ln=7) */
+/* Code (n=391, ln=7) */
 
 #line 7 "./libraries/driver-wclock/avr/../wclock.ceu"
 return 0;
 
-/* Code (n=724, ln=7) */
+/* Code (n=391, ln=7) */
 
 #line 7 "./libraries/driver-wclock/avr/../wclock.ceu"
 }
 
-/* Code (n=738, ln=11) */
+/* Code (n=405, ln=11) */
 
 #line 11 "./libraries/driver-wclock/avr/../wclock.ceu"
 /* do not enter from outside */
 if (0)
 {
 
-/* Code (n=738, ln=11) */
+/* Code (n=405, ln=11) */
 
 #line 11 "./libraries/driver-wclock/avr/../wclock.ceu"
 case CEU_LABEL_Code_WCLOCK_Freeze:;
 
-/* Block (n=737, ln=11) */
+/* Block (n=404, ln=11) */
 
 #line 11 "./libraries/driver-wclock/avr/../wclock.ceu"
 {
 
-/* Block (n=733, ln=11) */
+/* Block (n=400, ln=11) */
 
 #line 11 "./libraries/driver-wclock/avr/../wclock.ceu"
 {
 
-/* Block (n=731, ln=11) */
+/* Block (n=398, ln=11) */
 
 #line 11 "./libraries/driver-wclock/avr/../wclock.ceu"
 {
@@ -2331,32 +1914,32 @@ delayMicroseconds((((*((tceu_code_mem_WCLOCK_Freeze*)_ceu_mem)).us)));
 #line 12 "./libraries/driver-wclock/avr/../wclock.ceu"
 }
 
-/* Block (n=731, ln=11) */
+/* Block (n=398, ln=11) */
 
 #line 11 "./libraries/driver-wclock/avr/../wclock.ceu"
 }
 
-/* Block (n=733, ln=11) */
+/* Block (n=400, ln=11) */
 
 #line 11 "./libraries/driver-wclock/avr/../wclock.ceu"
 }
 
-/* Do (n=734, ln=11) */
+/* Do (n=401, ln=11) */
 
 #line 11 "./libraries/driver-wclock/avr/../wclock.ceu"
 case CEU_LABEL_WCLOCK_Freeze_Do__OUT_19:;
 
-/* Block (n=737, ln=11) */
+/* Block (n=404, ln=11) */
 
 #line 11 "./libraries/driver-wclock/avr/../wclock.ceu"
 }
 
-/* Code (n=738, ln=11) */
+/* Code (n=405, ln=11) */
 
 #line 11 "./libraries/driver-wclock/avr/../wclock.ceu"
 return 0;
 
-/* Code (n=738, ln=11) */
+/* Code (n=405, ln=11) */
 
 #line 11 "./libraries/driver-wclock/avr/../wclock.ceu"
 }
@@ -2367,661 +1950,34 @@ return 0;
 
     ceu_wclock_init();
 
-/* Set_Exp (n=973, ln=1) */
+/* Loop (n=94, ln=6) */
 
-#line 1 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-((((CEU_APP.root.usart_lock)).is_locked)) = 0;
-
-/* Set_Exp (n=105, ln=18) */
-
-#line 18 "./libraries/driver-usart/avr/usart.ceu"
-((CEU_APP.root.usart_pm_refs)) = 0;
-
-/* Vec_Init (n=989, ln=20) */
-
-#line 20 "./libraries/driver-usart/avr/usart.ceu"
-ceu_vector_init(&((CEU_APP.root.usart_rx_buf_110)),32, 1, 0, sizeof(byte),
-                (byte*)&((CEU_APP.root.usart_rx_buf_110_buf)));
-
-/* Code (n=846, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-/* do not enter from outside */
-if (0)
-{
-
-/* Code (n=846, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-case CEU_LABEL_Code_USART_Init:;
-
-/* Block (n=845, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-{
-
-/* Par_Or (n=1189, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-_ceu_mem->_trails[2].evt.id = CEU_INPUT__STACKED;
-_ceu_mem->_trails[2].level  = _ceu_level;
-_ceu_mem->_trails[2].lbl    = CEU_LABEL_USART_Init_Par_Or_sub_2_IN_46;
-
-/* Par_Or (n=1189, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-CEU_GOTO(CEU_LABEL_USART_Init_Par_Or_sub_1_IN_45);
-
-/* Par_Or (n=1189, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-case CEU_LABEL_USART_Init_Par_Or_sub_1_IN_45:;
-
-/* Finalize_Case (n=1105, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-_ceu_mem->_trails[1].evt.id = CEU_INPUT__FINALIZE;
-_ceu_mem->_trails[1].lbl    = CEU_LABEL_USART_Init_Finalize_Case__IN_50;
-
-/* Finalize_Case (n=1105, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-if (0) {
-
-/* Finalize_Case (n=1105, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-case CEU_LABEL_USART_Init_Finalize_Case__IN_50:;
-
-/* Block (n=840, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-{
-
-/* Code_Finalize (n=838, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-if (_ceu_mem->has_term) {
-    /* generate only if terminating from inside */
-    _ceu_mem->_trails[1].evt.id = CEU_INPUT__STACKED;
-    _ceu_mem->_trails[1].level  = _ceu_level;
-    _ceu_mem->_trails[1].lbl    = CEU_LABEL_USART_Init_Code_USART_Init__TERM_63;
-
-    tceu_evt   __ceu_evt   = { CEU_INPUT__CODE_TERMINATED, {_ceu_mem} };
-    tceu_range __ceu_range = { &CEU_APP.root._mem, 0, CEU_TRAILS_N-1 };
-    _ceu_nxt->evt      = __ceu_evt;
-    _ceu_nxt->range    = __ceu_range;
-
-/* Code_Finalize (n=838, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-_ceu_nxt->params_n = 0;
-
-/* Code_Finalize (n=838, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-}
-
-#ifdef CEU_FEATURES_POOL
-if (_ceu_mem->pak != NULL) {
-    tceu_code_mem_dyn* __ceu_dyn =
-        (tceu_code_mem_dyn*)(((byte*)(_ceu_mem)) - sizeof(tceu_code_mem_dyn));
-    __ceu_dyn->is_alive = 0;
-}
-#endif
-
-ceu_stack_clear(_ceu_cur, _ceu_mem);
-
-if (_ceu_mem->has_term) {
-    _ceu_mem->has_term = 0;
-    return 1;
-} else {
-    return 0;
-}
-
-/* Code_Finalize (n=838, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-return 0;
-
-/* Block (n=840, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-}
-
-/* Finalize_Case (n=1105, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-return 0;
-
-/* Finalize_Case (n=1105, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-}
-
-/* Await_Forever (n=1186, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-return 0;
-
-/* Par_Or (n=1189, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-CEU_GOTO(CEU_LABEL_USART_Init_Par_Or__OUT_47);
-
-/* Par_Or (n=1189, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-case CEU_LABEL_USART_Init_Par_Or_sub_2_IN_46:;
-
-/* Block (n=836, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-{
-
-/* Block (n=834, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-{
-
-/* Block (n=176, ln=67) */
-
-#line 67 "./libraries/driver-usart/avr/usart.ceu"
-{
-
-/* Nat_Stmt (n=168, ln=67) */
-
-#line 67 "./libraries/driver-usart/avr/usart.ceu"
-
-        UCSR0A = 1 << U2X0;
-        UBRR0H = (USART_BAUD((((*((tceu_code_mem_USART_Init*)_ceu_mem)).bps)))>>8); // set baud rate
-        UBRR0L = (USART_BAUD((((*((tceu_code_mem_USART_Init*)_ceu_mem)).bps))));
-        UCSR0C = (1<<USBS0) | (3<<UCSZ00); // 8data, 2stop-bit
-        UCSR0B = (1<<RXEN0) | (1<<RXCIE0); // enables RX & ISRS
-    
-/* Par_Or (n=1195, ln=74) */
-
-#line 74 "./libraries/driver-usart/avr/usart.ceu"
-_ceu_mem->_trails[4].evt.id = CEU_INPUT__STACKED;
-_ceu_mem->_trails[4].level  = _ceu_level;
-_ceu_mem->_trails[4].lbl    = CEU_LABEL_USART_Init_Par_Or_sub_2_IN_52;
-
-/* Par_Or (n=1195, ln=74) */
-
-#line 74 "./libraries/driver-usart/avr/usart.ceu"
-CEU_GOTO(CEU_LABEL_USART_Init_Par_Or_sub_1_IN_51);
-
-/* Par_Or (n=1195, ln=74) */
-
-#line 74 "./libraries/driver-usart/avr/usart.ceu"
-case CEU_LABEL_USART_Init_Par_Or_sub_1_IN_51:;
-
-/* Finalize_Case (n=1107, ln=74) */
-
-#line 74 "./libraries/driver-usart/avr/usart.ceu"
-_ceu_mem->_trails[3].evt.id = CEU_INPUT__FINALIZE;
-_ceu_mem->_trails[3].lbl    = CEU_LABEL_USART_Init_Finalize_Case__IN_56;
-
-/* Finalize_Case (n=1107, ln=74) */
-
-#line 74 "./libraries/driver-usart/avr/usart.ceu"
-if (0) {
-
-/* Finalize_Case (n=1107, ln=74) */
-
-#line 74 "./libraries/driver-usart/avr/usart.ceu"
-case CEU_LABEL_USART_Init_Finalize_Case__IN_56:;
-
-/* Block (n=171, ln=75) */
-
-#line 75 "./libraries/driver-usart/avr/usart.ceu"
-{
-
-/* Nat_Stmt (n=169, ln=75) */
-
-#line 75 "./libraries/driver-usart/avr/usart.ceu"
-
-            UCSR0B = 0; // disables TX/RX & ISRS
-        
-/* Block (n=171, ln=75) */
-
-#line 75 "./libraries/driver-usart/avr/usart.ceu"
-}
-
-/* Finalize_Case (n=1107, ln=74) */
-
-#line 74 "./libraries/driver-usart/avr/usart.ceu"
-return 0;
-
-/* Finalize_Case (n=1107, ln=74) */
-
-#line 74 "./libraries/driver-usart/avr/usart.ceu"
-}
-
-/* Await_Forever (n=1192, ln=74) */
-
-#line 74 "./libraries/driver-usart/avr/usart.ceu"
-return 0;
-
-/* Par_Or (n=1195, ln=74) */
-
-#line 74 "./libraries/driver-usart/avr/usart.ceu"
-CEU_GOTO(CEU_LABEL_USART_Init_Par_Or__OUT_53);
-
-/* Par_Or (n=1195, ln=74) */
-
-#line 74 "./libraries/driver-usart/avr/usart.ceu"
-case CEU_LABEL_USART_Init_Par_Or_sub_2_IN_52:;
-
-/* Await_Forever (n=174, ln=79) */
-
-#line 79 "./libraries/driver-usart/avr/usart.ceu"
-return 0;
-
-/* Nat_Stmt (n=997, ln=67) */
-
-#line 67 "./libraries/driver-usart/avr/usart.ceu"
-ceu_assert(0, "reached end of `code`");
-/* Par_Or (n=1195, ln=74) */
-
-#line 74 "./libraries/driver-usart/avr/usart.ceu"
-CEU_GOTO(CEU_LABEL_USART_Init_Par_Or__OUT_53);
-
-/* Par_Or (n=1195, ln=74) */
-
-#line 74 "./libraries/driver-usart/avr/usart.ceu"
-case CEU_LABEL_USART_Init_Par_Or__OUT_53:;
-
-/* Par_Or (n=1195, ln=74) */
-
-#line 74 "./libraries/driver-usart/avr/usart.ceu"
-_ceu_mem->_trails[2].evt.id = CEU_INPUT__STACKED;
-_ceu_mem->_trails[2].level  = _ceu_level;
-_ceu_mem->_trails[2].lbl    = CEU_LABEL_USART_Init_Par_Or__CLR_54;
-{
-    tceu_evt   __ceu_evt   = {CEU_INPUT__CLEAR,{NULL}};
-    tceu_range __ceu_range = { _ceu_mem, 2+1, 4 };
-    _ceu_nxt->evt      = __ceu_evt;
-    _ceu_nxt->range    = __ceu_range;
-    _ceu_nxt->params_n = 0;
-    return 1;
-}
-
-/* Par_Or (n=1195, ln=74) */
-
-#line 74 "./libraries/driver-usart/avr/usart.ceu"
-case CEU_LABEL_USART_Init_Par_Or__CLR_54:;
-
-/* Block (n=176, ln=67) */
-
-#line 67 "./libraries/driver-usart/avr/usart.ceu"
-}
-
-/* Block (n=834, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-}
-
-/* Block (n=836, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-}
-
-/* Do (n=837, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-case CEU_LABEL_USART_Init_Do__OUT_60:;
-
-/* Do (n=837, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-    _ceu_mem->has_term = 1;
-
-/* Par_Or (n=1189, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-CEU_GOTO(CEU_LABEL_USART_Init_Par_Or__OUT_47);
-
-/* Par_Or (n=1189, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-case CEU_LABEL_USART_Init_Par_Or__OUT_47:;
-
-/* Par_Or (n=1189, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-_ceu_mem->_trails[0].evt.id = CEU_INPUT__STACKED;
-_ceu_mem->_trails[0].level  = _ceu_level;
-_ceu_mem->_trails[0].lbl    = CEU_LABEL_USART_Init_Par_Or__CLR_48;
-{
-    tceu_evt   __ceu_evt   = {CEU_INPUT__CLEAR,{NULL}};
-    tceu_range __ceu_range = { _ceu_mem, 0+1, 4 };
-    _ceu_nxt->evt      = __ceu_evt;
-    _ceu_nxt->range    = __ceu_range;
-    _ceu_nxt->params_n = 0;
-    return 1;
-}
-
-/* Par_Or (n=1189, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-case CEU_LABEL_USART_Init_Par_Or__CLR_48:;
-
-/* Block (n=845, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-}
-
-/* Code (n=846, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-return 0;
-
-/* Code (n=846, ln=66) */
-
-#line 66 "./libraries/driver-usart/avr/usart.ceu"
-}
-
-/* Par_Or (n=1201, ln=5) */
-
-#line 5 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-_ceu_mem->_trails[2].evt.id = CEU_INPUT__STACKED;
-_ceu_mem->_trails[2].level  = _ceu_level;
-_ceu_mem->_trails[2].lbl    = CEU_LABEL_Par_Or_sub_2_IN_65;
-
-/* Par_Or (n=1201, ln=5) */
-
-#line 5 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-CEU_GOTO(CEU_LABEL_Par_Or_sub_1_IN_64);
-
-/* Par_Or (n=1201, ln=5) */
-
-#line 5 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Par_Or_sub_1_IN_64:;
-
-/* Abs_Spawn (n=335, ln=5) */
-
-#line 5 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-_ceu_mem->_trails[1].evt.id = CEU_INPUT__PROPAGATE_CODE;
-
-/* Abs_Spawn (n=335, ln=5) */
-
-#line 5 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-_ceu_mem->_trails[1].evt.mem = (tceu_code_mem*) &(CEU_APP.root.__mem_335);
-
-/* Abs_Spawn (n=335, ln=5) */
-
-#line 5 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-_ceu_mem->_trails[1].lbl = CEU_LABEL_Await_Spawn__OUT_68;
-
-/* Abs_Spawn (n=335, ln=5) */
-
-#line 5 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-{
-    *((tceu_code_mem_USART_Init*)(&(CEU_APP.root. __mem_335))) = 
-#if defined(__GNUC__) && defined(__cplusplus)
-({tceu_code_mem_USART_Init __ceu_334;__ceu_334.bps = 9600;; __ceu_334;})
-
-#else
-(tceu_code_mem_USART_Init) { .bps = 9600 }
-
-#endif
-;
-#ifdef CEU_FEATURES_POOL
-    (&(CEU_APP.root. __mem_335))->_mem.pak    = NULL;
-#endif
-    (&(CEU_APP.root. __mem_335))->_mem.up_mem = _ceu_mem;
-    (&(CEU_APP.root. __mem_335))->_mem.depth  = 0;
-    (&(CEU_APP.root. __mem_335))->_mem.has_term = 0;
-    (&(CEU_APP.root. __mem_335))->_mem.trails_n = 5;
-    memset(&(&(CEU_APP.root. __mem_335))->_mem._trails, 0, 5*sizeof(tceu_trl));
-    (&(CEU_APP.root. __mem_335))->_mem._trails[0].evt.id = CEU_INPUT__STACKED;
-    (&(CEU_APP.root. __mem_335))->_mem._trails[0].level  = _ceu_level+1;
-    (&(CEU_APP.root. __mem_335))->_mem._trails[0].lbl    = CEU_CODE_USART_Init_to_lbl((&(CEU_APP.root. __mem_335)));
-}
-
-{
-    tceu_evt   __ceu_evt   = {CEU_INPUT__NONE, {NULL}};
-    tceu_range __ceu_range = { (tceu_code_mem*)(&(CEU_APP.root. __mem_335)), 0, 5-1 };
-    _ceu_nxt->evt      = __ceu_evt;
-    _ceu_nxt->range    = __ceu_range;
-    _ceu_nxt->params_n = 0;
-    //return 1; (later, after deciding for spawn/await)
-}
-
-/* Abs_Spawn (n=335, ln=5) */
-
-#line 5 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-return 1;
-
-/* Abs_Spawn (n=335, ln=5) */
-
-#line 5 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Await_Spawn__OUT_68:;
-
-/* Await_Forever (n=1198, ln=5) */
-
-#line 5 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-return 0;
-
-/* Par_Or (n=1201, ln=5) */
-
-#line 5 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-CEU_GOTO(CEU_LABEL_Par_Or__OUT_66);
-
-/* Par_Or (n=1201, ln=5) */
-
-#line 5 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Par_Or_sub_2_IN_65:;
-
-/* Vec_Init (n=1063, ln=7) */
-
-#line 7 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-ceu_vector_init(&((CEU_APP.root.str_346)),20, 0, 0, sizeof(byte),
-                (byte*)&((CEU_APP.root.str_346_buf)));
-
-/* Set_Vec (n=345, ln=7) */
-
-#line 7 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-{
-    usize __ceu_nxt;
-
-/* Set_Vec (n=345, ln=7) */
-
-#line 7 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-    ceu_vector_setlen(&((CEU_APP.root.str_346)), 0, 0);
-    __ceu_nxt = 0;
-
-/* Set_Vec (n=345, ln=7) */
-
-#line 7 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-    ceu_vector_setlen(&((CEU_APP.root.str_346)), (((CEU_APP.root.str_346)).len + 3), 1);
-
-/* Set_Vec (n=345, ln=7) */
-
-#line 7 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-    *((byte*)
-        ceu_vector_buf_get(&((CEU_APP.root.str_346)), __ceu_nxt++)) = 0;
-
-/* Set_Vec (n=345, ln=7) */
-
-#line 7 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-    *((byte*)
-        ceu_vector_buf_get(&((CEU_APP.root.str_346)), __ceu_nxt++)) = 0;
-
-/* Set_Vec (n=345, ln=7) */
-
-#line 7 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-    *((byte*)
-        ceu_vector_buf_get(&((CEU_APP.root.str_346)), __ceu_nxt++)) = 0;
-
-/* Set_Vec (n=345, ln=7) */
-
-#line 7 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-
-/* Set_Vec (n=345, ln=7) */
-
-#line 7 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-}
-
-/* Loop (n=427, ln=12) */
-
-#line 12 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 6 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 while (1) {
         
-/* Block (n=426, ln=13) */
+/* Block (n=93, ln=7) */
 
-#line 13 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 7 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 {
 
-/* Block (n=952, ln=13) */
+/* Emit_Ext_emit (n=80, ln=7) */
 
-#line 13 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 7 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 {
 
-/* Loop_Num (n=950, ln=13) */
+/* Emit_Ext_emit (n=80, ln=7) */
 
-#line 13 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-(CEU_APP.root.__lim_950) = 15 + (1*0*-1);
-
-/* Loop_Num (n=950, ln=13) */
-
-#line 13 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-ceu_assert(1> 0, "invalid `loop` step : expected positive number");
-
-/* Loop_Num (n=950, ln=13) */
-
-#line 13 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-(CEU_APP.root.__fr_950) = 1;
-((CEU_APP.root.i)) = 1 + 1 * 0;
-ceu_assert_ex(((CEU_APP.root.i))>=(int)(CEU_APP.root.__fr_950),
-    "control variable overflow", CEU_TRACE(-3));
-while (1) {
-
-/* Loop_Num (n=950, ln=13) */
-
-#line 13 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-    if (((CEU_APP.root.i)) > (CEU_APP.root.__lim_950)) {
-        break;
-    }
-
-/* Loop_Num (n=950, ln=13) */
-
-#line 13 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-        
-/* Block (n=386, ln=18) */
-
-#line 18 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-{
-
-/* Par_Or (n=384, ln=18) */
-
-#line 18 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-_ceu_mem->_trails[6].evt.id = CEU_INPUT__STACKED;
-_ceu_mem->_trails[6].level  = _ceu_level;
-_ceu_mem->_trails[6].lbl    = CEU_LABEL_Par_Or_sub_2_IN_70;
-
-/* Par_Or (n=384, ln=18) */
-
-#line 18 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-CEU_GOTO(CEU_LABEL_Par_Or_sub_1_IN_69);
-
-/* Par_Or (n=384, ln=18) */
-
-#line 18 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Par_Or_sub_1_IN_69:;
-
-/* Block (n=361, ln=19) */
-
-#line 19 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-{
-
-/* Await_Wclock (n=359, ln=19) */
-
-#line 19 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-ceu_wclock(50000.0, &(CEU_APP.root.__wclk_359), NULL, CEU_TRACE(0));
-
-_CEU_HALT_359_:
-
-/* Await_Wclock (n=359, ln=19) */
-
-#line 19 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-_ceu_mem->_trails[5].evt.id = CEU_INPUT__WCLOCK;
-
-/* Await_Wclock (n=359, ln=19) */
-
-#line 19 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-_ceu_mem->_trails[5].lbl = CEU_LABEL_Await_Wclock__OUT_73;
-
-/* Await_Wclock (n=359, ln=19) */
-
-#line 19 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-return 0;
-
-/* Await_Wclock (n=359, ln=19) */
-
-#line 19 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Await_Wclock__OUT_73:;
-
-/* Await_Wclock (n=359, ln=19) */
-
-#line 19 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-/* subtract time and check if I have to awake */
-{
-    s32* dt = (s32*)_ceu_cur->params;
-    if (!ceu_wclock(*dt, NULL, &(CEU_APP.root.__wclk_359), CEU_TRACE(0)) ) {
-        goto _CEU_HALT_359_;
-    }
-}
-
-/* Block (n=361, ln=19) */
-
-#line 19 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-}
-
-/* Par_Or (n=384, ln=18) */
-
-#line 18 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-CEU_GOTO(CEU_LABEL_Par_Or__OUT_71);
-
-/* Par_Or (n=384, ln=18) */
-
-#line 18 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Par_Or_sub_2_IN_70:;
-
-/* Block (n=383, ln=21) */
-
-#line 21 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-{
-
-/* Loop (n=381, ln=21) */
-
-#line 21 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-while (1) {
-        
-/* Block (n=380, ln=22) */
-
-#line 22 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-{
-
-/* Emit_Ext_emit (n=366, ln=22) */
-
-#line 22 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-{
-
-/* Emit_Ext_emit (n=366, ln=22) */
-
-#line 22 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 7 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 tceu_output_OUT_13 __ceu_ps;
 
-/* Emit_Ext_emit (n=366, ln=22) */
+/* Emit_Ext_emit (n=80, ln=7) */
 
-#line 22 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 7 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 __ceu_ps._1 = 1;
 
-/* Emit_Ext_emit (n=366, ln=22) */
+/* Emit_Ext_emit (n=80, ln=7) */
 
-#line 22 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 7 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 
 #ifdef ceu_callback_output_OUT_13
 ceu_callback_output_OUT_13(&__ceu_ps, CEU_TRACE(-2));
@@ -3029,67 +1985,67 @@ ceu_callback_output_OUT_13(&__ceu_ps, CEU_TRACE(-2));
 1;
 #endif
 
-/* Emit_Ext_emit (n=366, ln=22) */
+/* Emit_Ext_emit (n=80, ln=7) */
 
-#line 22 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 7 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 }
 
-/* Await_Wclock (n=369, ln=23) */
+/* Await_Wclock (n=83, ln=8) */
 
-#line 23 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-ceu_wclock(1000.0, &(CEU_APP.root.__wclk_369), NULL, CEU_TRACE(0));
+#line 8 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
+ceu_wclock(1000000.0, &(CEU_APP.root.__wclk_83), NULL, CEU_TRACE(0));
 
-_CEU_HALT_369_:
+_CEU_HALT_83_:
 
-/* Await_Wclock (n=369, ln=23) */
+/* Await_Wclock (n=83, ln=8) */
 
-#line 23 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-_ceu_mem->_trails[6].evt.id = CEU_INPUT__WCLOCK;
+#line 8 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
+_ceu_mem->_trails[0].evt.id = CEU_INPUT__WCLOCK;
 
-/* Await_Wclock (n=369, ln=23) */
+/* Await_Wclock (n=83, ln=8) */
 
-#line 23 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-_ceu_mem->_trails[6].lbl = CEU_LABEL_Await_Wclock__OUT_76;
+#line 8 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
+_ceu_mem->_trails[0].lbl = CEU_LABEL_Await_Wclock__OUT_27;
 
-/* Await_Wclock (n=369, ln=23) */
+/* Await_Wclock (n=83, ln=8) */
 
-#line 23 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 8 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 return 0;
 
-/* Await_Wclock (n=369, ln=23) */
+/* Await_Wclock (n=83, ln=8) */
 
-#line 23 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Await_Wclock__OUT_76:;
+#line 8 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
+case CEU_LABEL_Await_Wclock__OUT_27:;
 
-/* Await_Wclock (n=369, ln=23) */
+/* Await_Wclock (n=83, ln=8) */
 
-#line 23 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 8 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 /* subtract time and check if I have to awake */
 {
     s32* dt = (s32*)_ceu_cur->params;
-    if (!ceu_wclock(*dt, NULL, &(CEU_APP.root.__wclk_369), CEU_TRACE(0)) ) {
-        goto _CEU_HALT_369_;
+    if (!ceu_wclock(*dt, NULL, &(CEU_APP.root.__wclk_83), CEU_TRACE(0)) ) {
+        goto _CEU_HALT_83_;
     }
 }
 
-/* Emit_Ext_emit (n=374, ln=24) */
+/* Emit_Ext_emit (n=88, ln=9) */
 
-#line 24 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 9 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 {
 
-/* Emit_Ext_emit (n=374, ln=24) */
+/* Emit_Ext_emit (n=88, ln=9) */
 
-#line 24 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 9 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 tceu_output_OUT_13 __ceu_ps;
 
-/* Emit_Ext_emit (n=374, ln=24) */
+/* Emit_Ext_emit (n=88, ln=9) */
 
-#line 24 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 9 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 __ceu_ps._1 = 0;
 
-/* Emit_Ext_emit (n=374, ln=24) */
+/* Emit_Ext_emit (n=88, ln=9) */
 
-#line 24 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 9 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 
 #ifdef ceu_callback_output_OUT_13
 ceu_callback_output_OUT_13(&__ceu_ps, CEU_TRACE(-2));
@@ -3097,554 +2053,88 @@ ceu_callback_output_OUT_13(&__ceu_ps, CEU_TRACE(-2));
 1;
 #endif
 
-/* Emit_Ext_emit (n=374, ln=24) */
+/* Emit_Ext_emit (n=88, ln=9) */
 
-#line 24 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 9 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 }
 
-/* Await_Wclock (n=378, ln=25) */
+/* Await_Wclock (n=91, ln=10) */
 
-#line 25 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-ceu_wclock((((CEU_APP.root.i)))*1000.0, &(CEU_APP.root.__wclk_378), NULL, CEU_TRACE(0));
+#line 10 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
+ceu_wclock(1000000.0, &(CEU_APP.root.__wclk_91), NULL, CEU_TRACE(0));
 
-_CEU_HALT_378_:
+_CEU_HALT_91_:
 
-/* Await_Wclock (n=378, ln=25) */
+/* Await_Wclock (n=91, ln=10) */
 
-#line 25 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-_ceu_mem->_trails[6].evt.id = CEU_INPUT__WCLOCK;
+#line 10 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
+_ceu_mem->_trails[0].evt.id = CEU_INPUT__WCLOCK;
 
-/* Await_Wclock (n=378, ln=25) */
+/* Await_Wclock (n=91, ln=10) */
 
-#line 25 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-_ceu_mem->_trails[6].lbl = CEU_LABEL_Await_Wclock__OUT_78;
+#line 10 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
+_ceu_mem->_trails[0].lbl = CEU_LABEL_Await_Wclock__OUT_29;
 
-/* Await_Wclock (n=378, ln=25) */
+/* Await_Wclock (n=91, ln=10) */
 
-#line 25 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 10 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 return 0;
 
-/* Await_Wclock (n=378, ln=25) */
+/* Await_Wclock (n=91, ln=10) */
 
-#line 25 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Await_Wclock__OUT_78:;
+#line 10 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
+case CEU_LABEL_Await_Wclock__OUT_29:;
 
-/* Await_Wclock (n=378, ln=25) */
+/* Await_Wclock (n=91, ln=10) */
 
-#line 25 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 10 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 /* subtract time and check if I have to awake */
 {
     s32* dt = (s32*)_ceu_cur->params;
-    if (!ceu_wclock(*dt, NULL, &(CEU_APP.root.__wclk_378), CEU_TRACE(0)) ) {
-        goto _CEU_HALT_378_;
+    if (!ceu_wclock(*dt, NULL, &(CEU_APP.root.__wclk_91), CEU_TRACE(0)) ) {
+        goto _CEU_HALT_91_;
     }
 }
 
-/* Block (n=380, ln=22) */
+/* Block (n=93, ln=7) */
 
-#line 22 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 7 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 }
 
-/* Loop (n=381, ln=21) */
+/* Loop (n=94, ln=6) */
 
-#line 21 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Loop_Continue__CNT_81:;
+#line 6 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
+case CEU_LABEL_Loop_Continue__CNT_32:;
 
-/* Loop (n=381, ln=21) */
+/* Loop (n=94, ln=6) */
 
-#line 21 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-        *_ceu_trlK = 5;
+#line 6 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
+        *_ceu_trlK = -1;
 }
 
-/* Loop (n=381, ln=21) */
+/* Loop (n=94, ln=6) */
 
-#line 21 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Loop_Break__OUT_83:;
+#line 6 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
+case CEU_LABEL_Loop_Break__OUT_34:;
 
-/* Block (n=383, ln=21) */
+/* Block (n=133, ln=1) */
 
-#line 21 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 1 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 }
 
-/* Par_Or (n=384, ln=18) */
+/* Do (n=134, ln=1) */
 
-#line 18 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-CEU_GOTO(CEU_LABEL_Par_Or__OUT_71);
-
-/* Par_Or (n=384, ln=18) */
-
-#line 18 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Par_Or__OUT_71:;
-
-/* Par_Or (n=384, ln=18) */
-
-#line 18 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-_ceu_mem->_trails[4].evt.id = CEU_INPUT__STACKED;
-_ceu_mem->_trails[4].level  = _ceu_level;
-_ceu_mem->_trails[4].lbl    = CEU_LABEL_Par_Or__CLR_72;
-{
-    tceu_evt   __ceu_evt   = {CEU_INPUT__CLEAR,{NULL}};
-    tceu_range __ceu_range = { _ceu_mem, 4+1, 6 };
-    _ceu_nxt->evt      = __ceu_evt;
-    _ceu_nxt->range    = __ceu_range;
-    _ceu_nxt->params_n = 0;
-    return 1;
-}
-
-/* Par_Or (n=384, ln=18) */
-
-#line 18 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Par_Or__CLR_72:;
-
-/* Block (n=386, ln=18) */
-
-#line 18 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-}
-
-/* Loop_Num (n=950, ln=13) */
-
-#line 13 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Loop_Continue__CNT_87:;
-
-/* Loop_Num (n=950, ln=13) */
-
-#line 13 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-    ((CEU_APP.root.i)) = ((CEU_APP.root.i)) + 1;
-    ceu_assert_ex(((CEU_APP.root.i))>(int)(CEU_APP.root.__fr_950),
-        "control variable overflow", CEU_TRACE(-2));
-        *_ceu_trlK = 2;
-}
-
-/* Loop_Num (n=950, ln=13) */
-
-#line 13 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Loop_Break__OUT_89:;
-
-/* Block (n=952, ln=13) */
-
-#line 13 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-}
-
-/* Block (n=960, ln=30) */
-
-#line 30 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-{
-
-/* Loop_Num (n=958, ln=30) */
-
-#line 30 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-(CEU_APP.root.__lim_958) = 14 + (1*0*-1);
-
-/* Loop_Num (n=958, ln=30) */
-
-#line 30 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-ceu_assert(1> 0, "invalid `loop` step : expected positive number");
-
-/* Loop_Num (n=958, ln=30) */
-
-#line 30 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-(CEU_APP.root.__fr_958) = 2;
-((CEU_APP.root.i)) = 2 + 1 * 0;
-ceu_assert_ex(((CEU_APP.root.i))>=(int)(CEU_APP.root.__fr_958),
-    "control variable overflow", CEU_TRACE(-3));
-while (1) {
-
-/* Loop_Num (n=958, ln=30) */
-
-#line 30 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-    if (((CEU_APP.root.i)) > (CEU_APP.root.__lim_958)) {
-        break;
-    }
-
-/* Loop_Num (n=958, ln=30) */
-
-#line 30 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-        
-/* Block (n=423, ln=31) */
-
-#line 31 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-{
-
-/* Par_Or (n=421, ln=31) */
-
-#line 31 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-_ceu_mem->_trails[6].evt.id = CEU_INPUT__STACKED;
-_ceu_mem->_trails[6].level  = _ceu_level;
-_ceu_mem->_trails[6].lbl    = CEU_LABEL_Par_Or_sub_2_IN_92;
-
-/* Par_Or (n=421, ln=31) */
-
-#line 31 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-CEU_GOTO(CEU_LABEL_Par_Or_sub_1_IN_91);
-
-/* Par_Or (n=421, ln=31) */
-
-#line 31 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Par_Or_sub_1_IN_91:;
-
-/* Block (n=396, ln=32) */
-
-#line 32 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-{
-
-/* Await_Wclock (n=394, ln=32) */
-
-#line 32 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-ceu_wclock(50000.0, &(CEU_APP.root.__wclk_394), NULL, CEU_TRACE(0));
-
-_CEU_HALT_394_:
-
-/* Await_Wclock (n=394, ln=32) */
-
-#line 32 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-_ceu_mem->_trails[5].evt.id = CEU_INPUT__WCLOCK;
-
-/* Await_Wclock (n=394, ln=32) */
-
-#line 32 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-_ceu_mem->_trails[5].lbl = CEU_LABEL_Await_Wclock__OUT_95;
-
-/* Await_Wclock (n=394, ln=32) */
-
-#line 32 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-return 0;
-
-/* Await_Wclock (n=394, ln=32) */
-
-#line 32 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Await_Wclock__OUT_95:;
-
-/* Await_Wclock (n=394, ln=32) */
-
-#line 32 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-/* subtract time and check if I have to awake */
-{
-    s32* dt = (s32*)_ceu_cur->params;
-    if (!ceu_wclock(*dt, NULL, &(CEU_APP.root.__wclk_394), CEU_TRACE(0)) ) {
-        goto _CEU_HALT_394_;
-    }
-}
-
-/* Block (n=396, ln=32) */
-
-#line 32 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-}
-
-/* Par_Or (n=421, ln=31) */
-
-#line 31 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-CEU_GOTO(CEU_LABEL_Par_Or__OUT_93);
-
-/* Par_Or (n=421, ln=31) */
-
-#line 31 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Par_Or_sub_2_IN_92:;
-
-/* Block (n=420, ln=34) */
-
-#line 34 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-{
-
-/* Loop (n=418, ln=34) */
-
-#line 34 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-while (1) {
-        
-/* Block (n=417, ln=35) */
-
-#line 35 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-{
-
-/* Emit_Ext_emit (n=401, ln=35) */
-
-#line 35 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-{
-
-/* Emit_Ext_emit (n=401, ln=35) */
-
-#line 35 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-tceu_output_OUT_13 __ceu_ps;
-
-/* Emit_Ext_emit (n=401, ln=35) */
-
-#line 35 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-__ceu_ps._1 = 1;
-
-/* Emit_Ext_emit (n=401, ln=35) */
-
-#line 35 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-
-#ifdef ceu_callback_output_OUT_13
-ceu_callback_output_OUT_13(&__ceu_ps, CEU_TRACE(-2));
-#else
-1;
-#endif
-
-/* Emit_Ext_emit (n=401, ln=35) */
-
-#line 35 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-}
-
-/* Await_Wclock (n=404, ln=36) */
-
-#line 36 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-ceu_wclock(1000.0, &(CEU_APP.root.__wclk_404), NULL, CEU_TRACE(0));
-
-_CEU_HALT_404_:
-
-/* Await_Wclock (n=404, ln=36) */
-
-#line 36 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-_ceu_mem->_trails[6].evt.id = CEU_INPUT__WCLOCK;
-
-/* Await_Wclock (n=404, ln=36) */
-
-#line 36 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-_ceu_mem->_trails[6].lbl = CEU_LABEL_Await_Wclock__OUT_98;
-
-/* Await_Wclock (n=404, ln=36) */
-
-#line 36 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-return 0;
-
-/* Await_Wclock (n=404, ln=36) */
-
-#line 36 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Await_Wclock__OUT_98:;
-
-/* Await_Wclock (n=404, ln=36) */
-
-#line 36 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-/* subtract time and check if I have to awake */
-{
-    s32* dt = (s32*)_ceu_cur->params;
-    if (!ceu_wclock(*dt, NULL, &(CEU_APP.root.__wclk_404), CEU_TRACE(0)) ) {
-        goto _CEU_HALT_404_;
-    }
-}
-
-/* Emit_Ext_emit (n=409, ln=37) */
-
-#line 37 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-{
-
-/* Emit_Ext_emit (n=409, ln=37) */
-
-#line 37 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-tceu_output_OUT_13 __ceu_ps;
-
-/* Emit_Ext_emit (n=409, ln=37) */
-
-#line 37 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-__ceu_ps._1 = 0;
-
-/* Emit_Ext_emit (n=409, ln=37) */
-
-#line 37 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-
-#ifdef ceu_callback_output_OUT_13
-ceu_callback_output_OUT_13(&__ceu_ps, CEU_TRACE(-2));
-#else
-1;
-#endif
-
-/* Emit_Ext_emit (n=409, ln=37) */
-
-#line 37 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-}
-
-/* Await_Wclock (n=415, ln=38) */
-
-#line 38 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-ceu_wclock(((16-((CEU_APP.root.i))))*1000.0, &(CEU_APP.root.__wclk_415), NULL, CEU_TRACE(0));
-
-_CEU_HALT_415_:
-
-/* Await_Wclock (n=415, ln=38) */
-
-#line 38 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-_ceu_mem->_trails[6].evt.id = CEU_INPUT__WCLOCK;
-
-/* Await_Wclock (n=415, ln=38) */
-
-#line 38 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-_ceu_mem->_trails[6].lbl = CEU_LABEL_Await_Wclock__OUT_100;
-
-/* Await_Wclock (n=415, ln=38) */
-
-#line 38 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-return 0;
-
-/* Await_Wclock (n=415, ln=38) */
-
-#line 38 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Await_Wclock__OUT_100:;
-
-/* Await_Wclock (n=415, ln=38) */
-
-#line 38 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-/* subtract time and check if I have to awake */
-{
-    s32* dt = (s32*)_ceu_cur->params;
-    if (!ceu_wclock(*dt, NULL, &(CEU_APP.root.__wclk_415), CEU_TRACE(0)) ) {
-        goto _CEU_HALT_415_;
-    }
-}
-
-/* Block (n=417, ln=35) */
-
-#line 35 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-}
-
-/* Loop (n=418, ln=34) */
-
-#line 34 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Loop_Continue__CNT_103:;
-
-/* Loop (n=418, ln=34) */
-
-#line 34 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-        *_ceu_trlK = 5;
-}
-
-/* Loop (n=418, ln=34) */
-
-#line 34 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Loop_Break__OUT_105:;
-
-/* Block (n=420, ln=34) */
-
-#line 34 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-}
-
-/* Par_Or (n=421, ln=31) */
-
-#line 31 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-CEU_GOTO(CEU_LABEL_Par_Or__OUT_93);
-
-/* Par_Or (n=421, ln=31) */
-
-#line 31 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Par_Or__OUT_93:;
-
-/* Par_Or (n=421, ln=31) */
-
-#line 31 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-_ceu_mem->_trails[4].evt.id = CEU_INPUT__STACKED;
-_ceu_mem->_trails[4].level  = _ceu_level;
-_ceu_mem->_trails[4].lbl    = CEU_LABEL_Par_Or__CLR_94;
-{
-    tceu_evt   __ceu_evt   = {CEU_INPUT__CLEAR,{NULL}};
-    tceu_range __ceu_range = { _ceu_mem, 4+1, 6 };
-    _ceu_nxt->evt      = __ceu_evt;
-    _ceu_nxt->range    = __ceu_range;
-    _ceu_nxt->params_n = 0;
-    return 1;
-}
-
-/* Par_Or (n=421, ln=31) */
-
-#line 31 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Par_Or__CLR_94:;
-
-/* Block (n=423, ln=31) */
-
-#line 31 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-}
-
-/* Loop_Num (n=958, ln=30) */
-
-#line 30 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Loop_Continue__CNT_109:;
-
-/* Loop_Num (n=958, ln=30) */
-
-#line 30 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-    ((CEU_APP.root.i)) = ((CEU_APP.root.i)) + 1;
-    ceu_assert_ex(((CEU_APP.root.i))>(int)(CEU_APP.root.__fr_958),
-        "control variable overflow", CEU_TRACE(-2));
-        *_ceu_trlK = 2;
-}
-
-/* Loop_Num (n=958, ln=30) */
-
-#line 30 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Loop_Break__OUT_111:;
-
-/* Block (n=960, ln=30) */
-
-#line 30 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-}
-
-/* Block (n=426, ln=13) */
-
-#line 13 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-}
-
-/* Loop (n=427, ln=12) */
-
-#line 12 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Loop_Continue__CNT_115:;
-
-/* Loop (n=427, ln=12) */
-
-#line 12 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-        *_ceu_trlK = 1;
-}
-
-/* Loop (n=427, ln=12) */
-
-#line 12 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Loop_Break__OUT_117:;
-
-/* Par_Or (n=1201, ln=5) */
-
-#line 5 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-CEU_GOTO(CEU_LABEL_Par_Or__OUT_66);
-
-/* Par_Or (n=1201, ln=5) */
-
-#line 5 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Par_Or__OUT_66:;
-
-/* Par_Or (n=1201, ln=5) */
-
-#line 5 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-_ceu_mem->_trails[0].evt.id = CEU_INPUT__STACKED;
-_ceu_mem->_trails[0].level  = _ceu_level;
-_ceu_mem->_trails[0].lbl    = CEU_LABEL_Par_Or__CLR_67;
-{
-    tceu_evt   __ceu_evt   = {CEU_INPUT__CLEAR,{NULL}};
-    tceu_range __ceu_range = { _ceu_mem, 0+1, 6 };
-    _ceu_nxt->evt      = __ceu_evt;
-    _ceu_nxt->range    = __ceu_range;
-    _ceu_nxt->params_n = 0;
-    return 1;
-}
-
-/* Par_Or (n=1201, ln=5) */
-
-#line 5 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Par_Or__CLR_67:;
-
-/* Block (n=466, ln=1) */
-
-#line 1 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-}
-
-/* Do (n=467, ln=1) */
-
-#line 1 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 1 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 ceu_assert(0, "reached end of `do`");
 
-/* Do (n=467, ln=1) */
+/* Do (n=134, ln=1) */
 
-#line 1 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
-case CEU_LABEL_Do__OUT_119:;
+#line 1 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
+case CEU_LABEL_Do__OUT_36:;
 
-/* Block (n=471, ln=1) */
+/* Block (n=138, ln=1) */
 
-#line 1 "/home/maged/Desktop/ceu-maker/ceu-maker/ceu-maker-ubuntu/examples/ceu-arduino/blink-01/blink-01.ceu"
+#line 1 "/home/osboxes/Desktop/Ceu-Arduino-IDE/build/linux/arduino-1.8.8/examples/12.Ceu/blink-01/blink-01.ceu"
 }
 
     }

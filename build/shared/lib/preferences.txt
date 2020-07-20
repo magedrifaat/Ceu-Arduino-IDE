@@ -309,7 +309,7 @@ pico-ceu-run=pico-run
 pico-ceu-extensions=ceu
 pico-ceu-keywords=keywords_ceu.txt
 
-ceu-title=Ceu-Scipt
+ceu-title=Ceu-Script
 ceu-compile=ceu-compiler
 ceu-upload=
 ceu-run=ceu-run
