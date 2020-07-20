@@ -1,0 +1,3 @@
+#include "pwm.ceu"
+
+await Pwm(6, 128);

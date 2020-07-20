@@ -1,0 +1,80 @@
+// compile with CEU_DEFS=-DCEU_PM_MIN
+
+/*
+ * The following program illustrates the process of master write using TWI.
+ * The program starts by setting the value of the Bit Rate (TWBR).
+ * It triggers the interrupt by sending the start condition every 300ms.
+ * The Start condition further changes the TWDR to SLA Write and the TWCR is
+ * set to resume the transfer.
+ * Further, the TWDR is set to the value we are going to send.
+ * In this case count%2 which toggles the data as count is increased every
+ * time.
+ *
+ * Testing:
+ *  - The ACK from the slave was acheived by a fully connected master slave TWI
+ *    system and the LED connected to the slave blinks every 300ms
+ *    corresponding to the data received.
+ *  - When a wrong address is mentioned or the slave is disconnected the NACK
+ *    is assumed and the assert is called accordingly.
+ *
+ * Circuit :
+ *  - SDA,SCL lines of both master and slave pulled up by a resistor to 5V.
+ *  - 5V and GND of both master and slave connected respectively to operate
+ *    both at same voltage.
+ *  - an LED connected to the slave that is set to the data received to observe
+ *    the blinking pattern.
+ */
+
+#include "wclock.ceu"
+
+native
+    _TWI_vect,
+;
+
+native/pre do
+    ##include <compat/twi.h>
+    int SLA=4;
+    int count=1;
+end
+
+spawn async/isr [_TWI_vect] do
+{
+  switch(TW_STATUS) {
+    case TW_START:
+        TWDR = (SLA << 1); // SLA+WRITE
+        TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWIE);
+        break;
+    
+    case TW_MT_SLA_ACK:
+        TWDR = count%2;
+        count++;
+        TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWIE);
+        break;
+
+    case TW_MT_SLA_NACK:
+        // in case of slave not connected or "receiving" NACK from slave
+        ceu_arduino_assert(0,3);
+        break;
+        
+    case TW_MT_DATA_ACK:
+        // default case sends stop condition
+        TWCR = (1<<TWINT)|(1<<TWEN)| (1<<TWSTO) | (1<<TWIE);
+        break;
+
+    default:
+        ceu_arduino_assert(0,1);    // should never reach this state
+  }
+}
+end
+
+{
+    TWBR = ((F_CPU / 100000L) - 16) / 2; // bit rate formula
+}
+
+// send start every 300ms
+loop do
+    {
+        TWCR = (1<<TWINT)|(1<<TWSTA)|(1<<TWEN)|(1<<TWIE); // start Condition
+    }
+    await 300ms;
+end
