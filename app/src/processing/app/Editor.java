@@ -1692,10 +1692,16 @@ public class Editor extends JFrame implements RunnerListener {
   }
   
   public void selectNextSideTab() {
+    if (sidePanelTabs.size() == 0)
+      return;
+
     selectSideTab((currentSideTabIndex + 1) % sidePanelTabs.size());
   }
 
   public void selectPrevSideTab() {
+    if (sidePanelTabs.size() == 0)
+      return;
+
     selectSideTab((currentSideTabIndex - 1 + sidePanelTabs.size()) % sidePanelTabs.size());
   }
   
