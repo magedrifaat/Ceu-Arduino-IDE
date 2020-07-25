@@ -34,7 +34,7 @@ public class CeuPlugin implements Plugin {
   JMenu createSubmenu(String menuName, String folderName, String pluginPath, PluginAPI pluginAPI) {
     JMenu subMenu = new JMenu(menuName);
 
-    JMenu examples = new JMenu("Exmaples");
+    JMenu examples = new JMenu("Examples");
     
     // TODO: implement support for recursive search for ceu-arduino examples
     String examplesPath = pluginPath + "/CeuPluginData/" + folderName + "/Examples/";
