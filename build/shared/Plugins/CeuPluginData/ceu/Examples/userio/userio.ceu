@@ -1,0 +1,9 @@
+await async/thread do
+    {
+        int x;
+        printf("Enter a number: ");
+        scanf("%d", &x);
+        printf("You entered %d\n", x);
+    }
+end
+escape 0;
