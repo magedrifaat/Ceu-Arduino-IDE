@@ -2280,6 +2280,7 @@ public class Editor extends JFrame implements RunnerListener {
     return true;
   }
 
+  // TODO: add some way to stop the running sketch
   synchronized public void handleRun(final boolean external) {
     if (PreferencesData.getBoolean("editor.save_on_verify")) {
       if (sketch.isModified() && !sketchController.isReadOnly()) {

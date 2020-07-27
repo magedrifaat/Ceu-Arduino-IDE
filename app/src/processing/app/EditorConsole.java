@@ -78,6 +78,8 @@ public class EditorConsole extends JScrollPane {
   private SimpleAttributeSet stdOutStyle;
   private SimpleAttributeSet stdErrStyle;
 
+  private Base base;
+
 
   public EditorConsole(Base base) {
     document = new DefaultStyledDocument();
@@ -136,6 +138,8 @@ public class EditorConsole extends JScrollPane {
 
     // Add font size adjustment listeners.
     base.addEditorFontResizeListeners(consoleTextPane);
+
+    this.base = base;
   }
 
   private void initializeListeners() {
@@ -159,8 +163,9 @@ public class EditorConsole extends JScrollPane {
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
           try {
             userInput = document.getText(fixedTextOffset, document.getLength() - fixedTextOffset) + "\n";
-            // Remove user input as it will be echoed by the process in windows
-            if (OSUtils.isWindows()) {
+            // Remove user input as it will be echoed by some processes in windows
+            Boolean echoOff = base.getActiveEditor().getProjectConfig().getPrefCommand("echo").equals("off");
+            if (echoOff) {
               document.remove(fixedTextOffset, userInput.length() - 1);
             } else {
               insertString("\n", stdOutStyle);

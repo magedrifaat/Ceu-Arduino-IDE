@@ -190,7 +190,7 @@ public class ProjectConfig {
    *  Returns the preference [projectType]-[command].
    *  If the preference doesn't exist, returns an empty string
    */
-  private String getPrefCommand(String command) {
+  public String getPrefCommand(String command) {
     String res = PreferencesData.getDefault(projectType + "-" + command);
     if (res == null) {
       res = PreferencesData.get(projectType + "-" + command);
