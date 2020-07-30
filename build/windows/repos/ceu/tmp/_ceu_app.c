@@ -89,12 +89,12 @@ typedef double   r64;
 
 /* CEU_C */
 
-#define CEU_FEATURES_TRACE true
 #define CEU_FEATURES_THREAD true
-#define CEU_FEATURES_DYNAMIC true
-#define CEU_FEATURES_LUA true
-#define CEU_FEATURES_OS true
+#define CEU_FEATURES_TRACE true
 #define CEU_FEATURES_ASYNC true
+#define CEU_FEATURES_LUA true
+#define CEU_FEATURES_DYNAMIC true
+#define CEU_FEATURES_OS true
         /* CEU_FEATURES */
 
 #include <stddef.h>     /* offsetof */
@@ -131,7 +131,7 @@ typedef u8  tceu_nstk;   /* TODO */
 typedef u8 tceu_ntrl;
 typedef u8 tceu_nlbl;
 
-#define CEU_TRAILS_N 3
+#define CEU_TRAILS_N 5
 #ifndef CEU_STACK_N
 #define CEU_STACK_N 500
 #endif
@@ -358,6 +358,11 @@ void  ceu_vector_copy_ex         (tceu_vector* dst, usize dst_i, tceu_vector* sr
 
 
 /* CEU_NATIVE_PRE */
+
+#include <stdio.h>
+    typedef struct sockaddr sockaddr;
+    typedef struct sockaddr_in sockaddr_in;
+    typedef struct sockaddr_storage sockaddr_storage;
 
 
 /* EVENTS_ENUM */
@@ -930,20 +935,20 @@ typedef struct tceu_pool_pak {
 
 #pragma pack(push,1)
 typedef struct tceu_data_Lock {
-    #line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+    #line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 bool  is_locked;
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 } tceu_data_Lock;
 
 typedef struct tceu_data_Exception {
     tceu_ndata _enum;
-    #line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+    #line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 char*  message;
 } tceu_data_Exception;
 
 typedef struct tceu_data_Exception__dot__Lua {
     tceu_ndata _enum;
-    #line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+    #line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 char*  message;
 } tceu_data_Exception__dot__Lua;
 
@@ -982,17 +987,68 @@ typedef struct tceu_event___lpar____rpar__ {
 
 typedef struct tceu_code_mem_ROOT {
     tceu_code_mem _mem;
-    tceu_trl      _trails[3];
+    tceu_trl      _trails[5];
     byte          _params[0];
     struct {
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 int  _RET;
+#line 4 "./include/c.ceu"
+#line 4 "./include/c.ceu"
+#line 4 "./include/c.ceu"
+#line 4 "./include/c.ceu"
+#line 4 "./include/c.ceu"
+#line 4 "./include/c.ceu"
+#line 13 "./include/c.ceu"
+#line 13 "./include/c.ceu"
+#line 13 "./include/c.ceu"
+#line 13 "./include/c.ceu"
+#line 20 "./include/c.ceu"
+#line 20 "./include/c.ceu"
+#line 20 "./include/c.ceu"
+#line 20 "./include/c.ceu"
+#line 20 "./include/c.ceu"
+#line 20 "./include/c.ceu"
+#line 20 "./include/c.ceu"
+#line 20 "./include/c.ceu"
+#line 31 "./include/c.ceu"
+#line 31 "./include/c.ceu"
+#line 31 "./include/c.ceu"
+#line 31 "./include/c.ceu"
+#line 31 "./include/c.ceu"
+#line 31 "./include/c.ceu"
+#line 31 "./include/c.ceu"
+#line 31 "./include/c.ceu"
+#line 31 "./include/c.ceu"
+#line 31 "./include/c.ceu"
+#line 31 "./include/c.ceu"
+#line 31 "./include/c.ceu"
+#line 31 "./include/c.ceu"
+#line 31 "./include/c.ceu"
+#line 31 "./include/c.ceu"
+#line 49 "./include/c.ceu"
+#line 49 "./include/c.ceu"
+#line 49 "./include/c.ceu"
+#line 49 "./include/c.ceu"
+#line 49 "./include/c.ceu"
+#line 49 "./include/c.ceu"
+#line 49 "./include/c.ceu"
+#line 49 "./include/c.ceu"
+#line 49 "./include/c.ceu"
+#line 49 "./include/c.ceu"
+#line 49 "./include/c.ceu"
+#line 49 "./include/c.ceu"
+#line 49 "./include/c.ceu"
+#line 49 "./include/c.ceu"
+#line 49 "./include/c.ceu"
+#line 49 "./include/c.ceu"
+#line 49 "./include/c.ceu"
+#line 49 "./include/c.ceu"
 union {
 struct {
 union {
@@ -1009,9 +1065,48 @@ union {
 struct {
 struct {
 union {
+struct {
+struct {
+union {
+struct {
+struct {
+union {
+s32 __wclk_10;
+struct {
+union {
 };
 };
-lua_State* __lua_41;
+};
+};
+};
+};
+};
+struct {
+union {
+struct {
+#line 9 "C://Users//Maged//Desktop//test//test.ceu"
+int  i_24;
+union {
+struct {
+union {
+struct {
+struct {
+union {
+};
+};
+int __fr_275;
+int __lim_275;
+};
+};
+};
+};
+};
+};
+};
+};
+};
+};
+lua_State* __lua_85;
 };
 };
 };
@@ -1037,12 +1132,35 @@ CEU_LABEL_Par_Or__OUT_7,
 CEU_LABEL_Par_Or__CLR_8,
 CEU_LABEL_Block__CLR_9,
 CEU_LABEL_Finalize_Case__IN_10,
-CEU_LABEL_Block__CLR_11,
-CEU_LABEL_Block__CLR_12,
-CEU_LABEL_Block__CLR_13,
-CEU_LABEL_Do__OUT_14,
-CEU_LABEL_Do__CLR_15,
+CEU_LABEL_Par_Or_sub_1_IN_11,
+CEU_LABEL_Par_Or_sub_2_IN_12,
+CEU_LABEL_Par_Or__OUT_13,
+CEU_LABEL_Par_Or__CLR_14,
+CEU_LABEL_Await_Wclock__OUT_15,
 CEU_LABEL_Block__CLR_16,
+CEU_LABEL_Block__CLR_17,
+CEU_LABEL_Loop__CLR_18,
+CEU_LABEL_Loop_Continue__CNT_19,
+CEU_LABEL_Loop_Continue__CLR_20,
+CEU_LABEL_Loop_Break__OUT_21,
+CEU_LABEL_Block__CLR_22,
+CEU_LABEL_Emit_Wclock__OUT_23,
+CEU_LABEL_Block__CLR_24,
+CEU_LABEL_Loop__CLR_25,
+CEU_LABEL_Loop_Continue__CNT_26,
+CEU_LABEL_Loop_Continue__CLR_27,
+CEU_LABEL_Loop_Break__OUT_28,
+CEU_LABEL_Loop_Async__CNT_29,
+CEU_LABEL_Block__CLR_30,
+CEU_LABEL_Block__CLR_31,
+CEU_LABEL_Async__IN_32,
+CEU_LABEL_Block__CLR_33,
+CEU_LABEL_Block__CLR_34,
+CEU_LABEL_Block__CLR_35,
+CEU_LABEL_Block__CLR_36,
+CEU_LABEL_Do__OUT_37,
+CEU_LABEL_Do__CLR_38,
+CEU_LABEL_Block__CLR_39,
 
 };
 
@@ -1208,6 +1326,8 @@ static void ceu_lua_createargtable (lua_State* lua, char** argv, int argc, int s
 static int ceu_lbl (tceu_nstk _ceu_level, tceu_stk* _ceu_cur, tceu_stk* _ceu_nxt, tceu_code_mem* _ceu_mem, tceu_nlbl _ceu_lbl, tceu_ntrl* _ceu_trlK);
 
 
+#define PURIFY(e) e
+
 
 
 
@@ -1352,120 +1472,478 @@ _CEU_LBL_:
         CEU_LABEL_NONE:
             break;
         
-/* ROOT (n=51, ln=1) */
+/* ROOT (n=95, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 case CEU_LABEL_ROOT:;
 
-/* Block (n=50, ln=1) */
+/* Block (n=94, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 {
 
-/* Block (n=45, ln=1) */
+/* Block (n=89, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 {
 
-/* Block (n=87, ln=1) */
+/* Block (n=313, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 {
 
-/* Lua_Do_Open (n=81, ln=1) */
+/* Lua_Do_Open (n=307, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
-(CEU_APP.root.__lua_41) = luaL_newstate();
-ceu_assert((CEU_APP.root.__lua_41) != NULL, "bug found");
-luaL_openlibs((CEU_APP.root.__lua_41));
-ceu_lua_createargtable((CEU_APP.root.__lua_41), CEU_APP.argv, CEU_APP.argc, CEU_APP.argc);
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
+(CEU_APP.root.__lua_85) = luaL_newstate();
+ceu_assert((CEU_APP.root.__lua_85) != NULL, "bug found");
+luaL_openlibs((CEU_APP.root.__lua_85));
+ceu_lua_createargtable((CEU_APP.root.__lua_85), CEU_APP.argv, CEU_APP.argc, CEU_APP.argc);
 
-/* Par_Or (n=108, ln=1) */
+/* Par_Or (n=348, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 _ceu_mem->_trails[2].evt.id = CEU_INPUT__STACKED;
 _ceu_mem->_trails[2].level  = _ceu_level;
 _ceu_mem->_trails[2].lbl    = CEU_LABEL_Par_Or_sub_2_IN_6;
 
-/* Par_Or (n=108, ln=1) */
+/* Par_Or (n=348, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 CEU_GOTO(CEU_LABEL_Par_Or_sub_1_IN_5);
 
-/* Par_Or (n=108, ln=1) */
+/* Par_Or (n=348, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 case CEU_LABEL_Par_Or_sub_1_IN_5:;
 
-/* Finalize_Case (n=88, ln=1) */
+/* Finalize_Case (n=314, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 _ceu_mem->_trails[1].evt.id = CEU_INPUT__FINALIZE;
 _ceu_mem->_trails[1].lbl    = CEU_LABEL_Finalize_Case__IN_10;
 
-/* Finalize_Case (n=88, ln=1) */
+/* Finalize_Case (n=314, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 if (0) {
 
-/* Finalize_Case (n=88, ln=1) */
+/* Finalize_Case (n=314, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 case CEU_LABEL_Finalize_Case__IN_10:;
 
-/* Block (n=84, ln=1) */
+/* Block (n=310, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 {
 
-/* Lua_Do_Close (n=82, ln=1) */
+/* Lua_Do_Close (n=308, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
-lua_close((CEU_APP.root.__lua_41));
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
+lua_close((CEU_APP.root.__lua_85));
 
-/* Block (n=84, ln=1) */
+/* Block (n=310, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 }
 
-/* Finalize_Case (n=88, ln=1) */
+/* Finalize_Case (n=314, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 return 0;
 
-/* Finalize_Case (n=88, ln=1) */
+/* Finalize_Case (n=314, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 }
 
-/* Await_Forever (n=105, ln=1) */
+/* Await_Forever (n=345, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 return 0;
 
-/* Par_Or (n=108, ln=1) */
+/* Par_Or (n=348, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 CEU_GOTO(CEU_LABEL_Par_Or__OUT_7);
 
-/* Par_Or (n=108, ln=1) */
+/* Par_Or (n=348, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 case CEU_LABEL_Par_Or_sub_2_IN_6:;
 
-/* Block (n=40, ln=1) */
+/* Block (n=84, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 {
 
-/* Set_Exp (n=62, ln=7) */
+/* Par_Or (n=43, ln=3) */
 
-#line 7 "G://Projects//CeuArduinoIDE//CeuArduino//build//windows//arduino-1.8.8//Plugins//CeuPluginData//ceu//Examples//test-00//test-00.ceu"
+#line 3 "C://Users//Maged//Desktop//test//test.ceu"
+_ceu_mem->_trails[4].evt.id = CEU_INPUT__STACKED;
+_ceu_mem->_trails[4].level  = _ceu_level;
+_ceu_mem->_trails[4].lbl    = CEU_LABEL_Par_Or_sub_2_IN_12;
+
+/* Par_Or (n=43, ln=3) */
+
+#line 3 "C://Users//Maged//Desktop//test//test.ceu"
+CEU_GOTO(CEU_LABEL_Par_Or_sub_1_IN_11);
+
+/* Par_Or (n=43, ln=3) */
+
+#line 3 "C://Users//Maged//Desktop//test//test.ceu"
+case CEU_LABEL_Par_Or_sub_1_IN_11:;
+
+/* Block (n=20, ln=4) */
+
+#line 4 "C://Users//Maged//Desktop//test//test.ceu"
+{
+
+/* Loop (n=267, ln=4) */
+
+#line 4 "C://Users//Maged//Desktop//test//test.ceu"
+while (1) {
+        
+/* Block (n=266, ln=4) */
+
+#line 4 "C://Users//Maged//Desktop//test//test.ceu"
+{
+
+/* Await_Wclock (n=10, ln=4) */
+
+#line 4 "C://Users//Maged//Desktop//test//test.ceu"
+ceu_wclock(1000000.0, &(CEU_APP.root.__wclk_10), NULL, CEU_TRACE(0));
+
+_CEU_HALT_10_:
+
+/* Await_Wclock (n=10, ln=4) */
+
+#line 4 "C://Users//Maged//Desktop//test//test.ceu"
+_ceu_mem->_trails[3].evt.id = CEU_INPUT__WCLOCK;
+
+/* Await_Wclock (n=10, ln=4) */
+
+#line 4 "C://Users//Maged//Desktop//test//test.ceu"
+_ceu_mem->_trails[3].lbl = CEU_LABEL_Await_Wclock__OUT_15;
+
+/* Await_Wclock (n=10, ln=4) */
+
+#line 4 "C://Users//Maged//Desktop//test//test.ceu"
+return 0;
+
+/* Await_Wclock (n=10, ln=4) */
+
+#line 4 "C://Users//Maged//Desktop//test//test.ceu"
+case CEU_LABEL_Await_Wclock__OUT_15:;
+
+/* Await_Wclock (n=10, ln=4) */
+
+#line 4 "C://Users//Maged//Desktop//test//test.ceu"
+/* subtract time and check if I have to awake */
+{
+    s32* dt = (s32*)_ceu_cur->params;
+    if (!ceu_wclock(*dt, NULL, &(CEU_APP.root.__wclk_10), CEU_TRACE(0)) ) {
+        goto _CEU_HALT_10_;
+    }
+}
+
+/* Block (n=17, ln=5) */
+
+#line 5 "C://Users//Maged//Desktop//test//test.ceu"
+{
+
+/* Stmt_Call (n=15, ln=5) */
+
+#line 5 "C://Users//Maged//Desktop//test//test.ceu"
+printf("Hello, world!\n");
+
+/* Block (n=17, ln=5) */
+
+#line 5 "C://Users//Maged//Desktop//test//test.ceu"
+}
+
+/* Block (n=266, ln=4) */
+
+#line 4 "C://Users//Maged//Desktop//test//test.ceu"
+}
+
+/* Loop (n=267, ln=4) */
+
+#line 4 "C://Users//Maged//Desktop//test//test.ceu"
+case CEU_LABEL_Loop_Continue__CNT_19:;
+
+/* Loop (n=267, ln=4) */
+
+#line 4 "C://Users//Maged//Desktop//test//test.ceu"
+        *_ceu_trlK = 2;
+}
+
+/* Loop (n=267, ln=4) */
+
+#line 4 "C://Users//Maged//Desktop//test//test.ceu"
+case CEU_LABEL_Loop_Break__OUT_21:;
+
+/* Block (n=20, ln=4) */
+
+#line 4 "C://Users//Maged//Desktop//test//test.ceu"
+}
+
+/* Par_Or (n=43, ln=3) */
+
+#line 3 "C://Users//Maged//Desktop//test//test.ceu"
+CEU_GOTO(CEU_LABEL_Par_Or__OUT_13);
+
+/* Par_Or (n=43, ln=3) */
+
+#line 3 "C://Users//Maged//Desktop//test//test.ceu"
+case CEU_LABEL_Par_Or_sub_2_IN_12:;
+
+/* Block (n=42, ln=8) */
+
+#line 8 "C://Users//Maged//Desktop//test//test.ceu"
+{
+
+/* Async (n=40, ln=8) */
+
+#line 8 "C://Users//Maged//Desktop//test//test.ceu"
+CEU_APP.async_pending = 1;
+ceu_callback_async_pending(CEU_TRACE(0));
+
+/* Async (n=40, ln=8) */
+
+#line 8 "C://Users//Maged//Desktop//test//test.ceu"
+_ceu_mem->_trails[4].evt.id = CEU_INPUT__ASYNC;
+
+/* Async (n=40, ln=8) */
+
+#line 8 "C://Users//Maged//Desktop//test//test.ceu"
+_ceu_mem->_trails[4].lbl = CEU_LABEL_Async__IN_32;
+
+/* Async (n=40, ln=8) */
+
+#line 8 "C://Users//Maged//Desktop//test//test.ceu"
+return 0;
+
+/* Async (n=40, ln=8) */
+
+#line 8 "C://Users//Maged//Desktop//test//test.ceu"
+case CEU_LABEL_Async__IN_32:;
+
+/* Block (n=39, ln=9) */
+
+#line 9 "C://Users//Maged//Desktop//test//test.ceu"
+{
+
+/* Block (n=277, ln=10) */
+
+#line 10 "C://Users//Maged//Desktop//test//test.ceu"
+{
+
+/* Loop_Num (n=275, ln=10) */
+
+#line 10 "C://Users//Maged//Desktop//test//test.ceu"
+(CEU_APP.root.__lim_275) = 5 + (1*1*-1);
+
+/* Loop_Num (n=275, ln=10) */
+
+#line 10 "C://Users//Maged//Desktop//test//test.ceu"
+ceu_assert((CEU_APP.root.__lim_275) < 5, "`loop` limit underflow/overflow");
+
+/* Loop_Num (n=275, ln=10) */
+
+#line 10 "C://Users//Maged//Desktop//test//test.ceu"
+ceu_assert(1> 0, "invalid `loop` step : expected positive number");
+
+/* Loop_Num (n=275, ln=10) */
+
+#line 10 "C://Users//Maged//Desktop//test//test.ceu"
+(CEU_APP.root.__fr_275) = 0;
+((CEU_APP.root.i_24)) = 0 + 1 * 0;
+ceu_assert_ex(((CEU_APP.root.i_24))>=(int)(CEU_APP.root.__fr_275),
+    "control variable overflow", CEU_TRACE(-3));
+while (1) {
+
+/* Loop_Num (n=275, ln=10) */
+
+#line 10 "C://Users//Maged//Desktop//test//test.ceu"
+    if (((CEU_APP.root.i_24)) > (CEU_APP.root.__lim_275)) {
+        break;
+    }
+
+/* Loop_Num (n=275, ln=10) */
+
+#line 10 "C://Users//Maged//Desktop//test//test.ceu"
+        
+/* Block (n=36, ln=11) */
+
+#line 11 "C://Users//Maged//Desktop//test//test.ceu"
+{
+
+/* Stmt_Call (n=32, ln=11) */
+
+#line 11 "C://Users//Maged//Desktop//test//test.ceu"
+sleep(1);
+
+/* Emit_Wclock (n=34, ln=12) */
+
+#line 12 "C://Users//Maged//Desktop//test//test.ceu"
+    CEU_APP.async_pending = 1;
+    ceu_callback_async_pending(CEU_TRACE(0));
+    _ceu_mem->_trails[4].evt.id = CEU_INPUT__ASYNC;
+    _ceu_mem->_trails[4].lbl    = CEU_LABEL_Emit_Wclock__OUT_23;
+    {
+        s32 __ceu_dt = 1000000.0;
+        tceu_evt   __ceu_evt   = { CEU_INPUT__WCLOCK, {NULL} };
+        tceu_range __ceu_range = { &CEU_APP.root._mem, 0, CEU_TRAILS_N-1 };
+        _ceu_nxt->evt      = __ceu_evt;
+        _ceu_nxt->range    = __ceu_range;
+        ceu_params_cpy(_ceu_nxt, &__ceu_dt, sizeof(__ceu_dt));
+        return 1;
+    }
+
+/* Emit_Wclock (n=34, ln=12) */
+
+#line 12 "C://Users//Maged//Desktop//test//test.ceu"
+_ceu_mem->_trails[4].evt.id = CEU_INPUT__ASYNC;
+
+/* Emit_Wclock (n=34, ln=12) */
+
+#line 12 "C://Users//Maged//Desktop//test//test.ceu"
+_ceu_mem->_trails[4].lbl = CEU_LABEL_Emit_Wclock__OUT_23;
+
+/* Emit_Wclock (n=34, ln=12) */
+
+#line 12 "C://Users//Maged//Desktop//test//test.ceu"
+return 0;
+
+/* Emit_Wclock (n=34, ln=12) */
+
+#line 12 "C://Users//Maged//Desktop//test//test.ceu"
+case CEU_LABEL_Emit_Wclock__OUT_23:;
+
+/* Emit_Wclock (n=34, ln=12) */
+
+#line 12 "C://Users//Maged//Desktop//test//test.ceu"
+    if (CEU_APP.wclk_min_set <= 0) {
+        CEU_APP.async_pending = 1;
+        ceu_callback_async_pending(CEU_TRACE(0));
+        _ceu_mem->_trails[4].evt.id = CEU_INPUT__ASYNC;
+        _ceu_mem->_trails[4].lbl    = CEU_LABEL_Emit_Wclock__OUT_23;
+        {
+            s32 __ceu_dt = 0;
+            tceu_evt   __ceu_evt   = { CEU_INPUT__WCLOCK, {NULL} };
+            tceu_range __ceu_range = { &CEU_APP.root._mem, 0, CEU_TRAILS_N-1 };
+            _ceu_nxt->evt      = __ceu_evt;
+            _ceu_nxt->range    = __ceu_range;
+            ceu_params_cpy(_ceu_nxt, &__ceu_dt, sizeof(__ceu_dt));
+            return 1;
+        }
+    }
+
+/* Block (n=36, ln=11) */
+
+#line 11 "C://Users//Maged//Desktop//test//test.ceu"
+}
+
+/* Loop_Num (n=275, ln=10) */
+
+#line 10 "C://Users//Maged//Desktop//test//test.ceu"
+case CEU_LABEL_Loop_Continue__CNT_26:;
+
+/* Loop_Num (n=275, ln=10) */
+
+#line 10 "C://Users//Maged//Desktop//test//test.ceu"
+CEU_APP.async_pending = 1;
+ceu_callback_async_pending(CEU_TRACE(0));
+
+/* Loop_Num (n=275, ln=10) */
+
+#line 10 "C://Users//Maged//Desktop//test//test.ceu"
+_ceu_mem->_trails[4].evt.id = CEU_INPUT__ASYNC;
+
+/* Loop_Num (n=275, ln=10) */
+
+#line 10 "C://Users//Maged//Desktop//test//test.ceu"
+_ceu_mem->_trails[4].lbl = CEU_LABEL_Loop_Async__CNT_29;
+
+/* Loop_Num (n=275, ln=10) */
+
+#line 10 "C://Users//Maged//Desktop//test//test.ceu"
+return 0;
+
+/* Loop_Num (n=275, ln=10) */
+
+#line 10 "C://Users//Maged//Desktop//test//test.ceu"
+case CEU_LABEL_Loop_Async__CNT_29:;
+
+/* Loop_Num (n=275, ln=10) */
+
+#line 10 "C://Users//Maged//Desktop//test//test.ceu"
+    ((CEU_APP.root.i_24)) = ((CEU_APP.root.i_24)) + 1;
+    ceu_assert_ex(((CEU_APP.root.i_24))>(int)(CEU_APP.root.__fr_275),
+        "control variable overflow", CEU_TRACE(-2));
+        *_ceu_trlK = 3;
+}
+
+/* Loop_Num (n=275, ln=10) */
+
+#line 10 "C://Users//Maged//Desktop//test//test.ceu"
+case CEU_LABEL_Loop_Break__OUT_28:;
+
+/* Block (n=277, ln=10) */
+
+#line 10 "C://Users//Maged//Desktop//test//test.ceu"
+}
+
+/* Block (n=39, ln=9) */
+
+#line 9 "C://Users//Maged//Desktop//test//test.ceu"
+}
+
+/* Block (n=42, ln=8) */
+
+#line 8 "C://Users//Maged//Desktop//test//test.ceu"
+}
+
+/* Par_Or (n=43, ln=3) */
+
+#line 3 "C://Users//Maged//Desktop//test//test.ceu"
+CEU_GOTO(CEU_LABEL_Par_Or__OUT_13);
+
+/* Par_Or (n=43, ln=3) */
+
+#line 3 "C://Users//Maged//Desktop//test//test.ceu"
+case CEU_LABEL_Par_Or__OUT_13:;
+
+/* Par_Or (n=43, ln=3) */
+
+#line 3 "C://Users//Maged//Desktop//test//test.ceu"
+_ceu_mem->_trails[2].evt.id = CEU_INPUT__STACKED;
+_ceu_mem->_trails[2].level  = _ceu_level;
+_ceu_mem->_trails[2].lbl    = CEU_LABEL_Par_Or__CLR_14;
+{
+    tceu_evt   __ceu_evt   = {CEU_INPUT__CLEAR,{NULL}};
+    tceu_range __ceu_range = { _ceu_mem, 2+1, 4 };
+    _ceu_nxt->evt      = __ceu_evt;
+    _ceu_nxt->range    = __ceu_range;
+    _ceu_nxt->params_n = 0;
+    return 1;
+}
+
+/* Par_Or (n=43, ln=3) */
+
+#line 3 "C://Users//Maged//Desktop//test//test.ceu"
+case CEU_LABEL_Par_Or__CLR_14:;
+
+/* Set_Exp (n=278, ln=17) */
+
+#line 17 "C://Users//Maged//Desktop//test//test.ceu"
 ((CEU_APP.root._RET)) = 0;
 
-/* Set_Exp (n=62, ln=7) */
+/* Set_Exp (n=278, ln=17) */
 
-#line 7 "G://Projects//CeuArduinoIDE//CeuArduino//build//windows//arduino-1.8.8//Plugins//CeuPluginData//ceu//Examples//test-00//test-00.ceu"
+#line 17 "C://Users//Maged//Desktop//test//test.ceu"
 {
 #ifdef CEU_FEATURES_OS
     CEU_APP.end_ok=1; CEU_APP.end_val=CEU_APP.root._RET;
@@ -1473,89 +1951,89 @@ case CEU_LABEL_Par_Or_sub_2_IN_6:;
     ceu_callback_terminating(CEU_TRACE(0));
 }
 
-/* Escape (n=1, ln=7) */
+/* Escape (n=45, ln=17) */
 
-#line 7 "G://Projects//CeuArduinoIDE//CeuArduino//build//windows//arduino-1.8.8//Plugins//CeuPluginData//ceu//Examples//test-00//test-00.ceu"
-CEU_GOTO(CEU_LABEL_Do__OUT_14);
+#line 17 "C://Users//Maged//Desktop//test//test.ceu"
+CEU_GOTO(CEU_LABEL_Do__OUT_37);
 
-/* Block (n=40, ln=1) */
+/* Block (n=84, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 }
 
-/* Par_Or (n=108, ln=1) */
+/* Par_Or (n=348, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 CEU_GOTO(CEU_LABEL_Par_Or__OUT_7);
 
-/* Par_Or (n=108, ln=1) */
+/* Par_Or (n=348, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 case CEU_LABEL_Par_Or__OUT_7:;
 
-/* Par_Or (n=108, ln=1) */
+/* Par_Or (n=348, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 _ceu_mem->_trails[0].evt.id = CEU_INPUT__STACKED;
 _ceu_mem->_trails[0].level  = _ceu_level;
 _ceu_mem->_trails[0].lbl    = CEU_LABEL_Par_Or__CLR_8;
 {
     tceu_evt   __ceu_evt   = {CEU_INPUT__CLEAR,{NULL}};
-    tceu_range __ceu_range = { _ceu_mem, 0+1, 2 };
+    tceu_range __ceu_range = { _ceu_mem, 0+1, 4 };
     _ceu_nxt->evt      = __ceu_evt;
     _ceu_nxt->range    = __ceu_range;
     _ceu_nxt->params_n = 0;
     return 1;
 }
 
-/* Par_Or (n=108, ln=1) */
+/* Par_Or (n=348, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 case CEU_LABEL_Par_Or__CLR_8:;
 
-/* Block (n=87, ln=1) */
+/* Block (n=313, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 }
 
-/* Block (n=45, ln=1) */
+/* Block (n=89, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 }
 
-/* Do (n=46, ln=1) */
+/* Do (n=90, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 ceu_assert(0, "reached end of `do`");
 
-/* Do (n=46, ln=1) */
+/* Do (n=90, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
-case CEU_LABEL_Do__OUT_14:;
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
+case CEU_LABEL_Do__OUT_37:;
 
-/* Do (n=46, ln=1) */
+/* Do (n=90, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 _ceu_mem->_trails[0].evt.id = CEU_INPUT__STACKED;
 _ceu_mem->_trails[0].level  = _ceu_level;
-_ceu_mem->_trails[0].lbl    = CEU_LABEL_Do__CLR_15;
+_ceu_mem->_trails[0].lbl    = CEU_LABEL_Do__CLR_38;
 {
     tceu_evt   __ceu_evt   = {CEU_INPUT__CLEAR,{NULL}};
-    tceu_range __ceu_range = { _ceu_mem, 0+1, 2 };
+    tceu_range __ceu_range = { _ceu_mem, 0+1, 4 };
     _ceu_nxt->evt      = __ceu_evt;
     _ceu_nxt->range    = __ceu_range;
     _ceu_nxt->params_n = 0;
     return 1;
 }
 
-/* Do (n=46, ln=1) */
+/* Do (n=90, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
-case CEU_LABEL_Do__CLR_15:;
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
+case CEU_LABEL_Do__CLR_38:;
 
-/* Block (n=50, ln=1) */
+/* Block (n=94, ln=1) */
 
-#line 1 "G:/Projects/CeuArduinoIDE/CeuArduino/build/windows/arduino-1.8.8/Plugins/CeuPluginData/ceu/Examples/test-00/test-00.ceu"
+#line 1 "C:/Users/Maged/Desktop/test/test.ceu"
 }
 
     }

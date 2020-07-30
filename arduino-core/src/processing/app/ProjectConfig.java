@@ -114,6 +114,10 @@ public class ProjectConfig {
   public String getTitle() {
     return projectTitle;
   }
+
+  public String getType() {
+    return projectType;
+  }
   
   public String getCompileCommand() {
     return compileCommand;

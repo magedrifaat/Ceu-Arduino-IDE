@@ -102,4 +102,16 @@ public class PluginAPI {
   public void setCurrentTabText(String text) {
     editor.getCurrentTab().setText(text);
   }
+
+  public String getProjectType() {
+    return editor.getProjectConfig().getType();
+  }
+
+  public int getCaretPosition() {
+    return editor.getCurrentTab().getTextArea().getCaretPosition();
+  }
+
+  public void indentNextLine() {
+    editor.getCurrentTab().getTextArea().indentNext();
+  }
 }

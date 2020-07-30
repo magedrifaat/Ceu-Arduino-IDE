@@ -79,11 +79,14 @@ public class SketchTextArea extends RSyntaxTextArea {
   private final static Logger LOG = Logger.getLogger(SketchTextArea.class.getName());
 
   private PdeKeywords pdeKeywords;
+  private boolean customIndent;
+
   public SketchTextArea(RSyntaxDocument document, PdeKeywords pdeKeywords) throws IOException {
     super(document);
     this.pdeKeywords = pdeKeywords;
     installFeatures();
     fixCtrlDeleteBehavior();
+    customIndent = false;
   }
 
   public void setKeywords(PdeKeywords keywords) {
@@ -390,9 +393,18 @@ public class SketchTextArea extends RSyntaxTextArea {
   }
   
   // TODO: support Ceu auto-indentaion by overriding getShouldIndentNextLine function
-  /*
+  
   @Override
   public boolean getShouldIndentNextLine(int linenum) {
-    return false;
-  }*/
+    if (customIndent) {
+      customIndent = false;
+      return true;
+    }
+
+    return super.getShouldIndentNextLine(linenum);
+  }
+
+  public void indentNext() {
+    customIndent = true;
+  }
 }
