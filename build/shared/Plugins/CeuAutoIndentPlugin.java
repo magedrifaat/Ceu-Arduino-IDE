@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 public class CeuAutoIndentPlugin implements Plugin {
     Pattern pattern;
-    private static final String REGEX = "^(?:[\\s]*|.*[\\s]+)((?:do|with|if|then|else)(?=/|[\\s]|$))(?!.*(?: end(?:$|[\\s])|;)).*$";
+    private static final String REGEX = "^(?:[\\s]*|.*[\\s]+)((?:do|with|if|then|else)(?=/|\\(|[\\s]|$))(?!.*(?: end(?:$|[\\s]))).*$";
     
     public CeuAutoIndentPlugin() {
         pattern = Pattern.compile(REGEX);
@@ -30,6 +30,10 @@ public class CeuAutoIndentPlugin implements Plugin {
         String lastline = "";
         try {
             lastline = text.substring(start + 1, end);
+            int commentIndex = lastline.indexOf("//");
+            if (commentIndex != -1) {
+                lastline = lastline.substring(0, commentIndex);
+            }
         } catch (Exception ex) {
             return;
         }
