@@ -23,6 +23,7 @@ public class PluginManager {
     
     plugins = new ArrayList<> ();
     
+    // TODO: support .jar files as well
     File pluginFolder = BaseNoGui.getContentFile("Plugins");
     for (File file : FileUtils.listFiles(pluginFolder, false, new ArrayList<String> ())) {
       if (file.getName().endsWith(".class")) {

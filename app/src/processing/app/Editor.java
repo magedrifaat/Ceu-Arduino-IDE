@@ -1154,7 +1154,12 @@ public class Editor extends JFrame implements RunnerListener {
   private void addInternalTools(JMenu menu) {
     JMenuItem item;
 
-    item = createToolMenuItem("cc.arduino.packages.formatter.AStyle");
+    // TODO: rebuild this tool on project type change
+    if (projectConfig.isLegacy()) {
+      item = createToolMenuItem("cc.arduino.packages.formatter.AStyle");
+    } else {
+      item = new JMenuItem("Auto Format");
+    }
     if (item == null) {
       throw new NullPointerException("Tool cc.arduino.packages.formatter.AStyle unavailable");
     }
