@@ -8,6 +8,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JDialog;
 import java.io.File;
 
+import org.fife.ui.rsyntaxtextarea.folding.FoldParser;
+import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager;
+import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
+
 public class PluginAPI {
   private Editor editor;
   
@@ -113,5 +117,9 @@ public class PluginAPI {
 
   public void indentNextLine() {
     editor.getCurrentTab().getTextArea().indentNext();
+  }
+
+  public void addFoldParser(FoldParser customParser) {
+    FoldParserManager.get().addFoldParserMapping(RSyntaxDocument.SYNTAX_STYLE_CPLUSPLUS, customParser);
   }
 }
