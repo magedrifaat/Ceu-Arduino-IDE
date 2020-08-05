@@ -35,6 +35,15 @@ public class PluginManager {
         catch (Exception ex) {
           ex.printStackTrace();
         }
+      } else if (file.getName().endsWith(".jar")) {
+        try {
+          URLClassLoader classLoader = new URLClassLoader(new URL[]{file.toURI().toURL()});
+          Class<?> cl = classLoader.loadClass(file.getName().substring(0, file.getName().length() - 4));
+          plugins.add((Plugin)(cl.newInstance()));
+        }
+        catch (Exception ex) {
+          ex.printStackTrace();
+        }
       }
     }
     
