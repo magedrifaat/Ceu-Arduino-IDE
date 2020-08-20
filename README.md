@@ -1,153 +1,34 @@
-# Creating Plugins
-The new plugin architecture lets the user write plugins that can execute code responding to certain events (hooks) by implementing the handlers of these hooks. The architecture also provides a plugin API object that is passed to all the handlers and has some methods that enables the user to add or modify GUI or perform some action on the IDE.
-## Main Skeleton
-A user defined plugin is a java class that implements the Plugin interface and provides a public zero-argument constructor, this class can override any of the handlers defined in the Plugin interface (and explained here in another section) to execute code handling the corresponding event.
-Here is an example of a simple plugin that handles the onStart hook:
-```java
-import processing.app.Plugin;
-import processing.app.PluginAPI;
+# Céu IDE
+## Project Code URL
+All the main work in this project was done here: https://github.com/magedrifaat/Ceu-Arduino-IDE/tree/ceu-language-integration
 
-public class TestPlugin implements Plugin {
-  
-  public TestPlugin() { }
-  
-  @Override
-  public void onStart(PluginAPI pluginAPI) {
-    System.out.println("Plugin Started!");
-  }
-}
-```
-## Deploying the Plugin
-To add the plugin to the IDE, you must compile your plugin java file to the compiled .class file that the IDE can load at runtime.
-To compile put your java in the Plugins folder under the Arduino folder, and in the same foler, execute the following command:
-```
-compile.bat [YourPLugin].java
-```
-or simply drag and drop your java file onto the compile.bat batch file.
-The file name of your java file must be the same as the name of the plugin class implemented inside the file.
-Make sure that the compilation completed without errors and a .class file was generated.
+Commits starting from 1 jun. 2020 on this branch are all the code written for the project during the GSoC program.
 
-## Hooks and Handlers
-The following are the set of the handlers that can be implemented in the plugin to handle the corresponding hooks:
-#### onStart handler
-This handler is called when the window is created
-```java
-public void onStart(PluginAPI pluginAPI)
-```
-#### onQuit handler
-This handler is called when the window is closing or the IDE is quitting
-```java
-public void onQuit(PluginAPI pluginAPI)
-```
-#### onCompile handler
-This handler is called just before the compilation of the project
-```java
-public void onCompile(PluginAPI pluginAPI)
-```
-#### onUpload handler
-This handler is called just before uploading the project
-```java
-public void onUpload(PluginAPI pluginAPI)
-```
-#### onRun handler
-This handler should be called before running the project (not supported yet)
-```java
-public void onRun(PluginAPI pluginAPI)
-```
-#### onMenu handler
-This handler is called only once when the menu bar is being created, implement this when you want to add your own menu to the menu bar by calling the relevant API functions in your implementation of the handler
-```java
-public void onMenu(PluginAPI pluginAPI)
-```
-#### onSide handler
-This handler is called only once when the side bar is being created, implement this when you need to add your own panel as another tab in the side bar by calling the relevant API functions in your implementation of the handler
-```java
-public void onSide(PluginAPI pluginAPI)
-```
-#### onEnter handler
-This handler is called whenever the user presses enter key in the text area of the IDE
-```java
-public void onEnter(PluginAPI pluginAPI)
-```
-#### onFormat handler
-This handler is called when the user attempts to use the auto-format feature of the IDE
-```java
-public void onFormat(PluginAPI pluginAPI)
-```
+A full diff covering all added code: https://github.com/magedrifaat/Ceu-Arduino-IDE/compare/master...ceu-language-integration
+## Project Description
+In this project, I implemented full support for the Céu programming language in the Arduino IDE. This includes Céu, pico-Céu and improved support for Céu-Arduino which was firstly implemented last year outside of the program. Language features include opening code files, compiling and running/uploading the scripts, menu items for examples and libraries specific for the language and its bindings, and syntax features like syntax highlighting, auto indentation, auto formatting and code folding.
 
-## API functions
-### GUI functions
-#### addMenu
-```java
-public void addMenu(JMenu newMenu)
-```
-This function should only be called in the onMenu handler. It takes a JMenu object as a parameter and adds it to the menu bar of the window.
+I also implemented some major features in the IDE itself which will make future development much easier. These features include: A plugin architecture to write plugins for the IDE which makes it easy to add new features to the IDE without having to modify the core code of the IDE. I also implemented support for user defined project types which permits adding complete support for user defined languages and project types through preferences and plugins only.
 
-#### addSideTab
-```java
-public void addSideTab(String tabName, JPanel tabPanel)
+## Documentation
+### Getting Started
+To use this IDE, simply download the latest release for your OS.
+For linux systems, you will need to install the SDL library for pico-Céu scripts to work:
 ```
-This function should only be called in the onSide handler. Call it when you want to add your own panel as a tab in the side bar, it takes the tab name as the first argument and a JPanel object as the second argument.
+$ sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libsdl2-net-dev libsdl2-gfx-dev
+```
+### Using Céu features
+Out of the box, the IDE can open, compile and upload/run scripts written in Céu which has the ".ceu" extension. This includes Céu scripts, pico-Céu and Céu-Arduino.
+In addition to this, there is a "Céu" menu in the menu bar from which you can open examples and include libraries for all three project types of Céu.
 
-#### showDialog
-```java
-public Object showDialog(JOptionPane optionPane, String title)
-```
-This function takes a JOptionPane object and a title and shows a dialog created from teh option pane and with the given title, and returns the result of the shown dialog.
+You can also use the "Auto Format"feature in the IDE to fix the indentation of the Céu code from "Tools > Auto Format" menu or by pressing Ctrl+T. Also, you can collapse and expand blocks of Céu code by enabling code folding in the preferences.
 
-### Utility functions
-#### openFile
-```java
-public void openFile(String fileName)
-```
-This function takes a full path of a file and opens the file in the IDE as a separate project.
+Also, the console in the IDE now supports user input for runnable scripts. You can write Céu scripts that accept command line user input and run them inside the IDE just like an external terminal.
 
-#### saveProject
-```java
-public boolean saveProject()
-```
-This function saves any modifications in the current projects and returns true if successful. (Equivalent to ctrl+s)
+### Adding custom project types
+A major feature added to this IDE is the possibility of adding a completely new language or project type to the IDE without modifying the IDE code. As a proof of concept, all the Céu features implemented in this project were implemented through this new technique without direct modification to the IDE code itself.
+A full documentation on how to add a new language to the IDE can be found here: TODO
 
-#### saveProjectAs
-```java
-public void saveProjectAs()
-```
-This function prompts the save a copy of the current project.
-
-#### getMainFilePath
-```java
-public String getMainFilePath()
-```
-This function returns the full path of the main file of the current project.
-
-#### getCurrentTabText
-```java
-public String getCurrentTabText()
-```
-This function returns the entire text in the text area of the current active tab of the project.
-
-#### setCurrentTabText
-```java
-public void setCurrentTabText(String text)
-```
-This function sets the entire text in the text area of the current active tab of the project.
-
-#### addLineHighlight
-```java
-public void addLineHighlight(int line)
-public void addLineHighlight(int line, Color color)
-```
-This function adds highlight to the line of the given line number, the default color of highlight is red but the user can optionally provide a color.
-
-#### removeAllLineHighlights
-```java
-public void removeAllLineHighlights()
-```
-This functions removes all line highlights in the current project.
-
-#### getIncludeAction
-```java
-public AbstractAction getIncludeAction(String folderName)
-```
-This function takes full path of a library folder and returns an abstract action that when executed, includes the library in the current active file (adds "#include ..." for all the includes of the given library).
-This abstract action can be added to the listener of a button or a menu item for example so that it executes when the button or menu item is pressed.
+### Writing Plugins
+Another big feature implemented in this project is a new Plugin Architecture developed for the IDE through which you can add new features to the IDE on the go, without modifying the IDE code.
+A full tutorial on how to write a plugin can be found here: TODO
