@@ -4,11 +4,18 @@ All the main work in this project was done here: https://github.com/magedrifaat/
 
 Commits starting from 1 jun. 2020 on this branch are all the code written for the project during the GSoC program.
 
-A full diff covering all added code: https://github.com/magedrifaat/Ceu-Arduino-IDE/compare/master...ceu-language-integration
+A full diff covering all added code: https://github.com/magedrifaat/Ceu-Arduino-IDE/compare/ceu-language-integration@%7B01-06-20%7D..ceu-language-integration@%7B20-08-20%7D
 ## Project Description
-In this project, I implemented full support for the Céu programming language in the Arduino IDE. This includes Céu, pico-Céu and improved support for Céu-Arduino which was firstly implemented last year outside of the program. Language features include opening code files, compiling and running/uploading the scripts, menu items for examples and libraries specific for the language and its bindings, and syntax features like syntax highlighting, auto indentation, auto formatting and code folding.
-
-I also implemented some major features in the IDE itself which will make future development much easier. These features include: A plugin architecture to write plugins for the IDE which makes it easy to add new features to the IDE without having to modify the core code of the IDE. I also implemented support for user defined project types which permits adding complete support for user defined languages and project types through preferences and plugins only.
+In this project, I implemented: 
+ - Full support for the Céu programming language in the Arduino IDE. This includes Céu, pico-Céu and improved support for Céu-Arduino which was firstly implemented last year outside of the program.
+ - Language features include opening code files, compiling and running/uploading the scripts.
+ - Céu Menu for examples and libraries specific for the language and its bindings.
+ - And syntax features like syntax highlighting, auto indentation, auto formatting and code folding.
+ 
+I also implemented some major features in the IDE itself which will make future development much easier. These features include: 
+ - A plugin architecture to write plugins for the IDE which makes it easy to add new features to the IDE without having to modify the core code of the IDE.
+ - Support for user defined project types which permits adding complete support for user defined languages and project types through preferences and plugins only.
+ - Command line input for the IDE console which permits running scripts that accepts user input inside the IDE just like an external terminal.
 
 ## Documentation
 ### Getting Started
@@ -27,7 +34,7 @@ Also, the console in the IDE now supports user input for runnable scripts. You c
 
 ### Adding custom project types
 A major feature added to this IDE is the possibility of adding a completely new language or project type to the IDE without modifying the IDE code. As a proof of concept, all the Céu features implemented in this project were implemented through this new technique without direct modification to the IDE code itself.
-A full documentation on how to add a new language to the IDE can be found here: TODO
+A full documentation on how to add a new language to the IDE can be found here: https://github.com/magedrifaat/Ceu-Arduino-IDE/wiki/Adding-Custom-Project-Type
 
 ### Writing Plugins
 Another big feature implemented in this project is a new Plugin Architecture developed for the IDE through which you can add new features to the IDE on the go, without modifying the IDE code.
