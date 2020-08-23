@@ -38,4 +38,4 @@ A full documentation on how to add a new language to the IDE can be found here: 
 
 ### Writing Plugins
 Another big feature implemented in this project is a new Plugin Architecture developed for the IDE through which you can add new features to the IDE on the go, without modifying the IDE code.
-A full tutorial on how to write a plugin can be found here: TODO
+A full tutorial on how to write a plugin can be found here: https://github.com/magedrifaat/Ceu-Arduino-IDE/wiki/Writing-a-Plugin
